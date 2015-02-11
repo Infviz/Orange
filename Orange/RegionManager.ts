@@ -15,8 +15,9 @@ module Orange.Modularity {
                 }
             }
             else {
-                var view = <Infviz.Controls.Control>root["instance"];
-                view.dispose();
+                var view = <any>root["instance"];
+		if (typeof view.dispose === 'function')
+                    view.dispose();
             }
         }
 
