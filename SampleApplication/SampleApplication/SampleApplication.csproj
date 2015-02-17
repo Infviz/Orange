@@ -113,7 +113,7 @@
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
     <TypeScriptOutFile>app.js</TypeScriptOutFile>
     <TypeScriptModuleKind>none</TypeScriptModuleKind>
-    <TypeScriptNoImplicitAny>True</TypeScriptNoImplicitAny>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
