@@ -16,7 +16,7 @@ module Orange.Modularity {
             }
             else {
                 var view = <any>root["instance"];
-		if (typeof view.dispose === 'function')
+		        if (typeof view.dispose === 'function')
                     view.dispose();
             }
         }

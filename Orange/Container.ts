@@ -22,7 +22,7 @@ module Orange.Modularity
         }
 
         resolve(type: any, register: boolean = false) {
-
+            
             var instance = this.lookup(this.instances, type);
             if (instance)
                 return instance;

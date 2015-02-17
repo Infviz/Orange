@@ -1,0 +1,30 @@
+﻿h1 {
+    text-align: center;
+}
+
+.addBox {
+    padding: 10px;
+    border-radius: 4px;
+    background-color: #333;
+    margin-top: 5px;
+}
+
+.todoItem {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    position: relative;
+}
+
+    .todoItem input[type=checkbox] {
+        margin-right: 10px;
+    }
+
+    .todoItem input {
+        position: absolute;
+        right: 0;
+    }
+
+.container {
+    max-width: 400px;
+}
+
