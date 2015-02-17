@@ -33,7 +33,7 @@ module Orange.Modularity
 
             instance = this.createInstance(resolvedType);
 
-            if (typeof register === "unknown" || register === true)
+            if (register === true)
             {
                 this.registerInstance(type, instance);
             }
