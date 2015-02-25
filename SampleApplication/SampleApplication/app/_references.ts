@@ -1,8 +1,4 @@
-
-/// <reference path="Scripts/typings/jquery/jquery.d.ts" />
-/// <reference path="Scripts/typings/knockout/knockout.d.ts" />
-
-/// <reference path="../../../Orange/Reference.d.ts" />
+/// <reference path="../bower_components/orange/ts/Reference.d.ts" />
 
 /// <reference path="UI/ViewBase.ts" />
 
