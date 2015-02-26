@@ -1,4 +1,4 @@
-/// <vs BeforeBuild='default' />
+/// <vs BeforeBuild='vs' />
 'use strict'
 
 /*
