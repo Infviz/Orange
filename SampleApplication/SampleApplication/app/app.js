@@ -175,23 +175,6 @@ var UI;
     })();
     UI.ViewBase = ViewBase;
 })(UI || (UI = {}));
-var templates = [
-    { id: "UI_TodoItemForm_TodoItemFormView", path: "UI/TodoItemForm/TodoItemFormView.tpl.html" },
-    { id: "UI_TodoList_TodoListView", path: "UI/TodoList/TodoListView.tpl.html" }
-];
-function prepareContainer(container) {
-    container.registerInstance(Domain.TodoTaskRepository, new Domain.TodoTaskRepository());
-}
-window.onload = function () {
-    var container = new Orange.Modularity.Container();
-    var regionManager = new Orange.Modularity.RegionManager(container);
-    container.registerInstance(Orange.Modularity.RegionManager, regionManager);
-    prepareContainer(container);
-    TemplateLoader.onload = function () {
-        regionManager.initializeRegions(document.body);
-    };
-    TemplateLoader.load(templates);
-};
 var Domain;
 (function (Domain) {
     var TodoTaskRepository = (function () {
@@ -287,4 +270,21 @@ var UI;
         TodoList.TodoListViewModel = TodoListViewModel;
     })(TodoList = UI.TodoList || (UI.TodoList = {}));
 })(UI || (UI = {}));
+var templates = [
+    { id: "UI_TodoItemForm_TodoItemFormView", path: "UI/TodoItemForm/TodoItemFormView.tpl.html" },
+    { id: "UI_TodoList_TodoListView", path: "UI/TodoList/TodoListView.tpl.html" }
+];
+function prepareContainer(container) {
+    container.registerInstance(Domain.TodoTaskRepository, new Domain.TodoTaskRepository());
+}
+window.onload = function () {
+    var container = new Orange.Modularity.Container();
+    var regionManager = new Orange.Modularity.RegionManager(container);
+    container.registerInstance(Orange.Modularity.RegionManager, regionManager);
+    prepareContainer(container);
+    TemplateLoader.onload = function () {
+        regionManager.initializeRegions(document.body);
+    };
+    TemplateLoader.load(templates);
+};
 //# sourceMappingURL=app.js.map

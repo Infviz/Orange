@@ -118,6 +118,7 @@ interface KnockoutBindingContext {
     $parents: any[];
     $root: any;
     $data: any;
+    $rawData: any | KnockoutObservable<any>;
     $index?: KnockoutObservable<number>;
     $parentContext?: KnockoutBindingContext;
 
@@ -294,7 +295,7 @@ interface KnockoutUtils {
 
     stringTokenize(str: string, delimiter: string): string[];
 
-    stringStartsWith(str: string, startsWith: string): string;
+    stringStartsWith(str: string, startsWith: string): boolean;
 
     domNodeIsContainedBy(node: any, containedByNode: any): boolean;
 
@@ -343,6 +344,7 @@ interface KnockoutArrayChange<T> {
     status: string;
     value: T;
     index: number;
+    moved?: number;
 }
 
 //////////////////////////////////

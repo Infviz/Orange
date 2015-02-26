@@ -14,9 +14,28 @@ module.exports = function(grunt) {
         }
       }
     },
+    tsd: {
+        refresh: {
+            options: {
+                // execute a command
+                command: 'reinstall',
+
+                //optional: always get from HEAD
+                latest: true,
+
+                // specify config file
+                config: 'tsd.json',
+
+                // experimental: options to pass to tsd.API
+                opts: {
+                    // props from tsd.Options
+                }
+            }
+        }
+    },
     ts: {
       default: {
-        src: ['app/**/*.ts'],
+        src: ['app/**/*.ts', '!app/bower_components/**/*.ts'],
         out: 'app/app.js',
         reference: 'app/_references.ts',
         options: {
@@ -26,7 +45,7 @@ module.exports = function(grunt) {
       }
     },
     watch: {
-      files: ['Gruntfile.js', 'app/**/*.ts'],
+      files: ['Gruntfile.js', 'app/**/*.ts', 'app/**/*.html'],
       tasks: ['ts']
     },
     open: {
@@ -36,6 +55,7 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.loadNpmTasks('grunt-tsd');
   grunt.loadNpmTasks('grunt-ts');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-connect');
@@ -50,4 +70,4 @@ module.exports = function(grunt) {
     'watch'
   ]);
 
-};
+}; 
