@@ -1,73 +1,122 @@
-module.exports = function(grunt) {
+/// <vs BeforeBuild='default' />
+'use strict'
 
-  // Project configuration.
-  grunt.initConfig({
-    pkg: grunt.file.readJSON('package.json'),
+/*
+- fixa .gitignore
+- livereload/watch task
+- dist task
+*/
 
-    port: 3000,
+module.exports = function (grunt) {
+    // Time how long tasks take. Can help when optimizing build times
+    require('time-grunt')(grunt);
+    
+    // Load grunt tasks automatically
+    require('load-grunt-tasks')(grunt);
 
-    connect: {
-      server: {
-        options: {
-          port: '<%= port %>',
-          base: './app'
-        }
-      }
-    },
-    tsd: {
-        refresh: {
+    var conf = {
+        app: 'app',
+        dist: 'dist',
+        styles: 'app/styles',
+        port: '3000'
+    }
+
+    // Project configuration.
+    grunt.initConfig({
+        conf: conf,
+
+        watch: {
+            bower: {
+                files: ['bower.json'],
+                tasks: ['wiredep']
+            },
+            ts: {
+                files: ['<%= conf.app %>/**/*.ts', '!<%= conf.app %>/bower_components/**'],
+                tasks: ['ts'],
+                options: {
+                    livereload: true
+                }
+            },
+            gruntfile: {
+                files: ['Gruntfile.js']
+            },
+            styles: {
+                files: ['<%= conf.styles %>/**/*.css'] // maybe we should do less-compile?
+            },
+            livereload: {
+                options: {
+                    livereload: '<%= connect.options.livereload %>'
+                },
+                files: [
+                    '<%= conf.app %>/**/*.html',
+
+                ]
+            }
+        },
+
+        connect: {
             options: {
-                // execute a command
-                command: 'reinstall',
-
-                //optional: always get from HEAD
-                latest: true,
-
-                // specify config file
-                config: 'tsd.json',
-
-                // experimental: options to pass to tsd.API
-                opts: {
-                    // props from tsd.Options
+                port: '<%= conf.port %>',
+                open: true,
+                livereload: 35729,
+                hostname: 'localhost',
+                directory: '<%= conf.app %>'
+            },
+            livereload: {
+                options: {
+                    middleware: function (connect) {
+                        return [
+                            connect.static(conf.app)
+                        ];
+                    }
                 }
             }
+        },
+        tsd: {
+            refresh: {
+                options: {
+                    command: 'reinstall',
+                    latest: true,
+                    config: 'tsd.json'
+                }
+            }
+        },
+        ts: {
+            default: {
+                src: ['<%= conf.app %>/**/*.ts', '!<%= conf.app%>/bower_components/**'],
+                out: 'app/app.js',
+                reference: 'app/_references.ts',
+                options: {
+                    target: 'es5',
+                    sourceMap: true
+                }
+            }
+        },
+
+        // Automatically inject Bower components into the HTML file
+        wiredep: {
+            app: {
+                ignorePath: /^\/|\.\.\//,
+                src: ['<%= conf.app %>/index.html'],
+                exclude: ['bower_components/bootstrap/dist/js/bootstrap.js']
+            }
         }
-    },
-    ts: {
-      default: {
-        src: ['app/**/*.ts', '!app/bower_components/**/*.ts'],
-        out: 'app/app.js',
-        reference: 'app/_references.ts',
-        options: {
-          target: 'es5',
-          sourceMap: true
-        }
-      }
-    },
-    watch: {
-      files: ['Gruntfile.js', 'app/**/*.ts', 'app/**/*.html'],
-      tasks: ['ts']
-    },
-    open: {
-      dev: {
-        path: 'http://localhost:<%= port %>'
-      }
-    }
-  });
+    });
 
-  grunt.loadNpmTasks('grunt-tsd');
-  grunt.loadNpmTasks('grunt-ts');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-contrib-connect');
-  grunt.loadNpmTasks('grunt-open');
+    grunt.registerTask('default', [
+        'ts'
+    ]);
 
-  grunt.registerTask('default', ['ts']);
-  
-  grunt.registerTask('serve', [
-    'ts',
-    'connect', 
-    'open', 
-    'watch'
-  ]);
+    grunt.registerTask('vs', [
+      'ts',
+      'wiredep'
+    ]);
 
-}; 
+    grunt.registerTask('serve', [
+      'ts',
+      'wiredep',
+      'connect:livereload',
+      'watch'
+    ]);
+
+};

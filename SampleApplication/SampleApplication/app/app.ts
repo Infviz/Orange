@@ -11,6 +11,7 @@ function prepareContainer(container: Orange.Modularity.Container) {
 }
 
 window.onload = () => {
+    console.log("hej hej sdfsdf sdf ");
     var container = new Orange.Modularity.Container();
 
     var regionManager = new Orange.Modularity.RegionManager(container);

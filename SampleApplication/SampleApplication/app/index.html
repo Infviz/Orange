@@ -13,26 +13,26 @@
     
     <title>Orange Sample TODO Application</title>
 
-    <!-- external styles -->
+    <!-- wiredep will automatically inject bower css deps -->
+    <!-- bower:css -->
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-    <!--
-    <link rel="stylesheet" href="Content/bootstrap-theme.css" />
--->
+    <!-- endbower -->
+
     <!-- our styles -->
     <link rel="stylesheet" href="styles/app.css" type="text/css" />
-
-    <!-- external scripts -->
-    <script src="bower_components/knockout/dist/knockout.js"></script>
+    
+    <!-- wiredep will automatically inject bower js deps -->
+    <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/knockout/dist/knockout.js"></script>
+    <!-- endbower -->
 
     <!-- our scripts -->
     <script src="app.js"></script>
 </head>
 <body>
-
     <div class="container">
         <div data-view="UI.TodoList.TodoListView"></div>
-
         <div data-view="UI.TodoItemForm.TodoItemFormView"></div>
     </div>
 </body>

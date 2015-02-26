@@ -1,0 +1,5 @@
+{
+  "registry": "http://fleetweb-utv.smhi.se:5678",
+  "timeout": 300000,
+  "directory": "app/bower_components"
+}

@@ -278,6 +278,7 @@ function prepareContainer(container) {
     container.registerInstance(Domain.TodoTaskRepository, new Domain.TodoTaskRepository());
 }
 window.onload = function () {
+    console.log("hej hej sdfsdf sdf ");
     var container = new Orange.Modularity.Container();
     var regionManager = new Orange.Modularity.RegionManager(container);
     container.registerInstance(Orange.Modularity.RegionManager, regionManager);
