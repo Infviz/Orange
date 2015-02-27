@@ -183,9 +183,10 @@ FakesAssemblies/
 
 # Typescript
 .tscache
+typings/
 
-# node
+#node
 node_modules/
 
-# bower
+#bower
 bower_components/
