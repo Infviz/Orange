@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="PRAGMA" content="NO-CACHE" />
+    <meta http-equiv="CACHE-CONTROL" content="NO-CACHE" />
+    <meta http-equiv="CACHE-CONTROL" content="NO-STORE" />
+    <meta http-equiv="EXPIRES" content="0" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1" />
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <title>Orange Sample TODO Application</title>
+
+    <!-- wiredep will automatically inject bower css deps -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <!-- endbower -->
+
+    <!-- our styles -->
+    <link rel="stylesheet" href="styles/app.css" type="text/css" />
+    
+    <!-- wiredep will automatically inject bower js deps -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/knockout/dist/knockout.js"></script>
+    <!-- endbower -->
+
+    <!-- our scripts -->
+    <script src="app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div data-view="UI.TodoList.TodoListView"></div>
+        <div data-view="UI.TodoItemForm.TodoItemFormView"></div>
+    </div>
+</body>
+</html>
