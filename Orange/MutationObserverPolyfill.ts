@@ -3,7 +3,7 @@
 /*
 * Copyright 2012 The Polymer Authors. All rights reserved.
 * Use of this source code is governed by this BSD-style
-* license that can be found in the LICENSE file.
+* license that can be found in the license below.
 */
 
 // Copyright (c) 2014 The Polymer Authors. All rights reserved.
