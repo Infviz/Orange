@@ -7,7 +7,11 @@ module Orange.Controls {
 
 		static dependencies = () => <any>[Orange.Modularity.Container];
 		
-		constructor(private _container: Orange.Modularity.Container) { }
+		private _container: Orange.Modularity.Container;
+
+		constructor(container: Orange.Modularity.Container) { 
+			this._container = container;
+		}
 
 		private static _mutationObserverConfig: MutationObserverInit = {
 			// Set to true if additions and removals of the target node's child elements 
@@ -211,7 +215,7 @@ module Orange.Controls {
 			return control;
 		}
 
-		private handleMutation(mutation: MutationRecord) {
+		private handleMutation = (mutation: MutationRecord) => {
 
 			if (mutation.type !== "childList")
 				return;

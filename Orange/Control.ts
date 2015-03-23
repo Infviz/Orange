@@ -1,7 +1,173 @@
 
 /// <reference path="Reference.d.ts"/>
 
+// class KnockoutBindingBase {
+
+// 	protected init(
+// 		element: HTMLElement, 
+// 		valueAccessor: () => any, 
+// 		allBindingsAccessor: () => any, 
+// 		viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+// 		bindingContext: KnockoutBindingContext) {
+
+// 		// This will be called when the element is removed by Knockout or
+//         // if some other part of your code calls ko.removeNode(element)
+//         var disposeCallback = 
+//         	() => {
+// 				this.dispose(element)
+// 				ko.utils.domNodeDisposal.removeDisposeCallback(element, disposeCallback);
+// 			};
+// 		ko.utils.domNodeDisposal.addDisposeCallback(element, disposeCallback);
+// 	}
+
+// 	protected update(
+// 		element: HTMLElement, 
+// 		valueAccessor: () => any, 
+// 		allBindingsAccessor: () => any, 
+// 		viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+// 		bindingContext: KnockoutBindingContext) { } 
+
+// 	protected dispose(element: HTMLElement) { }
+// }
+
+// class KockoutObservableToControllPropertyBinding extends KnockoutBindingBase {
+
+// 	protected init(
+// 		element: HTMLElement, 
+// 		valueAccessor: () => any, 
+// 		allBindingsAccessor: () => any, 
+// 		viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+// 		bindingContext: KnockoutBindingContext) {
+
+// 		super.update(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext);
+// 	}
+
+// 	protected update(
+// 		element: HTMLElement, 
+// 		valueAccessor: () => any, 
+// 		allBindingsAccessor: () => any, 
+// 		viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+// 		bindingContext: KnockoutBindingContext) { 
+// 	} 
+
+// 	protected dispose(element: HTMLElement) {
+// 		super.dispose(element);
+
+// 	}
+// }
+
+
+(<any>ko.bindingHandlers).mybinding = {
+	
+	init: (element: HTMLElement, 
+		valueAccessor: () => any, 
+		allBindingsAccessor: any, 
+		viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+		bindingContext: KnockoutBindingContext) => {
+
+        var options = ko.unwrap(valueAccessor());
+        // $el = $(element);
+        // $el.binding(options);
+ 
+        ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+            // This will be called when the element is removed by Knockout or
+            // if some other part of your code calls ko.removeNode(element)
+            // $el.myWidget("destroy");
+        });
+    }
+    //,
+
+    // update: (element: HTMLElement, 
+			 // valueAccessor: () => any, 
+			 // allBindingsAccessor: any, 
+			 // viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+			 // bindingContext: KnockoutBindingContext) => {
+
+    //     // First get the latest data that we're bound to
+    //     var value = valueAccessor();
+ 
+    //     // Next, whether or not the supplied model property is observable, get its current value
+    //     var valueUnwrapped = ko.unwrap(value);
+ 		
+    //     var mode = allBindingsAccessor.get('mode') || "oneWay";
+ 
+    //     if (mode != "oneWay" && mode != "twoWay")
+    //     	throw "'binding' mode must be oneWay or twoWay";
+
+    //     // TODO: If mode is two way the target control must implement something similar to 
+    //     // property changed that we can listen to.. 
+
+    //     var targetProperty = allBindingsAccessor.get('target'); 
+
+    //     if (!targetProperty || targetProperty == "")
+    //     	throw "binding is missing target property";
+
+    //     if (!((<any>element).orange) || !((<any>element).orange.getControl))
+    //     	throw "Attepmt to bind to control on a non controll element";
+
+    //     var control = (<any>element).orange.getControl();
+
+    //     control[targetProperty] = valueUnwrapped;
+    // }
+};
+
+
+
+(<any>ko.bindingHandlers).binding = {
+	
+	init: (element: HTMLElement, 
+		valueAccessor: () => any, 
+		allBindingsAccessor: any, 
+		viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+		bindingContext: KnockoutBindingContext) => {
+
+        var options = ko.unwrap(valueAccessor());
+        // $el = $(element);
+        // $el.binding(options);
+ 
+        ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+            // This will be called when the element is removed by Knockout or
+            // if some other part of your code calls ko.removeNode(element)
+            // $el.myWidget("destroy");
+        });
+    },
+
+    update: (element: HTMLElement, 
+			 valueAccessor: () => any, 
+			 allBindingsAccessor: any, 
+			 viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+			 bindingContext: KnockoutBindingContext) => {
+
+        // First get the latest data that we're bound to
+        var value = valueAccessor();
+ 
+        // Next, whether or not the supplied model property is observable, get its current value
+        var valueUnwrapped = ko.unwrap(value);
+ 		
+        var mode = allBindingsAccessor.get('mode') || "oneWay";
+ 
+        if (mode != "oneWay" && mode != "twoWay")
+        	throw "'binding' mode must be oneWay or twoWay";
+
+        // TODO: If mode is two way the target control must implement something similar to 
+        // property changed that we can listen to.. 
+
+        var targetProperty = allBindingsAccessor.get('target'); 
+
+        if (!targetProperty || targetProperty == "")
+        	throw "binding is missing target property";
+
+        if (!((<any>element).orange) || !((<any>element).orange.getControl))
+        	throw "Attepmt to bind to control on a non controll element";
+
+        var control = (<any>element).orange.getControl();
+
+        control[targetProperty] = valueUnwrapped;
+    }
+};
+
 module Orange.Controls {
+
 
 	export class Control {
 
@@ -136,7 +302,9 @@ module Orange.Controls {
 
 			if (this._isBindingsApplied || false == this.isTemplateApplied) return;
 
-			ko.applyBindings(this._dataContext, this.element);
+			//if (!!this._dataContext)
+				ko.applyBindings(this._dataContext, this.element);
+
 			this.onApplyBindings();
 
 			this._isBindingsApplied = true;
