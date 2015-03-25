@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Basic Orange MVVM View example</title>
+
+	<script src="bower_components/knockout/dist/knockout.js" type="text/javascript"></script>
+	<script src="bower_components/rxjs/dist/rx.all.js" type="text/javascript"></script>
+
+	<script src="app.js" type="text/javascript"></script>
+
+	<style>
+
+		body {
+			margin: 0;
+			font-family: sans-serif;
+		}
+
+		div[data-view] {
+			position: relative;
+			padding: 10px 25px;
+			margin: 10px;
+			background-color: rgb(252, 252, 252);
+
+			border-radius: 2px;
+			border-color: #dedede;
+			border-style: solid;
+			border-width: 1px;
+		}
+
+		div[data-view] .small_text {
+			font-size: 10px;
+
+
+		}
+
+		div[data-view] div[data-view] {
+			position: relative;
+			padding: 5px 5px;
+			margin: 5px;
+		}
+
+	</style>
+</head>
+
+<div data-view="Views.MainContainer.MainContainerView"></div>
+
+<body>
+<script>
+	TemplateLoader.load([
+		{ path: 'Views/MainContainer/MainContainerView.tpl.html', id: 'Views-MainContainer-MainContainerView' }
+	]);
+</script>
+
+</body>
+</html>

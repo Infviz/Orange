@@ -1,0 +1,25 @@
+
+<div>
+
+	<h3>The main container containing all other views!</h3>
+
+	<h4>Bind from view model to control</h4>
+	<p>With the binding<p/>
+	<pre>
+
+	data-bind="bindings: {property: 'ViewModelProperty', target: 'ControlProperty'}"
+	data-bind="bindings: [{property: 'vmProp1', target: 'cProp1'}, {property: 'vmProp2', target: 'cProp2'}]"
+	</pre>
+	<p>it is possible to bind directly from a property (Rx.Observable or knockout observable) on the view, to a getter/setter on a control.</p>
+	<p>Example using a knockout observable for the x position and a Rx.Observable for the y property.</p>
+
+	<div style="position: relative; width: 400px; height: 100px; border: 1px solid black;">
+		<div 
+			data-control="Controls.ElementPositioner" 
+			data-bind="bindings: [{ property: 'vmX', target: 'x' }, { property: 'vmY', target: 'y' }]">
+			<div class="position_me">
+				<span>Position me!</span>
+			</div>
+		</div>
+	</div>
+</div>

@@ -3,7 +3,57 @@
 
 module Orange.Controls {
 
-	export class ControlManager implements Rx.IDisposable {
+	export interface OrangeElement extends HTMLElement {
+
+		orange? : { 
+			control?: Control; 
+			isInitialized?: boolean;
+		};
+	}
+
+	export interface IOrangeElementExtension {
+
+		control: Control; 
+		isInitialized: boolean;
+		addOnInitializedListener(callback: () => void) : void;
+		removeOnInitializedListener(callback: () => void) : void;
+	}
+
+	class OrangeElementExtension implements IOrangeElementExtension {
+
+		control: Control = null;
+		isInitialized: boolean = false;
+
+
+		private _onInitializedListeners = new Array<() => void>();
+
+		public addOnInitializedListener(callback: () => void) {
+			this._onInitializedListeners.push(callback);
+		}
+
+		public removeOnInitializedListener(callback: () => void) : void {
+
+			var idx = this._onInitializedListeners.indexOf(callback);	
+			
+			if (idx > -1) 
+				this._onInitializedListeners = this._onInitializedListeners.splice(idx, 1);
+		}
+	}
+
+	export var GetOrangeElement = 
+		(element: HTMLElement) : IOrangeElementExtension => {
+
+			if (!((<any>element).orange)) {
+				
+				var orangeEl = new OrangeElementExtension();;
+				element["orange"] = orangeEl;
+				return orangeEl;
+			}
+
+			return <IOrangeElementExtension>(<any>element).orange;
+		};
+
+	export class ControlManager {
 
 		static dependencies = () => <any>[Orange.Modularity.Container];
 		
@@ -43,11 +93,12 @@ module Orange.Controls {
 
 		public static disposeDescendants(root: HTMLElement) {
 
-			var attr = root.getAttribute("data-iv-control");
-			if (attr == null || attr == "") {
+			var attr = ControlManager.getControlAttribute(root);
+
+			if (attr == null) {
 				if (typeof root.children !== "undefined") {
 					for (var i = 0; i < root.children.length; i++)
-					this.disposeDescendants(<HTMLElement>root.children[i]);
+						this.disposeDescendants(<HTMLElement>root.children[i]);
 				}
 			}
 			else {
@@ -57,8 +108,15 @@ module Orange.Controls {
 
 		public static disposeControl(control: Controls.Control) {
 
-			// NOTE: compositeDisposable is private.. 
-			(<any>control).compositeDisposable.dispose();
+			// Clear information stored on element.
+			if (!!(control.element))
+				(<any>control.element).orange = null;
+
+			// NOTE: disposables is private..
+			var disposables = <Array<{ dispose(): void; }>>(<any>control).disposables;
+			for (var dIdx = disposables.length - 1; dIdx >= 0; dIdx--) {
+				disposables[dIdx].dispose();
+			}
 
 			if (typeof control.element.children !== "undefined") {
 				for (var i = 0; i < control.element.children.length; i++) {
@@ -173,8 +231,9 @@ module Orange.Controls {
 			var type = ControlManager.getControlAttribute(element);
 
 			// The element already has a controll connected to it.
-			if (element["orange"] && element["orange"]["control"])
-				return;
+			var orangeElement = GetOrangeElement(element);
+			if (orangeElement.isInitialized)
+				return null;
 
 			var constructorFunction = <{ new () }>type.value.split(".").reduce((c, n) => c[n], window);
 			var control = <Control>(!!container ? container.resolve(constructorFunction) : new constructorFunction());
@@ -182,26 +241,17 @@ module Orange.Controls {
 			if (false == (control instanceof constructorFunction))
 				throw "ControlManager.createControl: instance of constructed object is not of the correct type."
 
-			if (!element["orange"])
-				element["orange"] = { };
-
-			var orange = element["orange"];
-
-			orange["control"] = control;
-			orange["getControl"] = () => element["orange"]["control"];
+			orangeElement.control = control;
 
 			// TODO: Improve this..
 			var uid = "uid-" + (ControlManager._uniqueIdCounter++);
 			element.setAttribute(type.attributeType + "-id", uid);
 
-			// Set element
 			control.element = element;
 
-			// Apply template
 			if (!!(<any>control).applyTemplate)
 				(<any>control).applyTemplate();
 
-			// Create child controls
 			var children = ControlManager.getChildren(element);
 
 			for (var i = 0; i < children.length; i++) {
@@ -212,6 +262,12 @@ module Orange.Controls {
 			if (!!(<any>control).onApplyTemplate)
 				(<any>control).onApplyTemplate();
 
+			orangeElement.isInitialized = true;
+			var listeners: Array<() => void> = <Array<() => void>>(<any>orangeElement)._onInitializedListeners;
+			for (var listenerIdx = listeners.length - 1; listenerIdx >= 0; listenerIdx--) {
+				listeners[listenerIdx]();
+			}
+			
 			return control;
 		}
 
@@ -229,6 +285,17 @@ module Orange.Controls {
 				if (node.nodeType !== 1) continue;
 
 				ControlManager.createControlsInElement(<HTMLElement>node, this._container);
+			}
+
+			var removedNodes = mutation.removedNodes;
+			for (var i = 0; i < removedNodes.length; i++) {
+
+				var node = removedNodes[i];
+
+				// 1 == ELEMENT_NODE
+				if (node.nodeType !== 1) continue;
+
+				ControlManager.disposeDescendants(<HTMLElement>node);
 			}
 		}
 	}
