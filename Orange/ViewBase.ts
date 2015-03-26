@@ -30,24 +30,38 @@ module Orange.Controls {
 			this.applyBindings();
 		}
 
-		public dispose(): void {
-			super.dispose();
-			ko.cleanNode(this.element);
-		}
-
 		private applyBindings(): void {
 
 			if (false == this.isTemplateApplied) return;
-
-			if (!this._dataContext)
-				return;
-
-			ko.cleanNode(this.element);
-			ko.applyBindings(this._dataContext, this.element);
 
 			this.onApplyBindings();
 		}
 
 		protected onApplyBindings(): void { }
+	}
+
+	export class KnockoutViewBase extends ViewBase {
+
+		constructor(templateName: string);
+		constructor(templateName: string, context: any);
+		constructor(templateName: string, context?: any) {
+
+			super(templateName, context);
+		}
+
+		public dispose(): void {
+			super.dispose();
+			ko.cleanNode(this.element);
+		}
+
+		protected onApplyBindings(): void {
+			super.onApplyBindings();
+
+			if (!this.dataContext)
+				return;
+
+			ko.cleanNode(this.element);
+			ko.applyBindings(this.dataContext, this.element);
+		}
 	}
 }

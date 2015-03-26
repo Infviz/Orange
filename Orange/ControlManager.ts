@@ -3,14 +3,6 @@
 
 module Orange.Controls {
 
-	export interface OrangeElement extends HTMLElement {
-
-		orange? : { 
-			control?: Control; 
-			isInitialized?: boolean;
-		};
-	}
-
 	export interface IOrangeElementExtension {
 
 		control: Control; 
@@ -23,7 +15,6 @@ module Orange.Controls {
 
 		control: Control = null;
 		isInitialized: boolean = false;
-
 
 		private _onInitializedListeners = new Array<() => void>();
 
@@ -58,6 +49,7 @@ module Orange.Controls {
 		static dependencies = () => <any>[Orange.Modularity.Container];
 		
 		private _container: Orange.Modularity.Container;
+		public get containter() : Orange.Modularity.Container { return this._container; }
 
 		constructor(container: Orange.Modularity.Container) { 
 			this._container = container;
@@ -107,6 +99,8 @@ module Orange.Controls {
 		}
 
 		public static disposeControl(control: Controls.Control) {
+
+			if (!control) return;
 
 			// Clear information stored on element.
 			if (!!(control.element))
@@ -158,16 +152,19 @@ module Orange.Controls {
 
 			var attr = null;
 			var anIdx = 0;
-			while ((!attr || attr == "") && anIdx < ControlManager._controlAttributeNames.length)
+			while ((!attr || attr == "") && anIdx < ControlManager._controlAttributeNames.length) {
 				attr = element.getAttribute(ControlManager._controlAttributeNames[anIdx++]);
+			}
 
-			if (!attr || attr == "")
+			if (!attr || attr == "") {
 				return null;
-			else
+			}
+			else {
 				return {
 					attributeType: ControlManager._controlAttributeNames[anIdx - 1], 
 					value: attr
 				};
+			}
 		}
 
 		public static createControlsInElement(element: HTMLElement);
@@ -185,7 +182,6 @@ module Orange.Controls {
 				}
 			}
 			else {
-
 				ControlManager.createControlFromElement(element, container);
 			}
 		}
@@ -243,8 +239,8 @@ module Orange.Controls {
 
 			orangeElement.control = control;
 
-			// TODO: Improve this..
-			var uid = "uid-" + (ControlManager._uniqueIdCounter++);
+			// TODO: Improve the id generation
+			var uid = "o-uid-" + (ControlManager._uniqueIdCounter++);
 			element.setAttribute(type.attributeType + "-id", uid);
 
 			control.element = element;

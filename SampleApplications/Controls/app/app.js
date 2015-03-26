@@ -651,17 +651,9 @@ var Orange;
                 _super.prototype.onApplyTemplate.call(this);
                 this.applyBindings();
             };
-            ViewBase.prototype.dispose = function () {
-                _super.prototype.dispose.call(this);
-                ko.cleanNode(this.element);
-            };
             ViewBase.prototype.applyBindings = function () {
                 if (false == this.isTemplateApplied)
                     return;
-                if (!this._dataContext)
-                    return;
-                ko.cleanNode(this.element);
-                ko.applyBindings(this._dataContext, this.element);
                 this.onApplyBindings();
             };
             ViewBase.prototype.onApplyBindings = function () {
@@ -669,6 +661,25 @@ var Orange;
             return ViewBase;
         })(Controls.TemplatedControl);
         Controls.ViewBase = ViewBase;
+        var KnockoutViewBase = (function (_super) {
+            __extends(KnockoutViewBase, _super);
+            function KnockoutViewBase(templateName, context) {
+                _super.call(this, templateName, context);
+            }
+            KnockoutViewBase.prototype.dispose = function () {
+                _super.prototype.dispose.call(this);
+                ko.cleanNode(this.element);
+            };
+            KnockoutViewBase.prototype.onApplyBindings = function () {
+                _super.prototype.onApplyBindings.call(this);
+                if (!this.dataContext)
+                    return;
+                ko.cleanNode(this.element);
+                ko.applyBindings(this.dataContext, this.element);
+            };
+            return KnockoutViewBase;
+        })(ViewBase);
+        Controls.KnockoutViewBase = KnockoutViewBase;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
 var Orange;
@@ -728,6 +739,13 @@ var Orange;
                 };
                 this._container = container;
             }
+            Object.defineProperty(ControlManager.prototype, "containter", {
+                get: function () {
+                    return this._container;
+                },
+                enumerable: true,
+                configurable: true
+            });
             ControlManager.disposeDescendants = function (root) {
                 var attr = ControlManager.getControlAttribute(root);
                 if (attr == null) {
@@ -741,6 +759,8 @@ var Orange;
                 }
             };
             ControlManager.disposeControl = function (control) {
+                if (!control)
+                    return;
                 if (!!(control.element))
                     control.element.orange = null;
                 var disposables = control.disposables;
@@ -773,15 +793,18 @@ var Orange;
             ControlManager.getControlAttribute = function (element) {
                 var attr = null;
                 var anIdx = 0;
-                while ((!attr || attr == "") && anIdx < ControlManager._controlAttributeNames.length)
+                while ((!attr || attr == "") && anIdx < ControlManager._controlAttributeNames.length) {
                     attr = element.getAttribute(ControlManager._controlAttributeNames[anIdx++]);
-                if (!attr || attr == "")
+                }
+                if (!attr || attr == "") {
                     return null;
-                else
+                }
+                else {
                     return {
                         attributeType: ControlManager._controlAttributeNames[anIdx - 1],
                         value: attr
                     };
+                }
             };
             ControlManager.createControlsInElement = function (element, container) {
                 var attr = ControlManager.getControlAttribute(element);
@@ -822,7 +845,7 @@ var Orange;
                 if (false == (control instanceof constructorFunction))
                     throw "ControlManager.createControl: instance of constructed object is not of the correct type.";
                 orangeElement.control = control;
-                var uid = "uid-" + (ControlManager._uniqueIdCounter++);
+                var uid = "o-uid-" + (ControlManager._uniqueIdCounter++);
                 element.setAttribute(type.attributeType + "-id", uid);
                 control.element = element;
                 if (!!control.applyTemplate)
@@ -950,9 +973,7 @@ var Orange;
                     onInitialized();
                 else
                     orangeEl.addOnInitializedListener(onInitialized);
-                ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                    orangeEl.removeOnInitializedListener(onInitialized);
-                });
+                ko.utils.domNodeDisposal.addDisposeCallback(element, function () { return orangeEl.removeOnInitializedListener(onInitialized); });
             }
         };
     })(Bindings = Orange.Bindings || (Orange.Bindings = {}));
@@ -1044,7 +1065,7 @@ var Views;
             };
             MainContainerView.dependencies = function () { return [Views.MainContainer.MainContainerViewModel]; };
             return MainContainerView;
-        })(Orange.Controls.ViewBase);
+        })(Orange.Controls.KnockoutViewBase);
         MainContainer.MainContainerView = MainContainerView;
     })(MainContainer = Views.MainContainer || (Views.MainContainer = {}));
 })(Views || (Views = {}));

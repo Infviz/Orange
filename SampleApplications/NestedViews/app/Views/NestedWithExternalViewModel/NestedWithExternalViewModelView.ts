@@ -3,7 +3,7 @@
 
 module Views.NestedWithExternalViewModel {
 
-	export class NestedWithExternalViewModelView extends Orange.Controls.ViewBase {
+	export class NestedWithExternalViewModelView extends Orange.Controls.KnockoutViewBase {
 		
 		constructor() {
 			

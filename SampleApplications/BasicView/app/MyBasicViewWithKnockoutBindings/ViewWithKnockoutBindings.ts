@@ -2,7 +2,7 @@
 
 module MyBasicViewWithKnockoutBindings {
 
-	export class ViewWithKnockoutBindings extends Orange.Controls.ViewBase {
+	export class ViewWithKnockoutBindings extends Orange.Controls.KnockoutViewBase {
 		
 		static dependencies = () => [MyBasicViewWithKnockoutBindings.ViewModelWithKnockoutBindings];
 

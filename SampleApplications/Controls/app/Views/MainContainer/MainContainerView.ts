@@ -2,7 +2,7 @@
 
 module Views.MainContainer {
 
-	export class MainContainerView extends Orange.Controls.ViewBase {
+	export class MainContainerView extends Orange.Controls.KnockoutViewBase {
 		
 		static dependencies = () => [Views.MainContainer.MainContainerViewModel];
 

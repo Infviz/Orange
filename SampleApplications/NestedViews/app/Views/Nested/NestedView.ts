@@ -2,7 +2,7 @@
 
 module Views.Nested {
 
-	export class NestedView extends Orange.Controls.ViewBase {
+	export class NestedView extends Orange.Controls.KnockoutViewBase {
 		
 		static dependencies = () => [Views.Nested.NestedViewModel];
 

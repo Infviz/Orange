@@ -2,7 +2,7 @@
 
 module Views.MainContainer {
 
-	export class MainContainerView extends Orange.Controls.ViewBase {
+	export class MainContainerView extends Orange.Controls.KnockoutViewBase {
 		
 		static dependencies = () => [Views.MainContainer.MainContainerViewModel];
 
@@ -35,6 +35,9 @@ module Views.MainContainer {
 			var injectView = () => {
 				var container = this.element.querySelector(".view_container");
 
+				if (container == null)
+					return;
+
 				var div = document.createElement("div");
 				var attr = document.createAttribute("data-view");
 				attr.value = "Views.FeedbackLoop.FeedbackLoopView";
@@ -47,6 +50,9 @@ module Views.MainContainer {
 				() => { 
 
 					var container = <HTMLElement>this.element.querySelector(".view_container");
+					if (container == null)
+						return;
+
 					container.innerHTML = "";
 					window.clearInterval(clearViewsInterval);
 				};

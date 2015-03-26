@@ -142,8 +142,9 @@ module Orange.Bindings {
 
 			element.setAttributeNode(dataViweAttr);
 
-			var onInitialized = () => 
-				{
+			var onInitialized = 
+				() => {
+
 					if((<any>orangeEl.control).dataContext != null)
 						return;
 						
@@ -155,12 +156,10 @@ module Orange.Bindings {
 			else
 				orangeEl.addOnInitializedListener(onInitialized);
 
-	        ko.utils
+			 ko.utils
 	        	.domNodeDisposal
 	        	.addDisposeCallback(element, 
-	        		() => {
-	        			orangeEl.removeOnInitializedListener(onInitialized);
-	        		});
+		        		() => orangeEl.removeOnInitializedListener(onInitialized));
 	    }
 	};
 }
