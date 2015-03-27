@@ -22,7 +22,8 @@ module Orange.Bindings {
 			private vm: any, 
 			private element: HTMLElement, 
 			private property: string, 
-			private target: string) {
+			private target: string, 
+			private mode: string) {
 
 			var orangeEl = Orange.Controls.GetOrangeElement(element);
 
@@ -40,7 +41,7 @@ module Orange.Bindings {
 	        if (!((<any>this.element).orange) || !((<any>this.element).orange.control))
 	        	throw "Attepmt to bind to control on a non controll element.";
 
-	        var control = (<any>this.element).orange.control;
+	        var control = <Orange.Controls.Control>(<any>this.element).orange.control;
 
 	        var pd = Object.getOwnPropertyDescriptor(control, this.target);
 
@@ -56,6 +57,32 @@ module Orange.Bindings {
 	        	control[this.target] = this.vm[this.property]();
 	        else 
 	        	control[this.target] = this.vm[this.property];
+
+	        if (this.mode == "twoWay")
+	        	control.addPropertyChangedListener(this.onPropertyChanged);
+		}
+
+		private onPropertyChanged = (propertyName: string, propertyValue: any) => {
+
+			if (propertyName != this.target)
+				return;
+
+			// if Rx.Observable
+			if (this.vm[this.property].onNext)
+			{
+				this.vm[this.property].onNext(propertyValue);	
+			}
+			// might have a knockout observable.. 
+			// TODO: Is there a better way to check this?
+			else if (typeof this.vm[this.property] === "function")
+			{
+				//console.log("Binding two way to knockout observable. (" + property.value + ")");
+				this.vm[this.property](propertyValue);
+			}
+			else
+			{
+				this.vm[this.property] = propertyValue;
+			}
 		}
 
 		public dispose() {
@@ -63,8 +90,13 @@ module Orange.Bindings {
 			if (!!this.propDisposable && !!(this.propDisposable.dispose))
 	            this.propDisposable.dispose();
 
-	        if(!!((<any>this.element).orange))
+	        if (!!((<any>this.element).orange)) {
 	        	(<Orange.Controls.IOrangeElementExtension>((<any>this.element).orange)).removeOnInitializedListener(this.init);
+
+	        	if (!!((<any>this.element).orange).control)
+	        		(<Orange.Controls.Control>((<any>this.element).orange).control).removePropertyChangedListener(this.onPropertyChanged);
+
+	        }
 		}
 	}
 
@@ -84,33 +116,37 @@ module Orange.Bindings {
 
 			var bindings = new Array<ViewModelToControlBinding>();
 
-			var value = valueAccessor();
+			var values = <Array<any>>(valueAccessor());
 
-			if (Array.isArray(value)) {
-			
-				var bindingInfos = <Array<BindingInfo>>value;
-			
-				for (var bIdx = bindingInfos.length - 1; bIdx >= 0; bIdx--) {
+			if (Array.isArray(values) == false)
+				values = [values];
 
-					var bi = <BindingInfo>bindingInfos[bIdx];
+			for (var vIdx = values.length - 1; vIdx >= 0; vIdx--) {
+				var value = values[vIdx];
+				
+				var propertyNames = Object.getOwnPropertyNames(value);
 
-					bindings.push(
-						new ViewModelToControlBinding(
-							bindingContext.$data, 
-							element, 
-							bi.property, 
-							bi.target));
+				if (propertyNames.length > 2)
+					throw "Faulty binding, should be {vmProp:ctrlProp [, mode: m]}, were m can be 'oneWay' or 'twoWay'.";
+
+				var mode = 'oneWay';
+				if (propertyNames.length == 2) {
+					mode = Object.getOwnPropertyDescriptor(value, "mode").value;
+
+					if (mode != 'oneWay' && mode != 'twoWay')
+						throw "Binding mode has to be 'oneWay' or 'twoWay'.";
 				}
-			}
-			else {
-				var bi = <BindingInfo>value;
+
+				var sourceProp = propertyNames.filter(v => v != "mode")[0];
+				var targetProp = Object.getOwnPropertyDescriptor(value, sourceProp).value;
 
 				bindings.push(
 					new ViewModelToControlBinding(
 						bindingContext.$data, 
 						element, 
-						bi.property, 
-						bi.target));
+						sourceProp, 
+						targetProp, 
+						mode));
 			}
 
 	        (<any>ko).utils

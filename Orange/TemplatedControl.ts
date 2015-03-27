@@ -55,7 +55,7 @@ module Orange.Controls {
 
 		constructor(templateProvider: ITemplatedControlTemplateProvider) {
 			super();
-			this._templateProvider = templateProvider;
+			this._templateProvider = templateProvider;	
 		}
 
 		protected onApplyTemplate(): void { }

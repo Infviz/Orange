@@ -528,6 +528,7 @@ var Orange;
             function Control() {
                 this._element = null;
                 this.disposables = new Array();
+                this._propertyChangedListeners = new Array();
             }
             Object.defineProperty(Control.prototype, "element", {
                 get: function () {
@@ -549,6 +550,24 @@ var Orange;
                 Controls.ControlManager.disposeControl(this);
             };
             Control.prototype.onElementSet = function () {
+            };
+            Control.prototype.addPropertyChangedListener = function (listener) {
+                this._propertyChangedListeners.push(listener);
+            };
+            Control.prototype.removePropertyChangedListener = function (listener) {
+                var idx = this._propertyChangedListeners.indexOf(listener);
+                if (idx > -1)
+                    this._propertyChangedListeners.splice(idx, 1);
+            };
+            Control.prototype.raisePropertyChanged = function (propertyName) {
+                var pd = Object.getOwnPropertyDescriptor(this, propertyName);
+                pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), propertyName);
+                this.onPropertyChanged(pd);
+                for (var plIdx = this._propertyChangedListeners.length - 1; plIdx >= 0; plIdx--) {
+                    this._propertyChangedListeners[plIdx](pd);
+                }
+            };
+            Control.prototype.onPropertyChanged = function (property) {
             };
             return Control;
         })();
@@ -698,7 +717,7 @@ var Orange;
             OrangeElementExtension.prototype.removeOnInitializedListener = function (callback) {
                 var idx = this._onInitializedListeners.indexOf(callback);
                 if (idx > -1)
-                    this._onInitializedListeners = this._onInitializedListeners.splice(idx, 1);
+                    this._onInitializedListeners.splice(idx, 1);
             };
             return OrangeElementExtension;
         })();
@@ -896,12 +915,25 @@ var Orange;
         };
         ko.virtualElements.allowedBindings.stopBindings = true;
         var ViewModelToControlBinding = (function () {
-            function ViewModelToControlBinding(vm, element, property, target) {
+            function ViewModelToControlBinding(vm, element, property, target, mode) {
+                var _this = this;
                 this.vm = vm;
                 this.element = element;
                 this.property = property;
                 this.target = target;
+                this.mode = mode;
                 this.propDisposable = null;
+                this.onPropertyChanged = function (property) {
+                    if (_this.vm[_this.property].onNext) {
+                        _this.vm[_this.property].onNext(property.value);
+                    }
+                    else if (typeof _this.vm[_this.property] === "function") {
+                        _this.vm[_this.property](property.value);
+                    }
+                    else {
+                        _this.vm[_this.property] = property.value;
+                    }
+                };
                 var orangeEl = Orange.Controls.GetOrangeElement(element);
                 if (orangeEl.isInitialized)
                     this.init();
@@ -925,12 +957,17 @@ var Orange;
                     control[this.target] = this.vm[this.property]();
                 else
                     control[this.target] = this.vm[this.property];
+                if (this.mode == "twoWay")
+                    control.addPropertyChangedListener(this.onPropertyChanged);
             };
             ViewModelToControlBinding.prototype.dispose = function () {
                 if (!!this.propDisposable && !!(this.propDisposable.dispose))
                     this.propDisposable.dispose();
-                if (!!(this.element.orange))
+                if (!!(this.element.orange)) {
                     (this.element.orange).removeOnInitializedListener(this.init);
+                    if (!!(this.element.orange).control)
+                        (this.element.orange).control.removePropertyChangedListener(this.onPropertyChanged);
+                }
             };
             return ViewModelToControlBinding;
         })();
@@ -938,17 +975,23 @@ var Orange;
         ko.bindingHandlers.bindings = {
             init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
                 var bindings = new Array();
-                var value = valueAccessor();
-                if (Array.isArray(value)) {
-                    var bindingInfos = value;
-                    for (var bIdx = bindingInfos.length - 1; bIdx >= 0; bIdx--) {
-                        var bi = bindingInfos[bIdx];
-                        bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, bi.property, bi.target));
+                var values = (valueAccessor());
+                if (Array.isArray(values) == false)
+                    values = [values];
+                for (var vIdx = values.length - 1; vIdx >= 0; vIdx--) {
+                    var value = values[vIdx];
+                    var propertyNames = Object.getOwnPropertyNames(value);
+                    if (propertyNames.length > 2)
+                        throw "Faulty binding, should be {vmProp:ctrlProp [, mode: m]}, were m can be 'oneWay' or 'twoWay'.";
+                    var mode = 'oneWay';
+                    if (propertyNames.length == 2) {
+                        mode = Object.getOwnPropertyDescriptor(value, "mode").value;
+                        if (mode != 'oneWay' && mode != 'twoWay')
+                            throw "Binding mode has to be 'oneWay' or 'twoWay'.";
                     }
-                }
-                else {
-                    var bi = value;
-                    bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, bi.property, bi.target));
+                    var sourceProp = propertyNames.filter(function (v) { return v != "mode"; })[0];
+                    var targetProp = Object.getOwnPropertyDescriptor(value, sourceProp).value;
+                    bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, sourceProp, targetProp, mode));
                 }
                 ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
                     for (var bIdx = bindings.length - 1; bIdx >= 0; bIdx--) {

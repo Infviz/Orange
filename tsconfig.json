@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "out": "SampleApplications/Controls/app/out.js", 
+        "sourceMap": true, 
+        "target": "es5"
+    }, 
+    "files": [
+        "SampleApplications/Controls/app/app.ts"
+    ]
+}

@@ -27,5 +27,34 @@ module Orange.Controls {
 		}
 
 		protected onElementSet(): void { }
+
+		private _propertyChangedListeners = new Array<(propertyName: string, value: any) => void>();
+		
+		public addPropertyChangedListener(listener: (propertyName: string, value: any) => void) {
+			this._propertyChangedListeners.push(listener);
+		}
+
+		public removePropertyChangedListener(listener: (propertyName: string, value: any) => void) {
+
+			var idx = this._propertyChangedListeners.indexOf(listener);
+			if (idx > -1)
+				this._propertyChangedListeners.splice(idx, 1);
+		}
+
+		protected raisePropertyChanged(propertyName: string) {
+
+			var propertyValue = this[propertyName];
+
+	        if (propertyValue == null || propertyValue == "undefined")
+	        	throw "trying to access undefined property '" + propertyName + "'.";
+	        
+	        this.onPropertyChanged(propertyName, propertyValue);
+
+	        for (var plIdx = this._propertyChangedListeners.length - 1; plIdx >= 0; plIdx--) {
+	        	this._propertyChangedListeners[plIdx](propertyName, propertyValue);
+	        }
+		}
+
+		protected onPropertyChanged(propertyName: string, value: any): void { }
 	}
 }

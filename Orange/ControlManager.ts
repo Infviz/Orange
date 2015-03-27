@@ -27,7 +27,7 @@ module Orange.Controls {
 			var idx = this._onInitializedListeners.indexOf(callback);	
 			
 			if (idx > -1) 
-				this._onInitializedListeners = this._onInitializedListeners.splice(idx, 1);
+				this._onInitializedListeners.splice(idx, 1);
 		}
 	}
 
@@ -80,7 +80,7 @@ module Orange.Controls {
 
 			// Set to an array of attribute local names (without namespace) if not all 
 			// attribute mutations need to be observed.
-			//attributeFilter: ["data-iv-control"]
+			//attributeFilter: ["data-control", "data-view"]
 		};
 
 		public static disposeDescendants(root: HTMLElement) {

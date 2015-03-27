@@ -19,6 +19,8 @@ module Views.MainContainer {
 		public vmX = ko.observable<number>(0.5);
 		public vmY = new Rx.BehaviorSubject<number>(0.5);
 
+		public name = ko.observable<string>("I am possitioned!");
+
 		constructor() {
 			this.init();
 		}
@@ -35,6 +37,8 @@ module Views.MainContainer {
 					}, 
 					(err) => {}, 
 					() => {});
+
+			this.name.subscribe((val) => { console.log(val); });
 		}
 	}
 }

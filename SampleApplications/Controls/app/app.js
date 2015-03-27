@@ -528,6 +528,7 @@ var Orange;
             function Control() {
                 this._element = null;
                 this.disposables = new Array();
+                this._propertyChangedListeners = new Array();
             }
             Object.defineProperty(Control.prototype, "element", {
                 get: function () {
@@ -549,6 +550,25 @@ var Orange;
                 Controls.ControlManager.disposeControl(this);
             };
             Control.prototype.onElementSet = function () {
+            };
+            Control.prototype.addPropertyChangedListener = function (listener) {
+                this._propertyChangedListeners.push(listener);
+            };
+            Control.prototype.removePropertyChangedListener = function (listener) {
+                var idx = this._propertyChangedListeners.indexOf(listener);
+                if (idx > -1)
+                    this._propertyChangedListeners.splice(idx, 1);
+            };
+            Control.prototype.raisePropertyChanged = function (propertyName) {
+                var propertyValue = this[propertyName];
+                if (propertyValue == null || propertyValue == "undefined")
+                    throw "trying to access undefined property '" + propertyName + "'.";
+                this.onPropertyChanged(propertyName, propertyValue);
+                for (var plIdx = this._propertyChangedListeners.length - 1; plIdx >= 0; plIdx--) {
+                    this._propertyChangedListeners[plIdx](propertyName, propertyValue);
+                }
+            };
+            Control.prototype.onPropertyChanged = function (propertyName, value) {
             };
             return Control;
         })();
@@ -698,7 +718,7 @@ var Orange;
             OrangeElementExtension.prototype.removeOnInitializedListener = function (callback) {
                 var idx = this._onInitializedListeners.indexOf(callback);
                 if (idx > -1)
-                    this._onInitializedListeners = this._onInitializedListeners.splice(idx, 1);
+                    this._onInitializedListeners.splice(idx, 1);
             };
             return OrangeElementExtension;
         })();
@@ -896,12 +916,27 @@ var Orange;
         };
         ko.virtualElements.allowedBindings.stopBindings = true;
         var ViewModelToControlBinding = (function () {
-            function ViewModelToControlBinding(vm, element, property, target) {
+            function ViewModelToControlBinding(vm, element, property, target, mode) {
+                var _this = this;
                 this.vm = vm;
                 this.element = element;
                 this.property = property;
                 this.target = target;
+                this.mode = mode;
                 this.propDisposable = null;
+                this.onPropertyChanged = function (propertyName, propertyValue) {
+                    if (propertyName != _this.target)
+                        return;
+                    if (_this.vm[_this.property].onNext) {
+                        _this.vm[_this.property].onNext(propertyValue);
+                    }
+                    else if (typeof _this.vm[_this.property] === "function") {
+                        _this.vm[_this.property](propertyValue);
+                    }
+                    else {
+                        _this.vm[_this.property] = propertyValue;
+                    }
+                };
                 var orangeEl = Orange.Controls.GetOrangeElement(element);
                 if (orangeEl.isInitialized)
                     this.init();
@@ -925,12 +960,17 @@ var Orange;
                     control[this.target] = this.vm[this.property]();
                 else
                     control[this.target] = this.vm[this.property];
+                if (this.mode == "twoWay")
+                    control.addPropertyChangedListener(this.onPropertyChanged);
             };
             ViewModelToControlBinding.prototype.dispose = function () {
                 if (!!this.propDisposable && !!(this.propDisposable.dispose))
                     this.propDisposable.dispose();
-                if (!!(this.element.orange))
+                if (!!(this.element.orange)) {
                     (this.element.orange).removeOnInitializedListener(this.init);
+                    if (!!(this.element.orange).control)
+                        (this.element.orange).control.removePropertyChangedListener(this.onPropertyChanged);
+                }
             };
             return ViewModelToControlBinding;
         })();
@@ -938,17 +978,23 @@ var Orange;
         ko.bindingHandlers.bindings = {
             init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
                 var bindings = new Array();
-                var value = valueAccessor();
-                if (Array.isArray(value)) {
-                    var bindingInfos = value;
-                    for (var bIdx = bindingInfos.length - 1; bIdx >= 0; bIdx--) {
-                        var bi = bindingInfos[bIdx];
-                        bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, bi.property, bi.target));
+                var values = (valueAccessor());
+                if (Array.isArray(values) == false)
+                    values = [values];
+                for (var vIdx = values.length - 1; vIdx >= 0; vIdx--) {
+                    var value = values[vIdx];
+                    var propertyNames = Object.getOwnPropertyNames(value);
+                    if (propertyNames.length > 2)
+                        throw "Faulty binding, should be {vmProp:ctrlProp [, mode: m]}, were m can be 'oneWay' or 'twoWay'.";
+                    var mode = 'oneWay';
+                    if (propertyNames.length == 2) {
+                        mode = Object.getOwnPropertyDescriptor(value, "mode").value;
+                        if (mode != 'oneWay' && mode != 'twoWay')
+                            throw "Binding mode has to be 'oneWay' or 'twoWay'.";
                     }
-                }
-                else {
-                    var bi = value;
-                    bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, bi.property, bi.target));
+                    var sourceProp = propertyNames.filter(function (v) { return v != "mode"; })[0];
+                    var targetProp = Object.getOwnPropertyDescriptor(value, sourceProp).value;
+                    bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, sourceProp, targetProp, mode));
                 }
                 ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
                     for (var bIdx = bindings.length - 1; bIdx >= 0; bIdx--) {
@@ -1045,6 +1091,45 @@ var Controls;
     })(Orange.Controls.TemplatedControl);
     Controls.ElementPositioner = ElementPositioner;
 })(Controls || (Controls = {}));
+var Controls;
+(function (Controls) {
+    var SmartInput = (function (_super) {
+        __extends(SmartInput, _super);
+        function SmartInput() {
+            var _this = this;
+            _super.call(this, new Orange.Controls.StringTemplateProvider('<input class="controls_smart_input_element" type="text" style="display: inline-block; position: relative;"/>'));
+            this._text = "";
+            this._input = null;
+            this.onkeypress = function (ev) { return _this.text = _this._input.value; };
+        }
+        Object.defineProperty(SmartInput.prototype, "text", {
+            get: function () {
+                return this._text;
+            },
+            set: function (v) {
+                if (this._text == v)
+                    return;
+                this._text = !v ? "" : v;
+                if (this._input.value != this._text)
+                    this._input.value = this._text;
+                this.raisePropertyChanged("text");
+            },
+            enumerable: true,
+            configurable: true
+        });
+        SmartInput.prototype.onApplyTemplate = function () {
+            _super.prototype.onApplyTemplate.call(this);
+            this._input = this.element.querySelector(".controls_smart_input_element");
+            this._input.addEventListener("input", this.onkeypress);
+        };
+        SmartInput.prototype.dispose = function () {
+            _super.prototype.dispose.call(this);
+            this._input.removeEventListener("input", this.onkeypress);
+        };
+        return SmartInput;
+    })(Orange.Controls.TemplatedControl);
+    Controls.SmartInput = SmartInput;
+})(Controls || (Controls = {}));
 var Views;
 (function (Views) {
     var MainContainer;
@@ -1085,6 +1170,7 @@ var Views;
             function MainContainerViewModel() {
                 this.vmX = ko.observable(0.5);
                 this.vmY = new Rx.BehaviorSubject(0.5);
+                this.name = ko.observable("I am possitioned!");
                 this.init();
             }
             MainContainerViewModel.prototype.init = function () {
@@ -1094,6 +1180,9 @@ var Views;
                     _this.vmY.onNext(Math.random());
                 }, function (err) {
                 }, function () {
+                });
+                this.name.subscribe(function (val) {
+                    console.log(val);
                 });
             };
             return MainContainerViewModel;
