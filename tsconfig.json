@@ -1,10 +1,10 @@
 {
     "compilerOptions": {
-        "out": "SampleApplications/Controls/app/out.js", 
+        "out": "SampleApplications/DataGrid/app/out.js", 
         "sourceMap": true, 
         "target": "es5"
     }, 
     "files": [
-        "SampleApplications/Controls/app/app.ts"
+        "SampleApplications/DataGrid/app/app.ts"
     ]
 }

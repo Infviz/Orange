@@ -1,0 +1,30 @@
+{
+  "version": "v4",
+  "repo": "borisyankov/DefinitelyTyped",
+  "ref": "master",
+  "path": "typings",
+  "bundle": "typings/tsd.d.ts",
+  "installed": {
+    "jquery/jquery.d.ts": {
+      "commit": "7ca8add069411b3bde47fad7208706801cde8656"
+    },
+    "knockout/knockout.d.ts": {
+      "commit": "7ca8add069411b3bde47fad7208706801cde8656"
+    },
+    "bootstrap/bootstrap.d.ts": {
+      "commit": "7ca8add069411b3bde47fad7208706801cde8656"
+    },
+    "ix.js/ix.d.ts": {
+      "commit": "7ca8add069411b3bde47fad7208706801cde8656"
+    },
+    "ix.js/l2o.d.ts": {
+      "commit": "7ca8add069411b3bde47fad7208706801cde8656"
+    },
+    "hammerjs/hammerjs.d.ts": {
+      "commit": "7ca8add069411b3bde47fad7208706801cde8656"
+    },
+    "touch-events/touch-events.d.ts": {
+      "commit": "7ca8add069411b3bde47fad7208706801cde8656"
+    }
+  }
+}

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Basic Orange MVVM View example</title>
+
+	<!-- wiredep will automatically inject bower css deps -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <!-- endbower -->
+
+    <link rel="stylesheet" href="styles/main.css" />
+
+    <!-- wiredep will automatically inject bower js deps -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/knockout/dist/knockout.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/Ix/l2o.js"></script>
+    <script src="bower_components/Ix/ix.js"></script>
+    <script src="bower_components/hammerjs/hammer.js"></script>
+    <!-- endbower -->
+    
+    <script src="bower_components/rxjs/dist/rx.all.js"></script>
+    <script src="bower_components/rx-dom/dist/rx.dom.js"></script>
+
+	<script src="app.js" type="text/javascript"></script>
+
+	<style>
+
+		div.wrapper {
+			position: relative;
+			left: 100px;
+			width: calc(100% - 100px);
+			background-color: #eeeeee;
+			height: 500px;
+
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+	</style>
+	<!--<style>
+		body {
+			/*background-color: black;*/
+		}
+
+		div.wrapper {
+			position: relative;
+			left: 100px;
+			width: calc(100% - 100px);
+			background-color: #eeeeee;
+			height: 500px;
+
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+
+		/* Data Grid */
+
+		div.data_grid {
+
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+
+			position: relative;
+			width: 100%;
+			height: 100%;
+			line-height: 100%;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+		
+		[data-control="Controls.DataGrid"] {
+			position: relative;
+			width: 100%;
+			height: 100%;
+		}
+
+		div.data_grid div.dg_header_container {
+			
+			position: absolute;
+			width: 100%;
+			/*overflow: hidden;*/
+			top: 0;
+			left: 0;
+			padding: 0;
+			margin: 0;
+			z-index: 201;
+		}
+
+		div.data_grid div.dg_body_container {
+
+			position: relative;
+			width: 100%;
+			height: 100%;
+			padding: 0;
+			margin: 0;
+			overflow-y: auto;
+			overflow-x: auto;
+		}
+
+		div.data_grid div.dg_body_container .dg_body {
+
+			margin: 0;
+			padding: 0;
+			position: relative;
+			width: 100%;
+		}
+
+		div.data_grid div.dg_header_container .dg_rows,
+		div.data_grid div.dg_body_container .dg_rows {
+
+			margin: 0;
+			padding: 0;
+			position: relative;
+			display: inline-block;
+		}
+
+		div.data_grid div.dg_header_container .dg_row,
+		div.data_grid div.dg_body_container .dg_row { 
+
+			margin: 0;
+			padding: 0;
+			position: relative;
+			display: inline-block;
+			white-space: nowrap;
+			float: left;
+			clear: both;
+		}
+
+		div.data_grid div.dg_header_container .dg_cell,
+		div.data_grid div.dg_body_container .dg_cell {
+
+			margin: 0;
+			padding: 0;
+			/*position: relative;*/
+			display: inline-block;
+			
+			white-space: nowrap;
+			/*overflow: hidden;*/
+			text-overflow: ellipsis;
+		}
+
+		div.data_grid div.dg_body_container .dg_frozen {
+
+			margin: 0;
+			padding: 0;
+			position: absolute;
+			left: 0;
+			display: block;
+		}
+
+		div.data_grid div.dg_body_container .dg_frozen.dg_rows {
+
+			z-index: 200;
+		}
+
+		/* The below styles are for "looks" only, le */
+
+		div.data_grid .dg_row:nth-child(even) { 
+			background-color: #f5f5f5;
+		}
+
+		div.data_grid .dg_row:nth-child(odd) { 
+			background-color: #ffffff;
+		}
+
+		div.data_grid .dg_header .dg_row {
+			border-bottom: 2px solid #303030;
+		}
+
+		div.data_grid div.dg_header_container .dg_cell,
+		div.data_grid div.dg_body_container .dg_cell {
+
+			padding: 10px 10px 10px 10px;
+
+			/* to be set..  */
+			/*width: 100px;*/
+
+			/* these might be good to set for cell */
+			font-size: 12px;
+			line-height: 12px;
+		}
+
+		div.data_grid div.dg_header_container .dg_cell {
+			font-size: 14px;
+			line-height: 14px;
+		}
+
+		div.data_grid div.dg_body_container .dg_frozen .dg_row {
+			border-right: 1px solid #303030;
+		}
+
+	</style>-->
+</head>
+
+<body>
+
+<div class="wrapper">
+	<div id="my_dg" data-control="Controls.DataGrid" data-grid-column-width="distributed"></div>
+</div>
+
+<!-- <div class="wrapper">
+
+	<div class="data_grid">
+
+		<div class="dg_body_container">
+			<div class="dg_rows dg_header">
+				<div class="dg_row"><div class="dg_cell"></div><div class="dg_cell">My first nice header</div><div class="dg_cell">b</div><div class="dg_cell">asdfasdfase</div><div class="dg_cell">b</div><div class="dg_cell">c</div><div class="dg_cell">c</div><div class="dg_cell">c</div><div class="dg_cell">c</div></div>
+			</div>
+
+			<div class="dg_body dg_frozen">
+				<div class="dg_rows dg_frozen">
+					<div class="dg_row">
+						<div class="dg_cell"><span>1</span></div><div class="dg_cell"><span>a</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>2</span></div><div class="dg_cell"><span>a</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>3</span></div><div class="dg_cell"><span>a</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>5</span></div><div class="dg_cell"><span>a</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>6</span></div><div class="dg_cell"><span>a</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>7</span></div><div class="dg_cell"><span>a</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>8</span></div><div class="dg_cell"><span>a</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>9</span></div><div class="dg_cell"><span>a</span></div>
+					</div>
+				</div>	
+			</div>
+
+			<div class="dg_body">
+				<div class="dg_rows">
+					<div class="dg_row">
+						<div class="dg_cell"><span>1</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>2</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>3</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
+					</div>
+
+					<div class="dg_row">
+						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
+					</div>
+				</div>	
+			</div>	
+		</div>
+		<div class="dg_header_container">
+			<div class="dg_rows dg_header">
+				<div class="dg_row">
+					<div class="dg_cell"></div><div class="dg_cell">My first nice header</div><div class="dg_cell">b</div><div class="dg_cell">asdfasdfase</div><div class="dg_cell">b</div><div class="dg_cell">c</div><div class="dg_cell">c</div><div class="dg_cell">c</div><div class="dg_cell">c</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div> -->
+
+<script></script>
+</body>
+</html>

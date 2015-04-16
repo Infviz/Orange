@@ -1,0 +1,119 @@
+/* 
+ *	Global scope less functions, mixins and variables should 
+ *	be defined here.
+ */
+/* Injected imports for controls and views */
+/* injector:less */
+[data-control="Controls.DataGrid"] {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  line-height: 100%;
+  overflow: hidden;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_body_container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_body_container .dg_body {
+  position: relative;
+  width: 100%;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_body_container .dg_rows {
+  position: relative;
+  display: inline-block;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_body_container .dg_row {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  float: left;
+  clear: both;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_body_container .dg_cell {
+  display: inline-block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_body_container .dg_frozen {
+  position: absolute;
+  left: 0;
+  display: block;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_body_container .dg_frozen.dg_rows {
+  z-index: 200;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_header_container {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 201;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_header_container .dg_rows {
+  position: relative;
+  display: inline-block;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_header_container .dg_row {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  float: left;
+  clear: both;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_header_container .dg_cell {
+  display: inline-block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid .dg_row:nth-child(even) {
+  background-color: #f5f5f5;
+}
+[data-control="Controls.DataGrid"] div.data_grid .dg_row:nth-child(odd) {
+  background-color: #ffffff;
+}
+[data-control="Controls.DataGrid"] div.data_grid .dg_header .dg_row {
+  border-bottom: 2px solid #303030;
+}
+[data-control="Controls.DataGrid"] div.data_grid .dg_cell {
+  padding: 10px 10px 10px 10px;
+}
+div.dg_body_container [data-control="Controls.DataGrid"] div.data_grid .dg_cell {
+  font-size: 12px;
+  line-height: 12px;
+}
+div.dg_header_container [data-control="Controls.DataGrid"] div.data_grid .dg_cell {
+  font-size: 14px;
+  line-height: 14px;
+}
+[data-control="Controls.DataGrid"] div.data_grid div.dg_body_container .dg_frozen .dg_row {
+  border-right: 1px solid #303030;
+}
+/* endinjector */
+/* 
+ *	General styles for the application not defined in a .less 
+ *	for a view or a control should be added after this comment.
+ */
