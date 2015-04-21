@@ -60,8 +60,8 @@ class Application {
             () => {
 
                 var cols = new Array<Controls.IDataGridColumnDefinition>(
-                    new Controls.TextColumnDefinition("col1","Column one", "col1", 20),
-                    new Controls.TextColumnDefinition("col2","Column two", "col2", 50),
+                    new Controls.TextColumnDefinition("col1","Column one", "col1", 100),
+                    new Controls.TextColumnDefinition("col2","Column two", "col2", 100),
 
                     new Controls.TemplatedKnockoutColumnDefinition(
                         '<div>' +
@@ -81,8 +81,8 @@ class Application {
                         '       </ul>' +
                         '   </div>'+ 
                         '</div>', 
-                        '<span>ko header</span>', 
-                        "col3.name", 200),
+                        '<span data-bind="text: col3Header"></span>',
+                        "col3.name", 140),
 
                     new Controls.TextColumnDefinition("col4","Column four", "col4", 100),
                     new Controls.TextColumnDefinition("col5","Column five", "col5", 100),
@@ -119,6 +119,8 @@ class Application {
 
                 var items = ko.observableArray<RowItem>(data);
                 dg.itemsSource = items;
+
+                dg.headerContext = { col3Header: "Col 3 Header"};
 
                 var counter = 1;
                 Rx.Observable.interval(50)

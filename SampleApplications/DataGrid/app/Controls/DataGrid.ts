@@ -6,111 +6,8 @@ module Controls {
 
 		width: number;
 		sortProperty: string;
-		createCellElement(row: HTMLDivElement, rowContext: any) : void;
-		createHeaderElement(row: HTMLDivElement, rowContext: any) : void;
-	}
-
-	export class TextColumnDefinition implements IDataGridColumnDefinition {
-
-		private _valueProperty: string = "";
-
-		private _width : number;
-		public get width() : number {
-			return this._width;
-		}
-		public set width(v : number) {
-			this._width = v;
-		}
-
-		private _header : string;
-		public get header() : string {
-			return this._header;
-		}
-
-		private _sortProperty : string;
-		public get sortProperty() : string {
-			return this._sortProperty;
-		}
-
-		constructor(valueProperty: string, header: string, sortProperty: string, width?: number) {
-
-			this._valueProperty = valueProperty;
-			this._header = header;
-			this._width = (<any>width == "undefined") ? null : width;
-			this._sortProperty = sortProperty ? sortProperty : valueProperty;
-		}
-
-		public createCellElement(row: HTMLDivElement, rowContext: any): void {
-
-			var cellEl = document.createElement('div');
-			cellEl.className = 'dg_cell';
-			cellEl.innerHTML = '<span>' + rowContext[this._valueProperty] + '</span>';
-
-			cellEl.style.width = this._width + "px";
-
-			row.appendChild(cellEl);
-		}
-
-		public createHeaderElement(row: HTMLDivElement, rowContext: any) : void {
-
-			var cellEl = document.createElement('div');
-			cellEl.className = 'dg_cell';
-			cellEl.innerHTML = '<span>' + this._header + '</span>';
-			cellEl.style.width = this._width + "px";
-
-			row.appendChild(cellEl);
-		}
-	}
-
-	export class TemplatedKnockoutColumnDefinition implements IDataGridColumnDefinition {
-
-		private _cellTemplate: string = "";
-		private _headerTemplate : string;
-		
-		private _sortProperty : string;
-		public get sortProperty() : string {
-			return this._sortProperty;
-		}
-
-		private _width : number;
-		public get width() : number {
-			return this._width;
-		}
-		public set width(v : number) {
-			this._width = v;
-		}
-		
-		constructor(cellTemplate: string, headerTemplate: string, sortProperty: string, width?: number) {
-
-			this._cellTemplate = cellTemplate;
-			this._headerTemplate = headerTemplate;
-			this._sortProperty = sortProperty;
-			this._width = (<any>width == "undefined") ? null : width;
-		}
-
-		public createCellElement(row: HTMLDivElement, rowContext: any): void {
-
-			var cellEl = document.createElement('div');
-			cellEl.className = 'dg_cell';
-			cellEl.innerHTML = this._cellTemplate;
-
-			cellEl.style.width = this._width + "px";
-
-			ko.applyBindings(rowContext, cellEl);
-
-			row.appendChild(cellEl);	
-		}
-
-		public createHeaderElement(row: HTMLDivElement, rowContext: any) : void {
-
-			var el = document.createElement('div');
-			el.className = 'dg_cell';
-			el.innerHTML = this._headerTemplate;
-
-			el.style.width = this._width + "px";
-
-			row.appendChild(el);
-		}
+		createCellElement(row: HTMLDivElement, rowContext: any) : HTMLDivElement;
+		createHeaderElement(row: HTMLDivElement, rowContext: any) : HTMLDivElement;
 	}
 
 	export class RenderFrame {
@@ -139,111 +36,6 @@ module Controls {
         }
     }
 
-    // export class DataGridCell {
-
-    // 	private _hammer: HammerManager = null;
-    // 	private _element: HTMLDivElement = null;
-    // 	private _columnDefinition: IDataGridColumnDefinition = null;
-    // 	private _parentRow: DataGridRow = null;
-
-    // 	constructor(parentRow: DataGridRow, columnDefinition: IDataGridColumnDefinition) {
-
-    // 		this._parentRow = parentRow;
-    // 		this._columnDefinition = columnDefinition;
-    // 	}
-
-    // 	public getElement() : HTMLDivElement {
-
-    // 		this._columnDefinition.createCellElement(row, this._context);
-    // 	}
-
-    // 	public dispose() {
-
-    // 	}
-    // }
-
-    export class DataGridRow {
-
-    	private _hammer: HammerManager = null;
-    	private _element: HTMLDivElement = null;
-    	private _columnDefinitions: Array<IDataGridColumnDefinition> = null;
-
-    	private _isRendered = false;
-
-    	private _id : string;
-    	public get id() : string {
-    		return this._id;
-    	}
-
-    	private _context: any = null;
-    	public get context() : any {
-    		return this._context;
-    	}
-
-    	constructor(context: any, id: string, columnDefinitions: Array<IDataGridColumnDefinition>) {
-    		
-    		this._context = context;
-    		this._id = id;
-    		this._columnDefinitions = columnDefinitions;
-
-    	}
-
-    	public getElement() : HTMLDivElement {
-
-    		if (!this._element)
-    			this.init();
-
-			return this._element;
-		}
-
-		public dispose() {
-
-			this._hammer.destroy();
-		}
-
-		private init() {
-
-			var row = document.createElement("div");
-			row.className = "dg_row";
-
-			row.setAttribute("data-dg-row-id", this.id);
-
-			for (var cIdx = 0; cIdx < this._columnDefinitions.length; ++cIdx) {
-				
-				var columnDefinition = this._columnDefinitions[cIdx];
-
-				columnDefinition.createCellElement(row, this._context);
-			}
-
-			this._element = row;
-
-			this._hammer = new Hammer.Manager(row, { });
-
-			var singleTap = new Hammer.Tap({ event: 'singletap' });
-			var doubleTap = new Hammer.Tap({ event: 'doubletap', taps: 2 });
-
-			this._hammer.add([doubleTap, singleTap]);
-
-			doubleTap.recognizeWith(singleTap);
-			singleTap.requireFailure(doubleTap);
-
-			this._hammer.on("singletap", this.onClick);
-			this._hammer.on("doubletap", this.onDoubleClick);
-		}
-
-		private onClick = (event: HammerInput) => {
-
-			console.log("Row " + this._element.getAttribute("data-dg-row-id") + " was clicked.");
-			console.log(event);
-		}
-
-		private onDoubleClick = (event: HammerInput) => {
-
-			console.log("Row " + this._element.getAttribute("data-dg-row-id") + " was double clicked.");
-			console.log(event);
-		}
-    }
-
     export class DataGridHeader {
 
     	private _hammer: HammerManager = null;
@@ -256,16 +48,21 @@ module Controls {
     	}
 
     	private _dgContainer: HTMLDivElement = null;
+		private _calculateDistributedColumns = false;
+		private _frozenColumnCount: number = 0;
 
     	constructor(
     		context: any, 
     		columnDefinitions: Array<IDataGridColumnDefinition>,
-    		dataGridElement: HTMLDivElement
-    		) {
+    		dataGridElement: HTMLDivElement,
+    		frozenColumnCount: number,
+    		calculateDistributedColumns: boolean) {
     		
     		this._context = context;
     		this._columnDefinitions = columnDefinitions;
     		this._dgContainer = dataGridElement;
+    		this._calculateDistributedColumns = calculateDistributedColumns;
+    		this._frozenColumnCount = frozenColumnCount;
     	}
 
     	updateHeader() : void {
@@ -288,15 +85,48 @@ module Controls {
 			rowEl.className = "dg_row";
 			headerEl.appendChild(rowEl);
 
+			var frozenHeaderColsEl = document.createElement("div");
+			frozenHeaderColsEl.className = "dg_rows dg_header";
+			
+			var frozenHeaderColsRowEl = document.createElement("div");
+			frozenHeaderColsRowEl.className = "dg_row";
+			frozenHeaderColsEl.appendChild(frozenHeaderColsRowEl);
+
 			for (var cIdx = 0; cIdx < this._columnDefinitions.length; ++cIdx) {
 				
 				var colItem = this._columnDefinitions[cIdx];
 
-				colItem.createHeaderElement(rowEl, this._context);
+				var cellEl = colItem.createHeaderElement(rowEl, this._context);
+
+				if (this._calculateDistributedColumns)
+				{
+					cellEl.style.minWidth = colItem.width + "px";
+					cellEl.style.width = (100.0 / this._columnDefinitions.length) + "%";
+				}
+				else
+				{
+					cellEl.style.width = colItem.width + "px";
+				}
+
+				if (cIdx < this._frozenColumnCount)
+				{
+					var frozenCellEl = colItem.createHeaderElement(frozenHeaderColsRowEl, this._context);
+
+					if (this._calculateDistributedColumns)
+					{
+						frozenCellEl.style.minWidth = colItem.width + "px";
+						frozenCellEl.style.width = (100.0 / this._columnDefinitions.length) + "%";
+					}
+					else
+					{
+						frozenCellEl.style.width = colItem.width + "px";
+					}
+				}				
 			}
 
 			bodyHeader.appendChild(headerEl);
 			frozenHeader.innerHTML = bodyHeader.innerHTML;
+			frozenHeaderColumns.appendChild(frozenHeaderColsEl);
     	}
 
     	public dispose() : void {
@@ -334,6 +164,19 @@ module Controls {
 				.subscribe<Array<KnockoutArrayChange<any>>>(this.itemsSourceChanged, null, "arrayChange");
 
 			this.recreateTable();
+		}
+
+		private _headerContext : any = null;
+		public get headerContext() : any {
+			return this._headerContext;
+		}
+		public set headerContext(v : any) {
+
+			if (v == this._headerContext) return;
+
+			this._headerContext = v;
+
+			this.recreateHeader();
 		}
 
 		private _columnDefinitions : Array<IDataGridColumnDefinition> = null;
@@ -384,6 +227,8 @@ module Controls {
 
 		private _header : DataGridHeader = null;
 
+		private _calculateDistributedColumns = false;
+
 		constructor() {
 			super(new Orange.Controls.StringTemplateProvider(DataGrid._template));
 		}
@@ -400,6 +245,9 @@ module Controls {
 			this._hammer = new Hammer(this.element);
 
 			this.initScrollEventListeners();
+
+			if (this.element.getAttribute("data-grid-column-width") == "distributed")
+				this._calculateDistributedColumns = true;
 		}
 
 		protected onApplyTemplate(): void {
@@ -409,7 +257,7 @@ module Controls {
 			var el = this.element;
 
 			this._body = <HTMLDivElement>el.querySelector("div.data_grid .dg_body_container .dg_body:not(.dg_frozen)");
-			this._frozenColumns = <HTMLDivElement>el.querySelector("div.data_grid .dg_body.dg_frozen");
+			this._frozenColumns = <HTMLDivElement>el.querySelector("div.data_grid .dg_body_container .dg_body.dg_frozen");
 			this._frozenHeader = <HTMLDivElement>el.querySelector("div.data_grid .dg_header_container:not(.dg_frozen)");
 
 			this._renderFrameDisposable = RenderFrame
@@ -562,7 +410,13 @@ module Controls {
 
 		private addRow(context: any, index?: number) {
 
-			var row = new DataGridRow(context, this.createUId(), this._columnDefinitions);
+			var row = new DataGridRow(
+				context, 
+				this.createUId(), 
+				this.columnDefinitions, 
+				this.frozenColumnCount, 
+				this._calculateDistributedColumns);
+
 			this._rowIdToElementDictionary[row.id] = row;
 
 			var rows = <HTMLDivElement>this._body.firstElementChild;
@@ -573,6 +427,19 @@ module Controls {
 			else {
 				rows.insertBefore(row.getElement(), rows.children[index]);
 			}
+
+			if (this.frozenColumnCount > 0) {
+
+				var frozenRows = <HTMLDivElement>this._frozenColumns.firstElementChild;
+
+				if (<any>index == "undefined" || index == null) {
+					var fr = row.getFrozenElement();
+					frozenRows.appendChild(fr);
+				}
+				else {
+					frozenRows.insertBefore(row.getFrozenElement(), rows.children[index]);
+				}
+			}
 		}
 
 		private recreateHeader() : void {
@@ -582,8 +449,12 @@ module Controls {
 				this._header = null;
 			}
 
-			var context = {};
-			this._header = new DataGridHeader(context, this._columnDefinitions, <HTMLDivElement>this.element);
+			this._header = new DataGridHeader(
+				this._headerContext, 
+				this._columnDefinitions, 
+				<HTMLDivElement>this.element, 
+				this.frozenColumnCount,
+				this._calculateDistributedColumns);
 
 			this._header.updateHeader();
 		}

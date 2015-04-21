@@ -560,14 +560,15 @@ var Orange;
                     this._propertyChangedListeners.splice(idx, 1);
             };
             Control.prototype.raisePropertyChanged = function (propertyName) {
-                var pd = Object.getOwnPropertyDescriptor(this, propertyName);
-                pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(this), propertyName);
-                this.onPropertyChanged(pd);
+                var propertyValue = this[propertyName];
+                if (propertyValue == null || propertyValue == "undefined")
+                    throw "trying to access undefined property '" + propertyName + "'.";
+                this.onPropertyChanged(propertyName, propertyValue);
                 for (var plIdx = this._propertyChangedListeners.length - 1; plIdx >= 0; plIdx--) {
-                    this._propertyChangedListeners[plIdx](pd);
+                    this._propertyChangedListeners[plIdx](propertyName, propertyValue);
                 }
             };
-            Control.prototype.onPropertyChanged = function (property) {
+            Control.prototype.onPropertyChanged = function (propertyName, value) {
             };
             return Control;
         })();
@@ -923,15 +924,17 @@ var Orange;
                 this.target = target;
                 this.mode = mode;
                 this.propDisposable = null;
-                this.onPropertyChanged = function (property) {
+                this.onPropertyChanged = function (propertyName, propertyValue) {
+                    if (propertyName != _this.target)
+                        return;
                     if (_this.vm[_this.property].onNext) {
-                        _this.vm[_this.property].onNext(property.value);
+                        _this.vm[_this.property].onNext(propertyValue);
                     }
                     else if (typeof _this.vm[_this.property] === "function") {
-                        _this.vm[_this.property](property.value);
+                        _this.vm[_this.property](propertyValue);
                     }
                     else {
-                        _this.vm[_this.property] = property.value;
+                        _this.vm[_this.property] = propertyValue;
                     }
                 };
                 var orangeEl = Orange.Controls.GetOrangeElement(element);

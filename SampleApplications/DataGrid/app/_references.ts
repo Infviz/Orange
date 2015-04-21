@@ -6,5 +6,7 @@
 
 //grunt-start
 /// <reference path="Controls/DataGrid.ts" />
+/// <reference path="Controls/DataGridColumnDefinitions.ts" />
+/// <reference path="Controls/DataGridRow.ts" />
 /// <reference path="app.ts" />
 //grunt-end

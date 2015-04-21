@@ -1026,98 +1026,6 @@ var Orange;
 })(Orange || (Orange = {}));
 var Controls;
 (function (Controls) {
-    var TextColumnDefinition = (function () {
-        function TextColumnDefinition(valueProperty, header, sortProperty, width) {
-            this._valueProperty = "";
-            this._valueProperty = valueProperty;
-            this._header = header;
-            this._width = (width == "undefined") ? null : width;
-            this._sortProperty = sortProperty ? sortProperty : valueProperty;
-        }
-        Object.defineProperty(TextColumnDefinition.prototype, "width", {
-            get: function () {
-                return this._width;
-            },
-            set: function (v) {
-                this._width = v;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TextColumnDefinition.prototype, "header", {
-            get: function () {
-                return this._header;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TextColumnDefinition.prototype, "sortProperty", {
-            get: function () {
-                return this._sortProperty;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        TextColumnDefinition.prototype.createCellElement = function (row, rowContext) {
-            var cellEl = document.createElement('div');
-            cellEl.className = 'dg_cell';
-            cellEl.innerHTML = '<span>' + rowContext[this._valueProperty] + '</span>';
-            cellEl.style.width = this._width + "px";
-            row.appendChild(cellEl);
-        };
-        TextColumnDefinition.prototype.createHeaderElement = function (row, rowContext) {
-            var cellEl = document.createElement('div');
-            cellEl.className = 'dg_cell';
-            cellEl.innerHTML = '<span>' + this._header + '</span>';
-            cellEl.style.width = this._width + "px";
-            row.appendChild(cellEl);
-        };
-        return TextColumnDefinition;
-    })();
-    Controls.TextColumnDefinition = TextColumnDefinition;
-    var TemplatedKnockoutColumnDefinition = (function () {
-        function TemplatedKnockoutColumnDefinition(cellTemplate, headerTemplate, sortProperty, width) {
-            this._cellTemplate = "";
-            this._cellTemplate = cellTemplate;
-            this._headerTemplate = headerTemplate;
-            this._sortProperty = sortProperty;
-            this._width = (width == "undefined") ? null : width;
-        }
-        Object.defineProperty(TemplatedKnockoutColumnDefinition.prototype, "sortProperty", {
-            get: function () {
-                return this._sortProperty;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TemplatedKnockoutColumnDefinition.prototype, "width", {
-            get: function () {
-                return this._width;
-            },
-            set: function (v) {
-                this._width = v;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        TemplatedKnockoutColumnDefinition.prototype.createCellElement = function (row, rowContext) {
-            var cellEl = document.createElement('div');
-            cellEl.className = 'dg_cell';
-            cellEl.innerHTML = this._cellTemplate;
-            cellEl.style.width = this._width + "px";
-            ko.applyBindings(rowContext, cellEl);
-            row.appendChild(cellEl);
-        };
-        TemplatedKnockoutColumnDefinition.prototype.createHeaderElement = function (row, rowContext) {
-            var el = document.createElement('div');
-            el.className = 'dg_cell';
-            el.innerHTML = this._headerTemplate;
-            el.style.width = this._width + "px";
-            row.appendChild(el);
-        };
-        return TemplatedKnockoutColumnDefinition;
-    })();
-    Controls.TemplatedKnockoutColumnDefinition = TemplatedKnockoutColumnDefinition;
     var RenderFrame = (function () {
         function RenderFrame() {
         }
@@ -1132,79 +1040,20 @@ var Controls;
         return RenderFrame;
     })();
     Controls.RenderFrame = RenderFrame;
-    var DataGridRow = (function () {
-        function DataGridRow(context, id, columnDefinitions) {
-            var _this = this;
-            this._hammer = null;
-            this._element = null;
-            this._columnDefinitions = null;
-            this._isRendered = false;
-            this._context = null;
-            this.onClick = function (event) {
-                console.log("Row " + _this._element.getAttribute("data-dg-row-id") + " was clicked.");
-                console.log(event);
-            };
-            this.onDoubleClick = function (event) {
-                console.log("Row " + _this._element.getAttribute("data-dg-row-id") + " was double clicked.");
-                console.log(event);
-            };
-            this._context = context;
-            this._id = id;
-            this._columnDefinitions = columnDefinitions;
-        }
-        Object.defineProperty(DataGridRow.prototype, "id", {
-            get: function () {
-                return this._id;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(DataGridRow.prototype, "context", {
-            get: function () {
-                return this._context;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        DataGridRow.prototype.getElement = function () {
-            if (!this._element)
-                this.init();
-            return this._element;
-        };
-        DataGridRow.prototype.dispose = function () {
-            this._hammer.destroy();
-        };
-        DataGridRow.prototype.init = function () {
-            var row = document.createElement("div");
-            row.className = "dg_row";
-            row.setAttribute("data-dg-row-id", this.id);
-            for (var cIdx = 0; cIdx < this._columnDefinitions.length; ++cIdx) {
-                var columnDefinition = this._columnDefinitions[cIdx];
-                columnDefinition.createCellElement(row, this._context);
-            }
-            this._element = row;
-            this._hammer = new Hammer.Manager(row, {});
-            var singleTap = new Hammer.Tap({ event: 'singletap' });
-            var doubleTap = new Hammer.Tap({ event: 'doubletap', taps: 2 });
-            this._hammer.add([doubleTap, singleTap]);
-            doubleTap.recognizeWith(singleTap);
-            singleTap.requireFailure(doubleTap);
-            this._hammer.on("singletap", this.onClick);
-            this._hammer.on("doubletap", this.onDoubleClick);
-        };
-        return DataGridRow;
-    })();
-    Controls.DataGridRow = DataGridRow;
     var DataGridHeader = (function () {
-        function DataGridHeader(context, columnDefinitions, dataGridElement) {
+        function DataGridHeader(context, columnDefinitions, dataGridElement, frozenColumnCount, calculateDistributedColumns) {
             this._hammer = null;
             this._element = null;
             this._columnDefinitions = null;
             this._context = null;
             this._dgContainer = null;
+            this._calculateDistributedColumns = false;
+            this._frozenColumnCount = 0;
             this._context = context;
             this._columnDefinitions = columnDefinitions;
             this._dgContainer = dataGridElement;
+            this._calculateDistributedColumns = calculateDistributedColumns;
+            this._frozenColumnCount = frozenColumnCount;
         }
         Object.defineProperty(DataGridHeader.prototype, "context", {
             get: function () {
@@ -1227,12 +1076,35 @@ var Controls;
             var rowEl = document.createElement("div");
             rowEl.className = "dg_row";
             headerEl.appendChild(rowEl);
+            var frozenHeaderColsEl = document.createElement("div");
+            frozenHeaderColsEl.className = "dg_rows dg_header";
+            var frozenHeaderColsRowEl = document.createElement("div");
+            frozenHeaderColsRowEl.className = "dg_row";
+            frozenHeaderColsEl.appendChild(frozenHeaderColsRowEl);
             for (var cIdx = 0; cIdx < this._columnDefinitions.length; ++cIdx) {
                 var colItem = this._columnDefinitions[cIdx];
-                colItem.createHeaderElement(rowEl, this._context);
+                var cellEl = colItem.createHeaderElement(rowEl, this._context);
+                if (this._calculateDistributedColumns) {
+                    cellEl.style.minWidth = colItem.width + "px";
+                    cellEl.style.width = (100.0 / this._columnDefinitions.length) + "%";
+                }
+                else {
+                    cellEl.style.width = colItem.width + "px";
+                }
+                if (cIdx < this._frozenColumnCount) {
+                    var frozenCellEl = colItem.createHeaderElement(frozenHeaderColsRowEl, this._context);
+                    if (this._calculateDistributedColumns) {
+                        frozenCellEl.style.minWidth = colItem.width + "px";
+                        frozenCellEl.style.width = (100.0 / this._columnDefinitions.length) + "%";
+                    }
+                    else {
+                        frozenCellEl.style.width = colItem.width + "px";
+                    }
+                }
             }
             bodyHeader.appendChild(headerEl);
             frozenHeader.innerHTML = bodyHeader.innerHTML;
+            frozenHeaderColumns.appendChild(frozenHeaderColsEl);
         };
         DataGridHeader.prototype.dispose = function () {
             var bodyHeader = this._dgContainer.querySelector("div.data_grid .dg_body_container .dg_rows.dg_header");
@@ -1252,6 +1124,7 @@ var Controls;
             _super.call(this, new Orange.Controls.StringTemplateProvider(DataGrid._template));
             this._itemsSourceDisposable = null;
             this._itemsSource = null;
+            this._headerContext = null;
             this._columnDefinitions = null;
             this._frozenColumnCount = 0;
             this._body = null;
@@ -1261,6 +1134,7 @@ var Controls;
             this._renderFrameDisposable = null;
             this._rowIdToElementDictionary = {};
             this._header = null;
+            this._calculateDistributedColumns = false;
             this._uIdCounter = 0;
             this._isUpdatePositionsRequested = false;
             this._isDisposing = false;
@@ -1285,6 +1159,19 @@ var Controls;
                 this._itemsSource = v;
                 this._itemsSourceDisposable = this._itemsSource.subscribe(this.itemsSourceChanged, null, "arrayChange");
                 this.recreateTable();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGrid.prototype, "headerContext", {
+            get: function () {
+                return this._headerContext;
+            },
+            set: function (v) {
+                if (v == this._headerContext)
+                    return;
+                this._headerContext = v;
+                this.recreateHeader();
             },
             enumerable: true,
             configurable: true
@@ -1318,13 +1205,15 @@ var Controls;
             _super.prototype.onElementSet.call(this);
             this._hammer = new Hammer(this.element);
             this.initScrollEventListeners();
+            if (this.element.getAttribute("data-grid-column-width") == "distributed")
+                this._calculateDistributedColumns = true;
         };
         DataGrid.prototype.onApplyTemplate = function () {
             var _this = this;
             _super.prototype.onApplyTemplate.call(this);
             var el = this.element;
             this._body = el.querySelector("div.data_grid .dg_body_container .dg_body:not(.dg_frozen)");
-            this._frozenColumns = el.querySelector("div.data_grid .dg_body.dg_frozen");
+            this._frozenColumns = el.querySelector("div.data_grid .dg_body_container .dg_body.dg_frozen");
             this._frozenHeader = el.querySelector("div.data_grid .dg_header_container:not(.dg_frozen)");
             this._renderFrameDisposable = RenderFrame.getObservable().subscribe(function (ts) { return _this.onRenderFrame(ts); });
         };
@@ -1363,7 +1252,7 @@ var Controls;
             this._frozenColumns.style.left = elbb.left - brbb.left + "px";
         };
         DataGrid.prototype.addRow = function (context, index) {
-            var row = new DataGridRow(context, this.createUId(), this._columnDefinitions);
+            var row = new Controls.DataGridRow(context, this.createUId(), this.columnDefinitions, this.frozenColumnCount, this._calculateDistributedColumns);
             this._rowIdToElementDictionary[row.id] = row;
             var rows = this._body.firstElementChild;
             if (index == "undefined" || index == null) {
@@ -1372,14 +1261,23 @@ var Controls;
             else {
                 rows.insertBefore(row.getElement(), rows.children[index]);
             }
+            if (this.frozenColumnCount > 0) {
+                var frozenRows = this._frozenColumns.firstElementChild;
+                if (index == "undefined" || index == null) {
+                    var fr = row.getFrozenElement();
+                    frozenRows.appendChild(fr);
+                }
+                else {
+                    frozenRows.insertBefore(row.getFrozenElement(), rows.children[index]);
+                }
+            }
         };
         DataGrid.prototype.recreateHeader = function () {
             if (this._header != null) {
                 this._header.dispose();
                 this._header = null;
             }
-            var context = {};
-            this._header = new DataGridHeader(context, this._columnDefinitions, this.element);
+            this._header = new DataGridHeader(this._headerContext, this._columnDefinitions, this.element, this.frozenColumnCount, this._calculateDistributedColumns);
             this._header.updateHeader();
         };
         DataGrid.prototype.disposeIdToElementDictionary = function () {
@@ -1416,6 +1314,249 @@ var Controls;
         return DataGrid;
     })(Orange.Controls.TemplatedControl);
     Controls.DataGrid = DataGrid;
+})(Controls || (Controls = {}));
+var Controls;
+(function (Controls) {
+    var TextColumnDefinition = (function () {
+        function TextColumnDefinition(valueProperty, header, sortProperty, width) {
+            this._valueProperty = "";
+            this._valueProperty = valueProperty;
+            this._header = header;
+            this._width = (width == "undefined") ? null : width;
+            this._sortProperty = sortProperty ? sortProperty : valueProperty;
+        }
+        Object.defineProperty(TextColumnDefinition.prototype, "width", {
+            get: function () {
+                return this._width;
+            },
+            set: function (v) {
+                this._width = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(TextColumnDefinition.prototype, "header", {
+            get: function () {
+                return this._header;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(TextColumnDefinition.prototype, "sortProperty", {
+            get: function () {
+                return this._sortProperty;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        TextColumnDefinition.prototype.createCellElement = function (row, rowContext) {
+            var cellEl = document.createElement('div');
+            cellEl.className = 'dg_cell';
+            cellEl.innerHTML = '<span>' + rowContext[this._valueProperty] + '</span>';
+            row.appendChild(cellEl);
+            return cellEl;
+        };
+        TextColumnDefinition.prototype.createHeaderElement = function (row, rowContext) {
+            var cellEl = document.createElement('div');
+            cellEl.className = 'dg_cell';
+            cellEl.innerHTML = '<span>' + this._header + '</span>';
+            row.appendChild(cellEl);
+            return cellEl;
+        };
+        return TextColumnDefinition;
+    })();
+    Controls.TextColumnDefinition = TextColumnDefinition;
+    var TemplatedKnockoutColumnDefinition = (function () {
+        function TemplatedKnockoutColumnDefinition(cellTemplate, headerTemplate, sortProperty, width) {
+            this._cellTemplate = "";
+            this._cellTemplate = cellTemplate;
+            this._headerTemplate = headerTemplate;
+            this._sortProperty = sortProperty;
+            this._width = (width == "undefined") ? null : width;
+        }
+        Object.defineProperty(TemplatedKnockoutColumnDefinition.prototype, "sortProperty", {
+            get: function () {
+                return this._sortProperty;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(TemplatedKnockoutColumnDefinition.prototype, "width", {
+            get: function () {
+                return this._width;
+            },
+            set: function (v) {
+                this._width = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        TemplatedKnockoutColumnDefinition.prototype.createCell = function (innerHtml) {
+            var el = document.createElement('div');
+            el.className = 'dg_cell';
+            el.innerHTML = innerHtml;
+            return el;
+        };
+        TemplatedKnockoutColumnDefinition.prototype.createCellElement = function (row, rowContext) {
+            var el = this.createCell(this._cellTemplate);
+            ko.applyBindings(rowContext, el);
+            row.appendChild(el);
+            return el;
+        };
+        TemplatedKnockoutColumnDefinition.prototype.createHeaderElement = function (row, rowContext) {
+            var el = this.createCell(this._headerTemplate);
+            if (!!rowContext)
+                ko.applyBindings(rowContext, el);
+            row.appendChild(el);
+            return el;
+        };
+        return TemplatedKnockoutColumnDefinition;
+    })();
+    Controls.TemplatedKnockoutColumnDefinition = TemplatedKnockoutColumnDefinition;
+})(Controls || (Controls = {}));
+var Controls;
+(function (Controls) {
+    var DataGridRowEventArgument = (function () {
+        function DataGridRowEventArgument(row, cell) {
+            this._row = row;
+            this._cell = cell;
+        }
+        Object.defineProperty(DataGridRowEventArgument.prototype, "row", {
+            get: function () {
+                return this._row;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGridRowEventArgument.prototype, "cell", {
+            get: function () {
+                return this._cell;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return DataGridRowEventArgument;
+    })();
+    Controls.DataGridRowEventArgument = DataGridRowEventArgument;
+    var DataGridRow = (function () {
+        function DataGridRow(context, id, columnDefinitions, frozenColumnCount, calculateDistributedColumns) {
+            var _this = this;
+            this._context = null;
+            this._element = null;
+            this._frozenElement = null;
+            this._columnDefinitions = null;
+            this._calculateDistributedColumns = false;
+            this._frozenColumnCount = 0;
+            this.onClicked = new Rx.AsyncSubject();
+            this.onDoubbleClicked = new Rx.AsyncSubject();
+            this.onMouseOver = function (event) {
+                var classes = _this._element.className;
+                $(_this._element).addClass("hover");
+                if (_this._frozenElement)
+                    $(_this._frozenElement).addClass("hover");
+            };
+            this.onMouseOut = function (event) {
+                var classes = _this._element.className;
+                $(_this._element).removeClass("hover");
+                if (_this._frozenElement)
+                    $(_this._frozenElement).removeClass("hover");
+            };
+            this.onClick = function (event) {
+                if (false == _this.onClicked.hasObservers())
+                    return;
+                var cell = $(event.target).hasClass("dg-cell") ? event.target : null;
+                _this.onClicked.onNext(new DataGridRowEventArgument(_this, cell));
+            };
+            this.onDoubleClick = function (event) {
+                if (false == _this.onDoubbleClicked.hasObservers())
+                    return;
+                var cell = $(event.target).hasClass("dg-cell") ? event.target : null;
+                _this.onDoubbleClicked.onNext(new DataGridRowEventArgument(_this, cell));
+            };
+            this._context = context;
+            this._id = id;
+            this._columnDefinitions = columnDefinitions;
+            this._calculateDistributedColumns = calculateDistributedColumns;
+            this._frozenColumnCount = frozenColumnCount;
+        }
+        Object.defineProperty(DataGridRow.prototype, "id", {
+            get: function () {
+                return this._id;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGridRow.prototype, "context", {
+            get: function () {
+                return this._context;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        DataGridRow.prototype.getElement = function () {
+            if (!this._element) {
+                this._element = this.createRow();
+                this._elementEventManager = this.createEventListener(this._element);
+            }
+            return this._element;
+        };
+        DataGridRow.prototype.getFrozenElement = function () {
+            if (this._frozenColumnCount < 1)
+                return null;
+            if (!this._frozenElement) {
+                this._frozenElement = this.createRow(this._frozenColumnCount);
+                this._frozenElementEventManager = this.createEventListener(this._frozenElement);
+            }
+            return this._frozenElement;
+        };
+        DataGridRow.prototype.dispose = function () {
+            if (this._elementEventManager)
+                this._elementEventManager.destroy();
+            if (this._frozenElementEventManager)
+                this._frozenElementEventManager.destroy();
+            if (this._frozenElement) {
+                Hammer.off(this._frozenElement, "mouseover", this.onMouseOver);
+                Hammer.off(this._frozenElement, "mouseout", this.onMouseOut);
+            }
+            if (this._element) {
+                Hammer.off(this._element, "mouseover", this.onMouseOver);
+                Hammer.off(this._element, "mouseout", this.onMouseOut);
+            }
+        };
+        DataGridRow.prototype.createRow = function (columnCount) {
+            var row = document.createElement("div");
+            row.className = "dg_row";
+            row.setAttribute("data-dg-row-id", this.id);
+            var colsToCreateCount = !columnCount ? this._columnDefinitions.length : columnCount;
+            for (var cIdx = 0; cIdx < colsToCreateCount; ++cIdx) {
+                var columnDefinition = this._columnDefinitions[cIdx];
+                var cellEl = columnDefinition.createCellElement(row, this._context);
+                if (this._calculateDistributedColumns) {
+                    cellEl.style.minWidth = columnDefinition.width + "px";
+                    cellEl.style.width = (100.0 / this._columnDefinitions.length) + "%";
+                }
+                else {
+                    cellEl.style.width = columnDefinition.width + "px";
+                }
+            }
+            return row;
+        };
+        DataGridRow.prototype.createEventListener = function (element) {
+            var hammer = new Hammer.Manager(element, {});
+            var singleTap = new Hammer.Tap({ event: 'singletap' });
+            var doubleTap = new Hammer.Tap({ event: 'doubletap', taps: 2 });
+            hammer.add([doubleTap, singleTap]);
+            doubleTap.recognizeWith(singleTap);
+            singleTap.requireFailure(doubleTap);
+            hammer.on("singletap", this.onClick);
+            hammer.on("doubletap", this.onDoubleClick);
+            Hammer.on(element, "mouseover", this.onMouseOver);
+            Hammer.on(element, "mouseout", this.onMouseOut);
+            return hammer;
+        };
+        return DataGridRow;
+    })();
+    Controls.DataGridRow = DataGridRow;
 })(Controls || (Controls = {}));
 var startReq = { windowLoaded: false, templatesLoaded: true };
 function tryStartup() {
@@ -1454,7 +1595,7 @@ var Application = (function () {
         var dgControl = Orange.Controls.GetOrangeElement(document.getElementById("my_dg"));
         var alphabet = new Array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
         var dgReady = function () {
-            var cols = new Array(new Controls.TextColumnDefinition("col1", "Column one", "col1", 20), new Controls.TextColumnDefinition("col2", "Column two", "col2", 50), new Controls.TemplatedKnockoutColumnDefinition('<div>' + '   <span class="glyphicon glyphicon-heart" aria-hidden="true"></span>' + '   <span data-bind="text: col3.name">' + '   </span>' + '   <div class="btn-group" style="float: right;">' + '       <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' + '           Action <span class="caret"></span>' + '       </button>' + '       <ul class="dropdown-menu" role="menu">' + '           <li><a href="#">Action</a></li>' + '           <li><a href="#">Another action</a></li> ' + '           <li><a href="#">Something else here</a></li> ' + '           <li class="divider"></li> ' + '           <li><a href="#">Separated link</a></li>' + '       </ul>' + '   </div>' + '</div>', '<span>ko header</span>', "col3.name", 200), new Controls.TextColumnDefinition("col4", "Column four", "col4", 100), new Controls.TextColumnDefinition("col5", "Column five", "col5", 100), new Controls.TextColumnDefinition("col6", "Column six", "col6", 100), new Controls.TextColumnDefinition("col7", "Column seven", "col7", 100), new Controls.TextColumnDefinition("col8", "Column eight", "col8", 100), new Controls.TextColumnDefinition("col9", "Column nine", "col9", 100));
+            var cols = new Array(new Controls.TextColumnDefinition("col1", "Column one", "col1", 100), new Controls.TextColumnDefinition("col2", "Column two", "col2", 100), new Controls.TemplatedKnockoutColumnDefinition('<div>' + '   <span class="glyphicon glyphicon-heart" aria-hidden="true"></span>' + '   <span data-bind="text: col3.name">' + '   </span>' + '   <div class="btn-group" style="float: right;">' + '       <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' + '           Action <span class="caret"></span>' + '       </button>' + '       <ul class="dropdown-menu" role="menu">' + '           <li><a href="#">Action</a></li>' + '           <li><a href="#">Another action</a></li> ' + '           <li><a href="#">Something else here</a></li> ' + '           <li class="divider"></li> ' + '           <li><a href="#">Separated link</a></li>' + '       </ul>' + '   </div>' + '</div>', '<span data-bind="text: col3Header"></span>', "col3.name", 140), new Controls.TextColumnDefinition("col4", "Column four", "col4", 100), new Controls.TextColumnDefinition("col5", "Column five", "col5", 100), new Controls.TextColumnDefinition("col6", "Column six", "col6", 100), new Controls.TextColumnDefinition("col7", "Column seven", "col7", 100), new Controls.TextColumnDefinition("col8", "Column eight", "col8", 100), new Controls.TextColumnDefinition("col9", "Column nine", "col9", 100));
             var data = Ix.Enumerable.range(0, 1).select(function (rIdx) {
                 var rowItem = new RowItem();
                 rowItem.col1 = '' + rIdx + ' 1';
@@ -1473,6 +1614,7 @@ var Application = (function () {
             dg.columnDefinitions = cols;
             var items = ko.observableArray(data);
             dg.itemsSource = items;
+            dg.headerContext = { col3Header: "Col 3 Header" };
             var counter = 1;
             Rx.Observable.interval(50).take(20).subscribe(function (_) {
                 var newItem = new RowItem();
