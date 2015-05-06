@@ -1,5 +1,4 @@
-
-/// <reference path="Reference.d.ts"/>
+/// <reference path="_references.ts"/>
 
 module Orange.Modularity {
 
