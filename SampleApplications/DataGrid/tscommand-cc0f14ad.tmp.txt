@@ -1,1 +1,0 @@
-"/Users/Nypan/Desktop/Orange/Orange/SampleApplications/DataGrid/app/_references.ts" --sourcemap --removeComments --target ES5 --module amd --out app/app.js
