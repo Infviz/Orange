@@ -173,16 +173,16 @@ module Orange.Controls {
 
 			var attr = ControlManager.getControlAttribute(element);
 
-			if (attr == null) {
-
-				var children = ControlManager.getChildren(element);
-
-				for (var i = 0; i < children.length; i++) {
-					ControlManager.createControlsInElement(<HTMLElement>element.children[i], container);
-				}
+			if (attr != null) {
+				ControlManager.createControlFromElement(element, container);
 			}
 			else {
-				ControlManager.createControlFromElement(element, container);
+				var controls = element.querySelectorAll("[" + this._controlAttributeNames.join("], [") +  "]");
+
+				for (var ceIdx = 0; ceIdx < controls.length; ++ceIdx) {
+					var ce = <HTMLElement>(controls[ceIdx]);
+					ControlManager.createControlFromElement(ce, container);
+				}
 			}
 		}
 
@@ -248,15 +248,13 @@ module Orange.Controls {
 			if (!!(<any>control).applyTemplate)
 				(<any>control).applyTemplate();
 
-			var children = ControlManager.getChildren(element);
-
-			for (var i = 0; i < children.length; i++) {
-				
-				ControlManager.createControlsInElement(children[i], container);
-			}
-
 			if (!!(<any>control).onApplyTemplate)
 				(<any>control).onApplyTemplate();
+
+			var children = ControlManager.getChildren(element);
+
+			for (var i = 0; i < children.length; i++) 
+				ControlManager.createControlsInElement(children[i], container);
 
 			orangeElement.isInitialized = true;
 			var listeners: Array<() => void> = <Array<() => void>>(<any>orangeElement)._onInitializedListeners;

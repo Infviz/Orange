@@ -19,6 +19,9 @@ module Views.MainContainer {
 		public nestedWithExternalViewModelItems: Array<NestedWithExternalViewModelItem>;
 		public nestedWithExternalViewModelObservableItems = ko.observableArray<NestedWithExternalViewModelItem>();
 
+		public nestedWithExternalViewModel: NestedWithExternalViewModelItem;
+		public nestedWithExternalViewModelObservable = ko.observable<NestedWithExternalViewModelItem>();
+
 		private _itemCounter: number = 0;
 		private _itemCreationIntervalHandle: any = null;
 		constructor() {
@@ -33,6 +36,10 @@ module Views.MainContainer {
 				new NestedWithExternalViewModelItem("Three", "rgb(30, 240, 30)")
 			];
 
+			this.nestedWithExternalViewModel = new NestedWithExternalViewModelItem("Amazing!", "rgb(240, 70, 30)");
+
+			this.nestedWithExternalViewModelObservable(new NestedWithExternalViewModelItem("Amazing!", "rgb(240, 70, 30)"));
+
 			// asynchronous view / view model injection. 
 			this.createViewItem();
 			this._itemCreationIntervalHandle = window.setInterval(this.createViewItem, 2000);
@@ -40,8 +47,8 @@ module Views.MainContainer {
 				() => {
 					window.setInterval(this.deleteItem, 2000);
 					window.clearInterval(_a);
-				}, 9000);
 
+				}, 9000);
 		}
 
 		private createViewItem = () => {
@@ -54,6 +61,12 @@ module Views.MainContainer {
 			var newView = new NestedWithExternalViewModelItem("Item #" + this._itemCounter, createColor());
 
 			this.nestedWithExternalViewModelObservableItems.unshift(newView);
+
+			var content = ["Fantascic!", "This is great!", "Dreamy!", "Yep!"];
+			this.nestedWithExternalViewModelObservable(
+				new NestedWithExternalViewModelItem(
+					content[Math.round(Math.random() * (content.length - 1))], 
+					createColor()));
 		}
 
 		private deleteItem = () => {

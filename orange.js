@@ -1,3 +1,38 @@
+/// <reference path="Reference.d.ts"/>
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/*
+ * Copyright 2012 The Polymer Authors. All rights reserved.
+ * Use of this source code is governed by this BSD-style
+ * license that can be found in the license below.
+ *
+ * Copyright (c) 2014 The Polymer Authors. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ *    * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *    * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following disclaimer
+ * in the documentation and/or other materials provided with the
+ * distribution.
+ *    * Neither the name of Google Inc. nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 if (typeof WeakMap === 'undefined') {
     (function () {
         var defineProperty = Object.defineProperty;
@@ -37,7 +72,9 @@ if (typeof WeakMap === 'undefined') {
 }
 (function (global) {
     var registrationsTable = new WeakMap();
+    // We use setImmediate or postMessage for our future callback.
     var setImmediate = window.msSetImmediate;
+    // Use post message to emulate setImmediate.
     if (!setImmediate) {
         var setImmediateQueue = [];
         var sentinel = String(Math.random());
@@ -55,8 +92,14 @@ if (typeof WeakMap === 'undefined') {
             window.postMessage(sentinel, '*');
         };
     }
+    // This is used to ensure that we never schedule 2 callas to setImmediate
     var isScheduled = false;
+    // Keep track of observers that needs to be notified next time.
     var scheduledObservers = [];
+    /**
+     * Schedules |dispatchCallback| to be called in the future.
+     * @param {MutationObserver} observer
+     */
     function scheduleCallback(observer) {
         scheduledObservers.push(observer);
         if (!isScheduled) {
@@ -68,21 +111,27 @@ if (typeof WeakMap === 'undefined') {
         return window.ShadowDOMPolyfill && window.ShadowDOMPolyfill.wrapIfNeeded(node) || node;
     }
     function dispatchCallbacks() {
-        isScheduled = false;
+        // http://dom.spec.whatwg.org/#mutation-observers
+        isScheduled = false; // Used to allow a new setImmediate call above.
         var observers = scheduledObservers;
         scheduledObservers = [];
+        // Sort observers based on their creation UID (incremental).
         observers.sort(function (o1, o2) {
             return o1.uid_ - o2.uid_;
         });
         var anyNonEmpty = false;
         observers.forEach(function (observer) {
+            // 2.1, 2.2
             var queue = observer.takeRecords();
+            // 2.3. Remove all transient registered observers whose observer is mo.
             removeTransientObserversFor(observer);
+            // 2.4
             if (queue.length) {
                 observer.callback_(queue, observer);
                 anyNonEmpty = true;
             }
         });
+        // 3.
         if (anyNonEmpty)
             dispatchCallbacks();
     }
@@ -97,6 +146,18 @@ if (typeof WeakMap === 'undefined') {
             });
         });
     }
+    /**
+     * This function is used for the "For each registered observer observer (with
+     * observer's options as options) in target's list of registered observers,
+     * run these substeps:" and the "For each ancestor ancestor of target, and for
+     * each registered observer observer (with options options) in ancestor's list
+     * of registered observers, run these substeps:" part of the algorithms. The
+     * |options.subtree| is checked to ensure that the callback is called
+     * correctly.
+     *
+     * @param {Node} target
+     * @param {function(MutationObserverInit):MutationRecord} callback
+     */
     function forEachAncestorAndObserverEnqueueRecord(target, callback) {
         for (var node = target; node; node = node.parentNode) {
             var registrations = registrationsTable.get(node);
@@ -104,6 +165,7 @@ if (typeof WeakMap === 'undefined') {
                 for (var j = 0; j < registrations.length; j++) {
                     var registration = registrations[j];
                     var options = registration.options;
+                    // Only target ignores subtree.
                     if (node !== target && !options.subtree)
                         continue;
                     var record = callback(options);
@@ -114,6 +176,11 @@ if (typeof WeakMap === 'undefined') {
         }
     }
     var uidCounter = 0;
+    /**
+     * The class that maps to the DOM MutationObserver interface.
+     * @param {Function} callback.
+     * @constructor
+     */
     function JsMutationObserver(callback) {
         this.callback_ = callback;
         this.nodes_ = [];
@@ -123,12 +190,17 @@ if (typeof WeakMap === 'undefined') {
     JsMutationObserver.prototype = {
         observe: function (target, options) {
             target = wrapIfNeeded(target);
+            // 1.1
             if (!options.childList && !options.attributes && !options.characterData || options.attributeOldValue && !options.attributes || options.attributeFilter && options.attributeFilter.length && !options.attributes || options.characterDataOldValue && !options.characterData) {
                 throw new SyntaxError();
             }
             var registrations = registrationsTable.get(target);
             if (!registrations)
                 registrationsTable.set(target, registrations = []);
+            // 2
+            // If target's list of registered observers already includes a registered
+            // observer associated with the context object, replace that registered
+            // observer's options with options.
             var registration;
             for (var i = 0; i < registrations.length; i++) {
                 if (registrations[i].observer === this) {
@@ -138,6 +210,11 @@ if (typeof WeakMap === 'undefined') {
                     break;
                 }
             }
+            // 3.
+            // Otherwise, add a new registered observer to target's list of registered
+            // observers with the context object as the observer and options as the
+            // options, and add target to context object's list of nodes on which it
+            // is registered.
             if (!registration) {
                 registration = new Registration(this, target, options);
                 registrations.push(registration);
@@ -165,6 +242,11 @@ if (typeof WeakMap === 'undefined') {
             return copyOfRecords;
         }
     };
+    /**
+     * @param {string} type
+     * @param {Node} target
+     * @constructor
+     */
     function MutationRecord(type, target) {
         this.type = type;
         this.target = target;
@@ -188,10 +270,22 @@ if (typeof WeakMap === 'undefined') {
         return record;
     }
     ;
+    // We keep track of the two (possibly one) records used in a single mutation.
     var currentRecord, recordWithOldValue;
+    /**
+     * Creates a record without |oldValue| and caches it as |currentRecord| for
+     * later use.
+     * @param {string} oldValue
+     * @return {MutationRecord}
+     */
     function getRecord(type, target) {
         return currentRecord = new MutationRecord(type, target);
     }
+    /**
+     * Gets or creates a record with |oldValue| based in the |currentRecord|
+     * @param {string} oldValue
+     * @return {MutationRecord}
+     */
     function getRecordWithOldValue(oldValue) {
         if (recordWithOldValue)
             return recordWithOldValue;
@@ -202,16 +296,38 @@ if (typeof WeakMap === 'undefined') {
     function clearRecords() {
         currentRecord = recordWithOldValue = undefined;
     }
+    /**
+     * @param {MutationRecord} record
+     * @return {boolean} Whether the record represents a record from the current
+     * mutation event.
+     */
     function recordRepresentsCurrentMutation(record) {
         return record === recordWithOldValue || record === currentRecord;
     }
+    /**
+     * Selects which record, if any, to replace the last record in the queue.
+     * This returns |null| if no record should be replaced.
+     *
+     * @param {MutationRecord} lastRecord
+     * @param {MutationRecord} newRecord
+     * @param {MutationRecord}
+     */
     function selectRecord(lastRecord, newRecord) {
         if (lastRecord === newRecord)
             return lastRecord;
+        // Check if the the record we are adding represents the same record. If
+        // so, we keep the one with the oldValue in it.
         if (recordWithOldValue && recordRepresentsCurrentMutation(lastRecord))
             return recordWithOldValue;
         return null;
     }
+    /**
+     * Class used to represent a registered observer.
+     * @param {MutationObserver} observer
+     * @param {Node} target
+     * @param {MutationObserverInit} options
+     * @constructor
+     */
     function Registration(observer, target, options) {
         this.observer = observer;
         this.target = target;
@@ -222,6 +338,10 @@ if (typeof WeakMap === 'undefined') {
         enqueue: function (record) {
             var records = this.observer.records_;
             var length = records.length;
+            // There are cases where we replace the last record with the new record.
+            // For example if the record represents the same mutation we need to use
+            // the one with the oldValue. If we get same record (this can happen as we
+            // walk up the tree) we ignore the new record.
             if (records.length > 0) {
                 var lastRecord = records[length - 1];
                 var recordToReplaceLast = selectRecord(lastRecord, record);
@@ -263,7 +383,14 @@ if (typeof WeakMap === 'undefined') {
             if (options.childList || options.subtree)
                 node.removeEventListener('DOMNodeRemoved', this, true);
         },
+        /**
+         * Adds a transient observer on node. The transient observer gets removed
+         * next time we deliver the change records.
+         * @param {Node} node
+         */
         addTransientObserver: function (node) {
+            // Don't add transient observers on the target itself. We already have all
+            // the required listeners set up on the target.
             if (node === this.target)
                 return;
             this.addListeners_(node);
@@ -271,12 +398,15 @@ if (typeof WeakMap === 'undefined') {
             var registrations = registrationsTable.get(node);
             if (!registrations)
                 registrationsTable.set(node, registrations = []);
+            // We know that registrations does not contain this because we already
+            // checked if node === this.target.
             registrations.push(this);
         },
         removeTransientObservers: function () {
             var transientObservedNodes = this.transientObservedNodes;
             this.transientObservedNodes = [];
             transientObservedNodes.forEach(function (node) {
+                // Transient observers are never added to the target.
                 this.removeListeners_(node);
                 var registrations = registrationsTable.get(node);
                 for (var i = 0; i < registrations.length; i++) {
@@ -288,42 +418,59 @@ if (typeof WeakMap === 'undefined') {
             }, this);
         },
         handleEvent: function (e) {
+            // Stop propagation since we are managing the propagation manually.
+            // This means that other mutation events on the page will not work
+            // correctly but that is by design.
             e.stopImmediatePropagation();
             switch (e.type) {
                 case 'DOMAttrModified':
+                    // http://dom.spec.whatwg.org/#concept-mo-queue-attributes
                     var name = e.attrName;
                     var namespace = e.relatedNode.namespaceURI;
                     var target = e.target;
+                    // 1.
                     var record = new getRecord('attributes', target);
                     record.attributeName = name;
                     record.attributeNamespace = namespace;
+                    // 2.
                     var oldValue = e.attrChange === MutationEvent.ADDITION ? null : e.prevValue;
                     forEachAncestorAndObserverEnqueueRecord(target, function (options) {
+                        // 3.1, 4.2
                         if (!options.attributes)
                             return;
+                        // 3.2, 4.3
                         if (options.attributeFilter && options.attributeFilter.length && options.attributeFilter.indexOf(name) === -1 && options.attributeFilter.indexOf(namespace) === -1) {
                             return;
                         }
+                        // 3.3, 4.4
                         if (options.attributeOldValue)
                             return getRecordWithOldValue(oldValue);
+                        // 3.4, 4.5
                         return record;
                     });
                     break;
                 case 'DOMCharacterDataModified':
+                    // http://dom.spec.whatwg.org/#concept-mo-queue-characterdata
                     var target = e.target;
+                    // 1.
                     var record = getRecord('characterData', target);
+                    // 2.
                     var oldValue = e.prevValue;
                     forEachAncestorAndObserverEnqueueRecord(target, function (options) {
+                        // 3.1, 4.2
                         if (!options.characterData)
                             return;
+                        // 3.2, 4.3
                         if (options.characterDataOldValue)
                             return getRecordWithOldValue(oldValue);
+                        // 3.3, 4.4
                         return record;
                     });
                     break;
                 case 'DOMNodeRemoved':
                     this.addTransientObserver(e.target);
                 case 'DOMNodeInserted':
+                    // http://dom.spec.whatwg.org/#concept-mo-queue-childlist
                     var target = e.relatedNode;
                     var changedNode = e.target;
                     var addedNodes, removedNodes;
@@ -337,14 +484,17 @@ if (typeof WeakMap === 'undefined') {
                     }
                     var previousSibling = changedNode.previousSibling;
                     var nextSibling = changedNode.nextSibling;
+                    // 1.
                     var record = getRecord('childList', target);
                     record.addedNodes = addedNodes;
                     record.removedNodes = removedNodes;
                     record.previousSibling = previousSibling;
                     record.nextSibling = nextSibling;
                     forEachAncestorAndObserverEnqueueRecord(target, function (options) {
+                        // 2.1, 3.2
                         if (!options.childList)
                             return;
+                        // 2.2, 3.3
                         return record;
                     });
             }
@@ -355,6 +505,8 @@ if (typeof WeakMap === 'undefined') {
     if (!global.MutationObserver)
         global.MutationObserver = JsMutationObserver;
 })(this);
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/// <reference path="Reference.d.ts"/>
 var Orange;
 (function (Orange) {
     var Modularity;
@@ -431,6 +583,7 @@ var Orange;
         Modularity.Container = Container;
     })(Modularity = Orange.Modularity || (Orange.Modularity = {}));
 })(Orange || (Orange = {}));
+/// <reference path="Reference.d.ts"/>
 var Orange;
 (function (Orange) {
     var Modularity;
@@ -514,12 +667,24 @@ var TemplateLoader = (function () {
                 };
                 xmlhttp.open("GET", tpl.path, true);
                 xmlhttp.send();
+                // $.get(
+                //     tpl.path,
+                //     tplCode => {
+                //         var code = '<script type="text/html" id="' + id + '">' + tplCode + '</script>';
+                //         $('body').append(code);
+                //         loadedTemplates++;
+                //         if (loadedTemplates == templates.length)
+                //         {
+                //             if (TemplateLoader.onload) TemplateLoader.onload();
+                //         }
+                //     });
             })();
         }
         ;
     };
     return TemplateLoader;
 })();
+/// <reference path="Reference.d.ts"/>
 var Orange;
 (function (Orange) {
     var Controls;
@@ -575,6 +740,7 @@ var Orange;
         Controls.Control = Control;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
+/// <reference path="Reference.d.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -643,6 +809,7 @@ var Orange;
         Controls.TemplatedControl = TemplatedControl;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
+/// <reference path="Reference.d.ts"/>
 var Orange;
 (function (Orange) {
     var Controls;
@@ -652,16 +819,16 @@ var Orange;
             function ViewBase(templateName, context) {
                 _super.call(this, new Controls.ScriptTemplateProvider(templateName));
                 this._dataContext = null;
-                this._dataContext = !context ? null : context;
+                if (!!context)
+                    this._dataContext = context;
             }
             Object.defineProperty(ViewBase.prototype, "dataContext", {
                 get: function () {
                     return this._dataContext;
                 },
                 set: function (context) {
-                    if (this._dataContext !== null)
-                        return;
                     this._dataContext = context;
+                    this.onDataContextSet();
                     this.applyBindings();
                 },
                 enumerable: true,
@@ -678,6 +845,8 @@ var Orange;
             };
             ViewBase.prototype.onApplyBindings = function () {
             };
+            ViewBase.prototype.onDataContextSet = function () {
+            };
             return ViewBase;
         })(Controls.TemplatedControl);
         Controls.ViewBase = ViewBase;
@@ -688,19 +857,33 @@ var Orange;
             }
             KnockoutViewBase.prototype.dispose = function () {
                 _super.prototype.dispose.call(this);
-                ko.cleanNode(this.element);
+                this.cleanChildBindings();
             };
             KnockoutViewBase.prototype.onApplyBindings = function () {
                 _super.prototype.onApplyBindings.call(this);
                 if (!this.dataContext)
                     return;
-                ko.applyBindingsToDescendants(this.dataContext, this.element);
+                window.ko.applyBindingsToDescendants(this.dataContext, this.element);
+            };
+            KnockoutViewBase.prototype.onDataContextSet = function () {
+                this.cleanChildBindings();
+            };
+            KnockoutViewBase.prototype.cleanChildBindings = function () {
+                var childNodes = this.element.childNodes;
+                for (var cIdx = childNodes.length - 1; cIdx >= 0; cIdx--) {
+                    var childNode = childNodes[cIdx];
+                    // 1 == ELEMENT_NODE
+                    if (childNode.nodeType !== 1)
+                        continue;
+                    window.ko.cleanNode(childNode);
+                }
             };
             return KnockoutViewBase;
         })(ViewBase);
         Controls.KnockoutViewBase = KnockoutViewBase;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
+/// <reference path="Reference.d.ts"/>
 var Orange;
 (function (Orange) {
     var Controls;
@@ -744,6 +927,7 @@ var Orange;
                     var addedNodes = mutation.addedNodes;
                     for (var i = 0; i < addedNodes.length; i++) {
                         var node = addedNodes[i];
+                        // 1 == ELEMENT_NODE
                         if (node.nodeType !== 1)
                             continue;
                         ControlManager.createControlsInElement(node, _this._container);
@@ -751,6 +935,7 @@ var Orange;
                     var removedNodes = mutation.removedNodes;
                     for (var i = 0; i < removedNodes.length; i++) {
                         var node = removedNodes[i];
+                        // 1 == ELEMENT_NODE
                         if (node.nodeType !== 1)
                             continue;
                         ControlManager.disposeDescendants(node);
@@ -780,8 +965,10 @@ var Orange;
             ControlManager.disposeControl = function (control) {
                 if (!control)
                     return;
+                // Clear information stored on element.
                 if (!!(control.element))
                     control.element.orange = null;
+                // NOTE: disposables is private..
                 var disposables = control.disposables;
                 for (var dIdx = disposables.length - 1; dIdx >= 0; dIdx--) {
                     disposables[dIdx].dispose();
@@ -827,14 +1014,15 @@ var Orange;
             };
             ControlManager.createControlsInElement = function (element, container) {
                 var attr = ControlManager.getControlAttribute(element);
-                if (attr == null) {
-                    var children = ControlManager.getChildren(element);
-                    for (var i = 0; i < children.length; i++) {
-                        ControlManager.createControlsInElement(element.children[i], container);
-                    }
+                if (attr != null) {
+                    ControlManager.createControlFromElement(element, container);
                 }
                 else {
-                    ControlManager.createControlFromElement(element, container);
+                    var controls = element.querySelectorAll("[" + this._controlAttributeNames.join("], [") + "]");
+                    for (var ceIdx = 0; ceIdx < controls.length; ++ceIdx) {
+                        var ce = (controls[ceIdx]);
+                        ControlManager.createControlFromElement(ce, container);
+                    }
                 }
             };
             ControlManager.prototype.dispose = function () {
@@ -856,6 +1044,7 @@ var Orange;
             };
             ControlManager.createControlInternal = function (element, container) {
                 var type = ControlManager.getControlAttribute(element);
+                // The element already has a controll connected to it.
                 var orangeElement = Controls.GetOrangeElement(element);
                 if (orangeElement.isInitialized)
                     return null;
@@ -864,17 +1053,17 @@ var Orange;
                 if (false == (control instanceof constructorFunction))
                     throw "ControlManager.createControl: instance of constructed object is not of the correct type.";
                 orangeElement.control = control;
+                // TODO: Improve the id generation
                 var uid = "o-uid-" + (ControlManager._uniqueIdCounter++);
                 element.setAttribute(type.attributeType + "-id", uid);
                 control.element = element;
                 if (!!control.applyTemplate)
                     control.applyTemplate();
-                var children = ControlManager.getChildren(element);
-                for (var i = 0; i < children.length; i++) {
-                    ControlManager.createControlsInElement(children[i], container);
-                }
                 if (!!control.onApplyTemplate)
                     control.onApplyTemplate();
+                var children = ControlManager.getChildren(element);
+                for (var i = 0; i < children.length; i++)
+                    ControlManager.createControlsInElement(children[i], container);
                 orangeElement.isInitialized = true;
                 var listeners = orangeElement._onInitializedListeners;
                 for (var listenerIdx = listeners.length - 1; listenerIdx >= 0; listenerIdx--) {
@@ -884,20 +1073,32 @@ var Orange;
             };
             ControlManager.dependencies = function () { return [Orange.Modularity.Container]; };
             ControlManager._mutationObserverConfig = {
+                // Set to true if additions and removals of the target node's child elements 
+                // (including text nodes) are to be observed.
                 childList: true,
+                // Set to true if mutations to target's attributes are to be observed.
                 attributes: false,
+                // Set to true if mutations to target's data are to be observed.
                 characterData: false,
+                // Set to true if mutations to not just target, but also target's descendants 
+                // are to be observed.
                 subtree: true,
+                // Set to true if attributes is set to true and target's attribute value 
+                // before the mutation needs to be recorded.
                 attributeOldValue: false,
+                // Set to true if characterData is set to true and target's data before the 
+                // mutation needs to be recorded.
                 characterDataOldValue: false,
             };
             ControlManager._controlAttributeNames = ["data-control", "data-view"];
+            // TODO: Replace with decent id generation later
             ControlManager._uniqueIdCounter = 0;
             return ControlManager;
         })();
         Controls.ControlManager = ControlManager;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
+/// <reference path="Reference.d.ts"/>
 (function () {
     if (!window.ko) {
         window.ko = {};
@@ -908,6 +1109,7 @@ var Orange;
 (function (Orange) {
     var Bindings;
     (function (Bindings) {
+        var ko = window.ko;
         ko.bindingHandlers.stopBindings = {
             init: function () {
                 return { controlsDescendantBindings: true };
@@ -923,13 +1125,36 @@ var Orange;
                 this.target = target;
                 this.mode = mode;
                 this.propDisposable = null;
+                this.init = function () {
+                    if (!(_this.vm))
+                        throw "No context was pressent for binding to use.";
+                    if (!(_this.vm[_this.property]))
+                        throw "The property " + _this.property + " could not be found.";
+                    if (!(_this.element.orange) || !(_this.element.orange.control))
+                        throw "Attepmt to bind to control on a non controll element.";
+                    var control = _this.element.orange.control;
+                    var pd = Object.getOwnPropertyDescriptor(control, _this.target);
+                    pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), _this.target);
+                    if (!pd && control[_this.target] == "undefined")
+                        throw "The target property " + _this.target + " could not be found.";
+                    if (!!(_this.vm[_this.property].subscribe))
+                        _this.propDisposable = _this.vm[_this.property].subscribe(function (val) { return control[_this.target] = val; });
+                    if (typeof _this.vm[_this.property] === "function")
+                        control[_this.target] = _this.vm[_this.property]();
+                    else
+                        control[_this.target] = _this.vm[_this.property];
+                    if (_this.mode == "twoWay")
+                        control.addPropertyChangedListener(_this.onPropertyChanged);
+                };
                 this.onPropertyChanged = function (propertyName, propertyValue) {
                     if (propertyName != _this.target)
                         return;
+                    // if Rx.Observable
                     if (_this.vm[_this.property].onNext) {
                         _this.vm[_this.property].onNext(propertyValue);
                     }
                     else if (typeof _this.vm[_this.property] === "function") {
+                        //console.log("Binding two way to knockout observable. (" + property.value + ")");
                         _this.vm[_this.property](propertyValue);
                     }
                     else {
@@ -942,26 +1167,6 @@ var Orange;
                 else
                     orangeEl.addOnInitializedListener(this.init);
             }
-            ViewModelToControlBinding.prototype.init = function () {
-                var _this = this;
-                if (!(this.vm[this.property]))
-                    throw "The property " + this.property + " could not be found.";
-                if (!(this.element.orange) || !(this.element.orange.control))
-                    throw "Attepmt to bind to control on a non controll element.";
-                var control = this.element.orange.control;
-                var pd = Object.getOwnPropertyDescriptor(control, this.target);
-                pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), this.target);
-                if (!pd && !(control[this.target]))
-                    throw "The target property " + this.target + " could not be found.";
-                if (!!(this.vm[this.property].subscribe))
-                    this.propDisposable = this.vm[this.property].subscribe(function (val) { return control[_this.target] = val; });
-                if (typeof this.vm[this.property] === "function")
-                    control[this.target] = this.vm[this.property]();
-                else
-                    control[this.target] = this.vm[this.property];
-                if (this.mode == "twoWay")
-                    control.addPropertyChangedListener(this.onPropertyChanged);
-            };
             ViewModelToControlBinding.prototype.dispose = function () {
                 if (!!this.propDisposable && !!(this.propDisposable.dispose))
                     this.propDisposable.dispose();
@@ -973,9 +1178,9 @@ var Orange;
             };
             return ViewModelToControlBinding;
         })();
-        Bindings.ViewModelToControlBinding = ViewModelToControlBinding;
         ko.bindingHandlers.bindings = {
-            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+            init: function (element, valueAccessor, allBindingsAccessor, viewModel, // Deprecated, use bindingContext.$data or .rawData instead
+                bindingContext) {
                 var bindings = new Array();
                 var values = (valueAccessor());
                 if (Array.isArray(values) == false)
@@ -1003,7 +1208,8 @@ var Orange;
             }
         };
         ko.bindingHandlers.orangeView = {
-            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+            init: function (element, valueAccessor, allBindingsAccessor, viewModel, // Deprecated, use bindingContext.$data or .rawData instead
+                bindingContext) {
                 var value = valueAccessor();
                 var dataViweAttr = document.createAttribute("data-view");
                 dataViweAttr.value = value;
@@ -1023,117 +1229,4 @@ var Orange;
         };
     })(Bindings = Orange.Bindings || (Orange.Bindings = {}));
 })(Orange || (Orange = {}));
-var MyBasicView;
-(function (MyBasicView) {
-    var View = (function (_super) {
-        __extends(View, _super);
-        function View(viewModel) {
-            _super.call(this, "MyBasicView-View", viewModel);
-            this.viewModel = null;
-            this.viewModel = viewModel;
-        }
-        View.prototype.onElementSet = function () {
-            _super.prototype.onElementSet.call(this);
-            var el = this.element;
-        };
-        View.prototype.onApplyTemplate = function () {
-            _super.prototype.onApplyTemplate.call(this);
-            var nameContainer = this.element.querySelector(".name_container");
-            nameContainer.appendChild(document.createTextNode(this.viewModel.name));
-        };
-        View.prototype.onApplyBindings = function () {
-            _super.prototype.onApplyBindings.call(this);
-        };
-        View.dependencies = function () { return [MyBasicView.ViewModel]; };
-        return View;
-    })(Orange.Controls.ViewBase);
-    MyBasicView.View = View;
-})(MyBasicView || (MyBasicView = {}));
-var MyBasicView;
-(function (MyBasicView) {
-    var ViewModel = (function () {
-        function ViewModel() {
-            this.name = "John Doe";
-        }
-        return ViewModel;
-    })();
-    MyBasicView.ViewModel = ViewModel;
-})(MyBasicView || (MyBasicView = {}));
-var MyBasicViewWithKnockoutBindings;
-(function (MyBasicViewWithKnockoutBindings) {
-    var ViewModelWithKnockoutBindings = (function () {
-        function ViewModelWithKnockoutBindings() {
-            this.name = "Jane Doe";
-        }
-        return ViewModelWithKnockoutBindings;
-    })();
-    MyBasicViewWithKnockoutBindings.ViewModelWithKnockoutBindings = ViewModelWithKnockoutBindings;
-})(MyBasicViewWithKnockoutBindings || (MyBasicViewWithKnockoutBindings = {}));
-var MyBasicViewWithKnockoutBindings;
-(function (MyBasicViewWithKnockoutBindings) {
-    var ViewWithKnockoutBindings = (function (_super) {
-        __extends(ViewWithKnockoutBindings, _super);
-        function ViewWithKnockoutBindings(viewModel) {
-            _super.call(this, "MyBasicViewWithKnockoutBindings-ViewWithKnockoutBindings", viewModel);
-        }
-        ViewWithKnockoutBindings.prototype.onElementSet = function () {
-            _super.prototype.onElementSet.call(this);
-        };
-        ViewWithKnockoutBindings.prototype.onApplyTemplate = function () {
-            _super.prototype.onApplyTemplate.call(this);
-        };
-        ViewWithKnockoutBindings.prototype.onApplyBindings = function () {
-            _super.prototype.onApplyBindings.call(this);
-        };
-        ViewWithKnockoutBindings.dependencies = function () { return [MyBasicViewWithKnockoutBindings.ViewModelWithKnockoutBindings]; };
-        return ViewWithKnockoutBindings;
-    })(Orange.Controls.KnockoutViewBase);
-    MyBasicViewWithKnockoutBindings.ViewWithKnockoutBindings = ViewWithKnockoutBindings;
-})(MyBasicViewWithKnockoutBindings || (MyBasicViewWithKnockoutBindings = {}));
-var MyBasicViewWithoutViewModel;
-(function (MyBasicViewWithoutViewModel) {
-    var ViewWithoutViewModel = (function (_super) {
-        __extends(ViewWithoutViewModel, _super);
-        function ViewWithoutViewModel() {
-            _super.call(this, "MyBasicViewWithoutViewModel-ViewWithoutViewModel");
-        }
-        ViewWithoutViewModel.prototype.onElementSet = function () {
-            _super.prototype.onElementSet.call(this);
-        };
-        ViewWithoutViewModel.prototype.onApplyTemplate = function () {
-            _super.prototype.onApplyTemplate.call(this);
-        };
-        ViewWithoutViewModel.prototype.onApplyBindings = function () {
-            _super.prototype.onApplyBindings.call(this);
-        };
-        return ViewWithoutViewModel;
-    })(Orange.Controls.ViewBase);
-    MyBasicViewWithoutViewModel.ViewWithoutViewModel = ViewWithoutViewModel;
-})(MyBasicViewWithoutViewModel || (MyBasicViewWithoutViewModel = {}));
-var startReq = { windowLoaded: false, templatesLoaded: false };
-function tryStartup() {
-    if (!startReq.windowLoaded || !startReq.templatesLoaded)
-        return;
-    var application = new Application();
-    application.run();
-}
-window.onload = function () {
-    startReq.windowLoaded = true;
-    tryStartup();
-};
-TemplateLoader.onload = function () {
-    startReq.templatesLoaded = true;
-    tryStartup();
-};
-var Application = (function () {
-    function Application() {
-    }
-    Application.prototype.run = function () {
-        var container = new Orange.Modularity.Container();
-        var controlManager = new Orange.Controls.ControlManager(container);
-        container.registerInstance(Orange.Controls.ControlManager, controlManager);
-        controlManager.manage(document.body);
-    };
-    return Application;
-})();
-//# sourceMappingURL=app.js.map
+//# sourceMappingURL=orange.js.map

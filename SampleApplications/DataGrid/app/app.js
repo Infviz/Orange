@@ -1024,6 +1024,44 @@ var Orange;
         };
     })(Bindings = Orange.Bindings || (Orange.Bindings = {}));
 })(Orange || (Orange = {}));
+var ArrayExtensions;
+(function (ArrayExtensions) {
+    function mergeSort(array, compareFunc) {
+        if (array.length < 2)
+            return;
+        compareFunc = compareFunc ? compareFunc : function (a, b) { return a < b ? -1 : (a > b ? 1 : 0); };
+        var _merge = function (left, right) {
+            var result = [];
+            while (left.length && right.length)
+                result.push(compareFunc(left[0], right[0]) <= 0 ? left.shift() : right.shift());
+            if (left.length)
+                result.push.apply(result, left);
+            if (right.length)
+                result.push.apply(result, right);
+            return result;
+        };
+        var _mergeSort = function (arr) {
+            var mid = ~~(arr.length * 0.5);
+            if (mid == 0)
+                return arr;
+            var left = _mergeSort(arr.slice(0, mid));
+            var right = _mergeSort(arr.slice(mid, arr.length));
+            return _merge(left, right);
+        };
+        var result = _mergeSort(array);
+        var args = [0, array.length].concat(result);
+        Array.prototype.splice.apply(array, args);
+        return array;
+    }
+    ArrayExtensions.mergeSort = mergeSort;
+})(ArrayExtensions || (ArrayExtensions = {}));
+ko.observableArray['fn']['mergeSort'] = function () {
+    var underlyingArray = this.peek();
+    this.valueWillMutate();
+    var methodCallResult = ArrayExtensions.mergeSort(underlyingArray, arguments[0]);
+    this.valueHasMutated();
+    return methodCallResult;
+};
 var Controls;
 (function (Controls) {
     var RenderFrame = (function () {
@@ -1040,8 +1078,635 @@ var Controls;
         return RenderFrame;
     })();
     Controls.RenderFrame = RenderFrame;
+    var DataGrid = (function (_super) {
+        __extends(DataGrid, _super);
+        function DataGrid() {
+            var _this = this;
+            _super.call(this, new Orange.Controls.StringTemplateProvider(DataGrid._template));
+            this._itemsSourceDisposable = null;
+            this._itemsSource = null;
+            this._headerContext = null;
+            this._columnDefinitions = null;
+            this._frozenColumnCount = 0;
+            this._selectionHandler = null;
+            this._selectionHandlerChangeDisposable = null;
+            this._sortingHandler = null;
+            this.onClicked = new Rx.Subject();
+            this.onDoubleClicked = new Rx.Subject();
+            this._body = null;
+            this._frozenColumns = null;
+            this._frozenHeader = null;
+            this._bodyHeader = null;
+            this._frozenHeaderColumns = null;
+            this._renderFrameDisposable = null;
+            this._rowIdToElementDictionary = {};
+            this._rows = new Array();
+            this._header = null;
+            this._calculateDistributedColumns = false;
+            this._uIdCounter = 0;
+            this._isUpdatePositionsRequested = false;
+            this.onSelectionChanged = function (change) {
+                var newSelection = Ix.Enumerable.fromArray(change.newSelection);
+                var oldSelection = Ix.Enumerable.fromArray(change.oldSelection);
+                var toSelect = newSelection.except(oldSelection).toArray();
+                var toDeSelect = oldSelection.except(newSelection).toArray();
+                if (toSelect.length == 0 && toDeSelect.length == 0 && (newSelection.any() || oldSelection.any())) {
+                    toSelect = toDeSelect = newSelection.toArray();
+                }
+                var rows = Ix.Enumerable.fromArray(_this._rows);
+                for (var i = 0; i < toDeSelect.length; ++i) {
+                    var item = toDeSelect[i];
+                    var row = rows.firstOrDefault(function (r) { return r.context == item; });
+                    if (row == null)
+                        continue;
+                    $(row.getElement()).removeClass("selected");
+                    $(row.getFrozenElement()).removeClass("selected");
+                }
+                for (var i = 0; i < toSelect.length; ++i) {
+                    var item = toSelect[i];
+                    var row = rows.firstOrDefault(function (r) { return r.context == item; });
+                    if (row == null)
+                        continue;
+                    $(row.getElement()).addClass("selected");
+                    $(row.getFrozenElement()).addClass("selected");
+                }
+            };
+            this._isDisposing = false;
+            this.onScroll = function (args) {
+                _this._isUpdatePositionsRequested = true;
+            };
+            this.itemsSourceChanged = function () {
+                console.log("ItemsSourceChanged");
+                var newRows = new Array();
+                var rowDict = Ix.Enumerable.fromArray(_this._rows).toDictionary(function (r) { return r.context; }, function (r) { return r; });
+                var bRows = _this._body.firstElementChild.parentNode.removeChild(_this._body.firstElementChild);
+                var fRows = _this._frozenColumns.firstElementChild.parentNode.removeChild(_this._frozenColumns.firstElementChild);
+                bRows.innerHTML = "";
+                fRows.innerHTML = "";
+                var items = _this._itemsSource();
+                for (var itemIdx = 0; itemIdx < items.length; ++itemIdx) {
+                    var item = items[itemIdx];
+                    var row = rowDict.tryGetValue(item);
+                    if (!row) {
+                        row = new Controls.DataGridRow(item, _this.createUId(), _this.columnDefinitions, _this.frozenColumnCount, _this._calculateDistributedColumns);
+                    }
+                    newRows.push(row);
+                    bRows.appendChild(row.getElement());
+                    if (_this.frozenColumnCount > 0)
+                        fRows.appendChild(row.getFrozenElement());
+                }
+                _this._body.appendChild(bRows);
+                _this._frozenColumns.appendChild(fRows);
+                console.log("ItemsSourceChanged.. done.");
+                _this.selectionHandler.onItemsSourceChanged(_this.itemsSource);
+                _this.sortingHandler.onItemsSourceChanged(_this.itemsSource);
+                _this.updateSortDomState();
+            };
+            this.selectionHandler = new Controls.DataGridSingleSelectSelectionHandler();
+            this.sortingHandler = new Controls.DataGridSortingHandler();
+            this.onClicked.subscribe(function (evt) { return _this.selectionHandler.trySelect(_this.itemsSource, evt); });
+        }
+        Object.defineProperty(DataGrid.prototype, "itemsSource", {
+            get: function () {
+                return this._itemsSource;
+            },
+            set: function (v) {
+                if (v == this._itemsSource)
+                    return;
+                if (this._itemsSourceDisposable != null) {
+                    this._itemsSourceDisposable.dispose();
+                    this._itemsSourceDisposable = null;
+                }
+                this._itemsSource = v;
+                this._itemsSource.extend({
+                    rateLimit: {
+                        timeout: 50,
+                        method: "notifyWhenChangesStop"
+                    }
+                });
+                this._itemsSourceDisposable = this._itemsSource.subscribe(this.itemsSourceChanged, null, "arrayChange");
+                this.recreateTable();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGrid.prototype, "headerContext", {
+            get: function () {
+                return this._headerContext;
+            },
+            set: function (v) {
+                if (v == this._headerContext)
+                    return;
+                this._headerContext = v;
+                this.recreateHeader();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGrid.prototype, "columnDefinitions", {
+            get: function () {
+                return this._columnDefinitions;
+            },
+            set: function (v) {
+                this._columnDefinitions = v;
+                this.recreateTable();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGrid.prototype, "frozenColumnCount", {
+            get: function () {
+                return this._frozenColumnCount;
+            },
+            set: function (v) {
+                this._frozenColumnCount = v ? v : 0;
+                this.recreateTable();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGrid.prototype, "selectionHandler", {
+            get: function () {
+                return this._selectionHandler;
+            },
+            set: function (v) {
+                if (this._selectionHandler == v)
+                    return;
+                if (this._selectionHandler)
+                    this._selectionHandler.clearSelection();
+                this._selectionHandler = v;
+                if (this._selectionHandlerChangeDisposable)
+                    this._selectionHandlerChangeDisposable.dispose();
+                this._selectionHandlerChangeDisposable = this._selectionHandler.selectionChanged.subscribe(this.onSelectionChanged);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGrid.prototype, "sortingHandler", {
+            get: function () {
+                return this._sortingHandler;
+            },
+            set: function (v) {
+                if (this._sortingHandler == v)
+                    return;
+                this._sortingHandler = v;
+                this._sortingHandler.onItemsSourceChanged(this.itemsSource);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        DataGrid.prototype.createUId = function () {
+            return "o-dg-id-" + this._uIdCounter++;
+        };
+        DataGrid.prototype.onElementSet = function () {
+            _super.prototype.onElementSet.call(this);
+            this.initScrollEventListeners();
+            if (this.element.getAttribute("data-grid-column-width") == "distributed")
+                this._calculateDistributedColumns = true;
+        };
+        DataGrid.prototype.onApplyTemplate = function () {
+            var _this = this;
+            _super.prototype.onApplyTemplate.call(this);
+            var el = this.element;
+            this._body = el.querySelector("div.data_grid .dg_body_container .dg_body:not(.dg_frozen)");
+            this._frozenColumns = el.querySelector("div.data_grid .dg_body_container .dg_body.dg_frozen");
+            this._frozenHeader = el.querySelector("div.data_grid .dg_header_container:not(.dg_frozen)");
+            this._bodyHeader = el.querySelector("div.data_grid .dg_body_container .dg_rows.dg_header");
+            this._frozenHeaderColumns = el.querySelector("div.data_grid .dg_header_container.dg_frozen");
+            this._renderFrameDisposable = RenderFrame.getObservable().subscribe(function (ts) { return _this.onRenderFrame(ts); });
+        };
+        DataGrid.prototype.onApplyBindings = function () {
+        };
+        DataGrid.prototype.onRenderFrame = function (ts) {
+            if (this._isDisposing)
+                return;
+            if (this._isUpdatePositionsRequested) {
+                this._isUpdatePositionsRequested = false;
+                this.updatePositions();
+            }
+        };
+        DataGrid.prototype.initScrollEventListeners = function () {
+            window.addEventListener("scroll", this.onScroll, true);
+            window.addEventListener("resize", this.onScroll, true);
+        };
+        DataGrid.prototype.dispose = function () {
+            this._isDisposing = true;
+            _super.prototype.dispose.call(this);
+            window.removeEventListener("scroll", this.onScroll, true);
+            window.removeEventListener("resize", this.onScroll, true);
+            if (this._itemsSourceDisposable != null) {
+                this._itemsSourceDisposable.dispose();
+                this._itemsSourceDisposable = null;
+            }
+            this._renderFrameDisposable.dispose();
+        };
+        DataGrid.prototype.updatePositions = function () {
+            this._isUpdatePositionsRequested = false;
+            var elbb = this.element.getBoundingClientRect();
+            var brbb = this._body.getBoundingClientRect();
+            var fhbb = this._frozenHeader.getBoundingClientRect();
+            var fcbb = this._frozenColumns.getBoundingClientRect();
+            var diff = elbb.left + fhbb.left - brbb.left;
+            this._frozenHeader.style.left = fhbb.left - diff + "px";
+            this._frozenColumns.style.left = elbb.left - brbb.left + "px";
+        };
+        DataGrid.prototype.removeRow = function (rowContainer, frozenRowContainer, index) {
+            var c = rowContainer.children[index];
+            rowContainer.removeChild(c);
+            var fc = frozenRowContainer.children[index];
+            frozenRowContainer.removeChild(fc);
+            var id = c.getAttribute("data-dg-row-id");
+            if (!id)
+                return;
+            var row = this._rowIdToElementDictionary[id];
+            delete this._rowIdToElementDictionary[id];
+            return this._rows.splice(this._rows.indexOf(row), 1)[0];
+        };
+        DataGrid.prototype.addRow = function (context, rowContainer, frozenRowContainer, index) {
+            var row = new Controls.DataGridRow(context, this.createUId(), this.columnDefinitions, this.frozenColumnCount, this._calculateDistributedColumns);
+            this._rowIdToElementDictionary[row.id] = row;
+            var rows = rowContainer;
+            if (index == "undefined" || index == null)
+                rows.appendChild(row.getElement());
+            else
+                rows.insertBefore(row.getElement(), rows.children[index]);
+            if (this.frozenColumnCount > 0) {
+                var frozenRows = frozenRowContainer;
+                if (index == "undefined" || index == null || index >= frozenRows.children.length)
+                    frozenRows.appendChild(row.getFrozenElement());
+                else
+                    frozenRows.insertBefore(row.getFrozenElement(), frozenRows.children[index]);
+            }
+            this._rows.push(row);
+            row.onClicked.subscribe(this.onClicked);
+            row.onDoubleClicked.subscribe(this.onDoubleClicked);
+        };
+        DataGrid.prototype.recreateHeader = function () {
+            var _this = this;
+            if (this._header != null) {
+                this._header.dispose();
+                this._header = null;
+            }
+            this._frozenHeader.innerHTML = "";
+            this._bodyHeader.innerHTML = "";
+            this._frozenHeaderColumns.innerHTML = "";
+            if (!this._columnDefinitions)
+                return;
+            this._header = new Controls.DataGridHeader(this._headerContext, "dg_header", this._columnDefinitions, this.frozenColumnCount, this._calculateDistributedColumns);
+            var mainHeaderElement = this._header.getElement();
+            var frozenHeaderElement = this._header.getFrozenElement();
+            this._frozenHeader.appendChild(mainHeaderElement);
+            this._bodyHeader.innerHTML = this._frozenHeader.innerHTML;
+            this._frozenHeaderColumns.appendChild(frozenHeaderElement);
+            this._header.onClicked.subscribe(function (e) {
+                if (false == _this._sortingHandler.trySort(_this.itemsSource, e))
+                    return;
+                _this.updateSortDomState();
+            });
+        };
+        DataGrid.prototype.updateSortDomState = function () {
+            var _this = this;
+            var header = this._header;
+            var hEl = header.getElement();
+            $(hEl).find(".sort_by").removeClass("sort_by");
+            $(hEl).find(".invert_sort").removeClass("invert_sort");
+            var fhEl = header.getFrozenElement();
+            $(fhEl).find(".sort_by").removeClass("sort_by");
+            $(fhEl).find(".inverted_sort").removeClass("inverted_sort");
+            var sortOrder = this._sortingHandler.sortBy;
+            var allDefs = Ix.Enumerable.fromArray(this._columnDefinitions).select(function (def, dIdx) {
+                return { definition: def, index: dIdx };
+            });
+            var activeDefs = Ix.Enumerable.fromArray(this._sortingHandler.sortBy).join(allDefs, function (a) { return a.definition; }, function (b) { return b.definition; }, function (a, b) {
+                return { isInverted: a.isInverted, index: b.index };
+            });
+            activeDefs.forEach(function (item) {
+                var el = header.getElement().firstChild.childNodes[item.index];
+                $(el).addClass("sort_by");
+                if (item.isInverted)
+                    $(el).addClass("inverted_sort");
+                if (item.index < _this._frozenColumnCount) {
+                    var fEl = header.getFrozenElement().firstChild.childNodes[item.index];
+                    $(fEl).addClass("sort_by");
+                    if (item.isInverted)
+                        $(fEl).addClass("inverted_sort");
+                }
+            });
+        };
+        DataGrid.prototype.disposeIdToElementDictionary = function () {
+            for (var key in this._rowIdToElementDictionary) {
+                this._rowIdToElementDictionary[key].dispose();
+            }
+            this._rowIdToElementDictionary = {};
+        };
+        DataGrid.prototype.recreateTable = function () {
+            this._body.innerHTML = "";
+            this._frozenColumns.innerHTML = "";
+            this._rows = new Array();
+            this.recreateHeader();
+            if (!this._columnDefinitions || !this._itemsSource)
+                return;
+            var rows = document.createElement("div");
+            rows.className = "dg_rows";
+            var items = this._itemsSource();
+            var frozenRows = document.createElement("div");
+            frozenRows.className = "dg_rows dg_frozen";
+            for (var rIdx = 0; rIdx < items.length; ++rIdx) {
+                this.addRow(items[rIdx], rows, frozenRows);
+            }
+            this._body.appendChild(rows);
+            this._frozenColumns.appendChild(frozenRows);
+        };
+        DataGrid._template = '<div class="data_grid" data-bind="stopBindings: true">' + '	<div class="dg_body_container">' + '		<div class="dg_rows dg_header">' + '		</div>' + '		<div class="dg_body dg_frozen">' + '		</div>' + '		<div class="dg_body">' + '		</div>' + '	</div>' + '	<div class="dg_header_container">' + '	</div>' + '	<div class="dg_header_container dg_frozen">' + '	</div>' + '</div>';
+        return DataGrid;
+    })(Orange.Controls.TemplatedControl);
+    Controls.DataGrid = DataGrid;
+})(Controls || (Controls = {}));
+var Controls;
+(function (Controls) {
+    var TextColumnDefinition = (function () {
+        function TextColumnDefinition(valueProperty, header, sortProperty, width, compareFunc) {
+            this._valueProperty = "";
+            this.compare = function (a, b) { return a == b ? 0 : (a < b ? -1 : 1); };
+            this._header = header;
+            this._width = width;
+            this._valueProperty = valueProperty.replace("[", ".").replace("]", ".");
+            if (sortProperty)
+                this._sortProperty = sortProperty.replace("[", ".").replace("]", ".");
+            else
+                this._sortProperty = valueProperty;
+            if (compareFunc)
+                this.compare = compareFunc;
+        }
+        Object.defineProperty(TextColumnDefinition.prototype, "width", {
+            get: function () {
+                return this._width;
+            },
+            set: function (v) {
+                this._width = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(TextColumnDefinition.prototype, "header", {
+            get: function () {
+                return this._header;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        TextColumnDefinition.prototype.getSortValue = function (context) {
+            return this.getValueFromPath(this._sortProperty, context);
+        };
+        TextColumnDefinition.prototype.getValueFromPath = function (path, obj) {
+            return path.split('.').reduce(function (p, c) { return p ? p[c] : undefined; }, obj);
+        };
+        TextColumnDefinition.prototype.createCellElement = function (row, rowContext) {
+            var cellEl = document.createElement('div');
+            cellEl.className = 'dg_cell';
+            cellEl.innerHTML = '<span>' + this.getValueFromPath(this._valueProperty, rowContext) + '</span>';
+            row.appendChild(cellEl);
+            return cellEl;
+        };
+        TextColumnDefinition.prototype.createHeaderElement = function (row, rowContext) {
+            var cellEl = document.createElement('div');
+            cellEl.className = 'dg_cell dg_text_column_cell';
+            cellEl.innerHTML = '<div>' + '<span class="glyphicon glyphicon-triangle-bottom dg_sort_icon" aria-hidden="true"></span>' + '<span class="glyphicon glyphicon-triangle-top dg_inverted_sort_icon" aria-hidden="true"></span>' + '<span>' + this._header + '</span>' + '</div>';
+            row.appendChild(cellEl);
+            return cellEl;
+        };
+        return TextColumnDefinition;
+    })();
+    Controls.TextColumnDefinition = TextColumnDefinition;
+    var TemplatedKnockoutColumnDefinition = (function () {
+        function TemplatedKnockoutColumnDefinition(cellTemplate, headerTemplate, sortProperty, width) {
+            this._cellTemplate = "";
+            this._headerTemplate = "";
+            this._sortProperty = "";
+            this.compare = function (a, b) { return a == b ? 0 : (a < b ? -1 : 1); };
+            this._cellTemplate = cellTemplate;
+            this._headerTemplate = headerTemplate;
+            this._sortProperty = sortProperty;
+            this._width = (width == "undefined") ? null : width;
+        }
+        Object.defineProperty(TemplatedKnockoutColumnDefinition.prototype, "width", {
+            get: function () {
+                return this._width;
+            },
+            set: function (v) {
+                this._width = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        TemplatedKnockoutColumnDefinition.prototype.getSortValue = function (context) {
+            return ko.unwrap(this.getValueFromPath(this._sortProperty, context));
+        };
+        TemplatedKnockoutColumnDefinition.prototype.getValueFromPath = function (path, obj) {
+            ;
+            return path.split('.').reduce(function (p, c) { return p ? p[c] : undefined; }, obj);
+        };
+        TemplatedKnockoutColumnDefinition.prototype.createCell = function (innerHtml) {
+            var el = document.createElement('div');
+            el.className = 'dg_cell';
+            el.innerHTML = innerHtml;
+            return el;
+        };
+        TemplatedKnockoutColumnDefinition.prototype.createCellElement = function (row, rowContext) {
+            var el = this.createCell(this._cellTemplate);
+            ko.applyBindings(rowContext, el);
+            row.appendChild(el);
+            return el;
+        };
+        TemplatedKnockoutColumnDefinition.prototype.createHeaderElement = function (row, rowContext) {
+            var el = this.createCell(this._headerTemplate);
+            if (!!rowContext)
+                ko.applyBindings(rowContext, el);
+            row.appendChild(el);
+            return el;
+        };
+        return TemplatedKnockoutColumnDefinition;
+    })();
+    Controls.TemplatedKnockoutColumnDefinition = TemplatedKnockoutColumnDefinition;
+})(Controls || (Controls = {}));
+var Controls;
+(function (Controls) {
+    var DataGridHeaderEventArgument = (function () {
+        function DataGridHeaderEventArgument(header, column, evt) {
+            this._header = header;
+            this._column = column;
+            this._event = evt;
+        }
+        Object.defineProperty(DataGridHeaderEventArgument.prototype, "header", {
+            get: function () {
+                return this._header;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGridHeaderEventArgument.prototype, "column", {
+            get: function () {
+                return this._column;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGridHeaderEventArgument.prototype, "event", {
+            get: function () {
+                return this._event;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return DataGridHeaderEventArgument;
+    })();
+    Controls.DataGridHeaderEventArgument = DataGridHeaderEventArgument;
     var DataGridHeader = (function () {
-        function DataGridHeader(context, columnDefinitions, dataGridElement, frozenColumnCount, calculateDistributedColumns) {
+        function DataGridHeader(context, id, columnDefinitions, frozenColumnCount, calculateDistributedColumns) {
+            var _this = this;
+            this._context = null;
+            this._element = null;
+            this._frozenElement = null;
+            this._columnDefinitions = null;
+            this._calculateDistributedColumns = false;
+            this._frozenColumnCount = 0;
+            this.onClicked = new Rx.Subject();
+            this.onDoubleClicked = new Rx.Subject();
+            this.onMouseOver = function (event) {
+                var classes = _this._element.className;
+                $(_this._element).addClass("hover");
+                if (_this._frozenElement)
+                    $(_this._frozenElement).addClass("hover");
+            };
+            this.onMouseOut = function (event) {
+                var classes = _this._element.className;
+                $(_this._element).removeClass("hover");
+                if (_this._frozenElement)
+                    $(_this._frozenElement).removeClass("hover");
+            };
+            this.onClick = function (event) {
+                if (false == _this.onClicked.hasObservers() || !(_this._element))
+                    return;
+                var def = _this.findDefinitionFromEvent(event);
+                if (def == null)
+                    return;
+                _this.onClicked.onNext(new DataGridHeaderEventArgument(_this, def, event));
+            };
+            this.onDoubleClick = function (event) {
+                if (false == _this.onClicked.hasObservers() || !(_this._element))
+                    return;
+                var def = _this.findDefinitionFromEvent(event);
+                if (def == null)
+                    return;
+                _this.onDoubleClicked.onNext(new DataGridHeaderEventArgument(_this, def, event));
+            };
+            this._context = context;
+            this._id = id;
+            this._columnDefinitions = columnDefinitions;
+            this._calculateDistributedColumns = calculateDistributedColumns;
+            this._frozenColumnCount = frozenColumnCount;
+        }
+        Object.defineProperty(DataGridHeader.prototype, "id", {
+            get: function () {
+                return this._id;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGridHeader.prototype, "context", {
+            get: function () {
+                return this._context;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        DataGridHeader.prototype.getElement = function () {
+            if (!this._element) {
+                this._element = this.createRow();
+                this._elementEventManager = this.createEventListener(this._element);
+            }
+            return this._element;
+        };
+        DataGridHeader.prototype.getFrozenElement = function () {
+            if (this._frozenColumnCount < 1)
+                return null;
+            if (!this._frozenElement) {
+                this._frozenElement = this.createRow(this._frozenColumnCount);
+                this._frozenElementEventManager = this.createEventListener(this._frozenElement);
+            }
+            return this._frozenElement;
+        };
+        DataGridHeader.prototype.dispose = function () {
+            if (this._elementEventManager)
+                this._elementEventManager.destroy();
+            if (this._frozenElementEventManager)
+                this._frozenElementEventManager.destroy();
+            if (this._frozenElement) {
+                Hammer.off(this._frozenElement, "mouseover", this.onMouseOver);
+                Hammer.off(this._frozenElement, "mouseout", this.onMouseOut);
+            }
+            if (this._element) {
+                Hammer.off(this._element, "mouseover", this.onMouseOver);
+                Hammer.off(this._element, "mouseout", this.onMouseOut);
+            }
+            this.onClicked.dispose();
+            this.onDoubleClicked.dispose();
+        };
+        DataGridHeader.prototype.createRow = function (columnCount) {
+            var headerEl = document.createElement("div");
+            headerEl.className = "dg_rows dg_header";
+            var row = document.createElement("div");
+            row.className = "dg_row";
+            headerEl.appendChild(row);
+            row.setAttribute("data-dg-row-id", this.id);
+            var colsToCreateCount = !columnCount ? this._columnDefinitions.length : columnCount;
+            for (var cIdx = 0; cIdx < colsToCreateCount; ++cIdx) {
+                var columnDefinition = this._columnDefinitions[cIdx];
+                var cellEl = columnDefinition.createHeaderElement(row, this._context);
+                if (this._calculateDistributedColumns) {
+                    cellEl.style.minWidth = columnDefinition.width + "px";
+                    cellEl.style.width = (100.0 / this._columnDefinitions.length) + "%";
+                }
+                else {
+                    cellEl.style.width = columnDefinition.width + "px";
+                }
+            }
+            return headerEl;
+        };
+        DataGridHeader.prototype.createEventListener = function (element) {
+            var hammer = new Hammer.Manager(element, {});
+            var singleTap = new Hammer.Tap({ event: 'singletap' });
+            var doubleTap = new Hammer.Tap({ event: 'doubletap', taps: 2 });
+            hammer.add([doubleTap, singleTap]);
+            hammer.on("singletap", this.onClick);
+            hammer.on("doubletap", this.onDoubleClick);
+            Hammer.on(element, "mouseover", this.onMouseOver);
+            Hammer.on(element, "mouseout", this.onMouseOut);
+            return hammer;
+        };
+        DataGridHeader.prototype.findDefinitionFromEvent = function (event) {
+            var evtPos = event.center;
+            var row = $(event.target).closest(".dg_row")[0];
+            var collEls = row.childNodes;
+            var targetCell = null;
+            var cIdx = 0;
+            for (cIdx = 0; cIdx < collEls.length && targetCell == null; cIdx++) {
+                var collEl = collEls[cIdx];
+                var cbb = collEl.getBoundingClientRect();
+                var x = evtPos.x - cbb.left;
+                var y = evtPos.y - cbb.top;
+                if (x > 0 && x < cbb.width && y > 0 && y < cbb.height)
+                    targetCell = collEl;
+            }
+            if (targetCell == null)
+                return null;
+            return this._columnDefinitions[cIdx - 1];
+        };
+        return DataGridHeader;
+    })();
+    Controls.DataGridHeader = DataGridHeader;
+    var DataGridHeaderasdfa = (function () {
+        function DataGridHeaderasdfa(context, columnDefinitions, dataGridElement, frozenColumnCount, calculateDistributedColumns) {
             this._hammer = null;
             this._element = null;
             this._columnDefinitions = null;
@@ -1055,14 +1720,21 @@ var Controls;
             this._calculateDistributedColumns = calculateDistributedColumns;
             this._frozenColumnCount = frozenColumnCount;
         }
-        Object.defineProperty(DataGridHeader.prototype, "context", {
+        Object.defineProperty(DataGridHeaderasdfa.prototype, "columnDefinitions", {
+            get: function () {
+                return this._columnDefinitions;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGridHeaderasdfa.prototype, "context", {
             get: function () {
                 return this._context;
             },
             enumerable: true,
             configurable: true
         });
-        DataGridHeader.prototype.updateHeader = function () {
+        DataGridHeaderasdfa.prototype.updateHeader = function () {
             var bodyHeader = this._dgContainer.querySelector("div.data_grid .dg_body_container .dg_rows.dg_header");
             var frozenHeader = this._dgContainer.querySelector("div.data_grid .dg_header_container:not(.dg_frozen)");
             var frozenHeaderColumns = this._dgContainer.querySelector("div.data_grid .dg_header_container.dg_frozen");
@@ -1106,7 +1778,7 @@ var Controls;
             frozenHeader.innerHTML = bodyHeader.innerHTML;
             frozenHeaderColumns.appendChild(frozenHeaderColsEl);
         };
-        DataGridHeader.prototype.dispose = function () {
+        DataGridHeaderasdfa.prototype.dispose = function () {
             var bodyHeader = this._dgContainer.querySelector("div.data_grid .dg_body_container .dg_rows.dg_header");
             var frozenHeader = this._dgContainer.querySelector("div.data_grid .dg_header_container:not(.dg_frozen)");
             var frozenHeaderColumns = this._dgContainer.querySelector("div.data_grid .dg_header_container.dg_frozen");
@@ -1114,312 +1786,17 @@ var Controls;
             frozenHeader.innerHTML = "";
             frozenHeaderColumns.innerHTML = "";
         };
-        return DataGridHeader;
+        return DataGridHeaderasdfa;
     })();
-    Controls.DataGridHeader = DataGridHeader;
-    var DataGrid = (function (_super) {
-        __extends(DataGrid, _super);
-        function DataGrid() {
-            var _this = this;
-            _super.call(this, new Orange.Controls.StringTemplateProvider(DataGrid._template));
-            this._itemsSourceDisposable = null;
-            this._itemsSource = null;
-            this._headerContext = null;
-            this._columnDefinitions = null;
-            this._frozenColumnCount = 0;
-            this._body = null;
-            this._frozenColumns = null;
-            this._frozenHeader = null;
-            this._hammer = null;
-            this._renderFrameDisposable = null;
-            this._rowIdToElementDictionary = {};
-            this._header = null;
-            this._calculateDistributedColumns = false;
-            this._uIdCounter = 0;
-            this._isUpdatePositionsRequested = false;
-            this._isDisposing = false;
-            this.onScroll = function (args) {
-                _this._isUpdatePositionsRequested = true;
-            };
-            this.itemsSourceChanged = function (changes) {
-                _this.recreateTable();
-            };
-        }
-        Object.defineProperty(DataGrid.prototype, "itemsSource", {
-            get: function () {
-                return this._itemsSource;
-            },
-            set: function (v) {
-                if (v == this._itemsSource)
-                    return;
-                if (this._itemsSourceDisposable != null) {
-                    this._itemsSourceDisposable.dispose();
-                    this._itemsSourceDisposable = null;
-                }
-                this._itemsSource = v;
-                this._itemsSourceDisposable = this._itemsSource.subscribe(this.itemsSourceChanged, null, "arrayChange");
-                this.recreateTable();
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(DataGrid.prototype, "headerContext", {
-            get: function () {
-                return this._headerContext;
-            },
-            set: function (v) {
-                if (v == this._headerContext)
-                    return;
-                this._headerContext = v;
-                this.recreateHeader();
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(DataGrid.prototype, "columnDefinitions", {
-            get: function () {
-                return this._columnDefinitions;
-            },
-            set: function (v) {
-                this._columnDefinitions = v;
-                this.recreateTable();
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(DataGrid.prototype, "frozenColumnCount", {
-            get: function () {
-                return this._frozenColumnCount;
-            },
-            set: function (v) {
-                this._frozenColumnCount = v ? v : 0;
-                this.recreateTable();
-            },
-            enumerable: true,
-            configurable: true
-        });
-        DataGrid.prototype.createUId = function () {
-            return "o-dg-id-" + this._uIdCounter++;
-        };
-        DataGrid.prototype.onElementSet = function () {
-            _super.prototype.onElementSet.call(this);
-            this._hammer = new Hammer(this.element);
-            this.initScrollEventListeners();
-            if (this.element.getAttribute("data-grid-column-width") == "distributed")
-                this._calculateDistributedColumns = true;
-        };
-        DataGrid.prototype.onApplyTemplate = function () {
-            var _this = this;
-            _super.prototype.onApplyTemplate.call(this);
-            var el = this.element;
-            this._body = el.querySelector("div.data_grid .dg_body_container .dg_body:not(.dg_frozen)");
-            this._frozenColumns = el.querySelector("div.data_grid .dg_body_container .dg_body.dg_frozen");
-            this._frozenHeader = el.querySelector("div.data_grid .dg_header_container:not(.dg_frozen)");
-            this._renderFrameDisposable = RenderFrame.getObservable().subscribe(function (ts) { return _this.onRenderFrame(ts); });
-        };
-        DataGrid.prototype.onApplyBindings = function () {
-        };
-        DataGrid.prototype.onRenderFrame = function (ts) {
-            if (this._isDisposing)
-                return;
-            if (this._isUpdatePositionsRequested) {
-                this._isUpdatePositionsRequested = false;
-                this.updatePositions();
-            }
-        };
-        DataGrid.prototype.initScrollEventListeners = function () {
-            window.addEventListener("scroll", this.onScroll, true);
-            this._hammer.destroy();
-        };
-        DataGrid.prototype.dispose = function () {
-            this._isDisposing = true;
-            _super.prototype.dispose.call(this);
-            window.removeEventListener("scroll", this.onScroll, true);
-            if (this._itemsSourceDisposable != null) {
-                this._itemsSourceDisposable.dispose();
-                this._itemsSourceDisposable = null;
-            }
-            this._renderFrameDisposable.dispose();
-        };
-        DataGrid.prototype.updatePositions = function () {
-            this._isUpdatePositionsRequested = false;
-            var elbb = this.element.getBoundingClientRect();
-            var brbb = this._body.getBoundingClientRect();
-            var fhbb = this._frozenHeader.getBoundingClientRect();
-            var fcbb = this._frozenColumns.getBoundingClientRect();
-            var diff = elbb.left + fhbb.left - brbb.left;
-            this._frozenHeader.style.left = fhbb.left - diff + "px";
-            this._frozenColumns.style.left = elbb.left - brbb.left + "px";
-        };
-        DataGrid.prototype.addRow = function (context, index) {
-            var row = new Controls.DataGridRow(context, this.createUId(), this.columnDefinitions, this.frozenColumnCount, this._calculateDistributedColumns);
-            this._rowIdToElementDictionary[row.id] = row;
-            var rows = this._body.firstElementChild;
-            if (index == "undefined" || index == null) {
-                rows.appendChild(row.getElement());
-            }
-            else {
-                rows.insertBefore(row.getElement(), rows.children[index]);
-            }
-            if (this.frozenColumnCount > 0) {
-                var frozenRows = this._frozenColumns.firstElementChild;
-                if (index == "undefined" || index == null) {
-                    var fr = row.getFrozenElement();
-                    frozenRows.appendChild(fr);
-                }
-                else {
-                    frozenRows.insertBefore(row.getFrozenElement(), rows.children[index]);
-                }
-            }
-        };
-        DataGrid.prototype.recreateHeader = function () {
-            if (this._header != null) {
-                this._header.dispose();
-                this._header = null;
-            }
-            this._header = new DataGridHeader(this._headerContext, this._columnDefinitions, this.element, this.frozenColumnCount, this._calculateDistributedColumns);
-            this._header.updateHeader();
-        };
-        DataGrid.prototype.disposeIdToElementDictionary = function () {
-            for (var key in this._rowIdToElementDictionary) {
-                this._rowIdToElementDictionary[key].dispose();
-            }
-            this._rowIdToElementDictionary = {};
-        };
-        DataGrid.prototype.recreateTable = function () {
-            this._body.innerHTML = "";
-            this._frozenColumns.innerHTML = "";
-            this.recreateHeader();
-            if (!this._columnDefinitions || !this._itemsSource)
-                return;
-            var rows = document.createElement("div");
-            rows.className = "dg_rows";
-            this._body.appendChild(rows);
-            var items = this._itemsSource();
-            if (this.frozenColumnCount > 0) {
-                var frozenRows = document.createElement("div");
-                frozenRows.className = "dg_rows dg_frozen";
-                this._frozenColumns.appendChild(frozenRows);
-                for (var rIdx = 0; rIdx < items.length; ++rIdx) {
-                    this.addRow(items[rIdx]);
-                }
-            }
-            else {
-                for (var rIdx = 0; rIdx < items.length; ++rIdx) {
-                    this.addRow(items[rIdx]);
-                }
-            }
-        };
-        DataGrid._template = '<div class="data_grid" data-bind="stopBindings: true">' + '	<div class="dg_body_container">' + '		<div class="dg_rows dg_header">' + '		</div>' + '		<div class="dg_body dg_frozen">' + '		</div>' + '		<div class="dg_body">' + '		</div>' + '	</div>' + '	<div class="dg_header_container">' + '	</div>' + '	<div class="dg_header_container dg_frozen">' + '	</div>' + '</div>';
-        return DataGrid;
-    })(Orange.Controls.TemplatedControl);
-    Controls.DataGrid = DataGrid;
-})(Controls || (Controls = {}));
-var Controls;
-(function (Controls) {
-    var TextColumnDefinition = (function () {
-        function TextColumnDefinition(valueProperty, header, sortProperty, width) {
-            this._valueProperty = "";
-            this._valueProperty = valueProperty;
-            this._header = header;
-            this._width = (width == "undefined") ? null : width;
-            this._sortProperty = sortProperty ? sortProperty : valueProperty;
-        }
-        Object.defineProperty(TextColumnDefinition.prototype, "width", {
-            get: function () {
-                return this._width;
-            },
-            set: function (v) {
-                this._width = v;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TextColumnDefinition.prototype, "header", {
-            get: function () {
-                return this._header;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TextColumnDefinition.prototype, "sortProperty", {
-            get: function () {
-                return this._sortProperty;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        TextColumnDefinition.prototype.createCellElement = function (row, rowContext) {
-            var cellEl = document.createElement('div');
-            cellEl.className = 'dg_cell';
-            cellEl.innerHTML = '<span>' + rowContext[this._valueProperty] + '</span>';
-            row.appendChild(cellEl);
-            return cellEl;
-        };
-        TextColumnDefinition.prototype.createHeaderElement = function (row, rowContext) {
-            var cellEl = document.createElement('div');
-            cellEl.className = 'dg_cell';
-            cellEl.innerHTML = '<span>' + this._header + '</span>';
-            row.appendChild(cellEl);
-            return cellEl;
-        };
-        return TextColumnDefinition;
-    })();
-    Controls.TextColumnDefinition = TextColumnDefinition;
-    var TemplatedKnockoutColumnDefinition = (function () {
-        function TemplatedKnockoutColumnDefinition(cellTemplate, headerTemplate, sortProperty, width) {
-            this._cellTemplate = "";
-            this._cellTemplate = cellTemplate;
-            this._headerTemplate = headerTemplate;
-            this._sortProperty = sortProperty;
-            this._width = (width == "undefined") ? null : width;
-        }
-        Object.defineProperty(TemplatedKnockoutColumnDefinition.prototype, "sortProperty", {
-            get: function () {
-                return this._sortProperty;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(TemplatedKnockoutColumnDefinition.prototype, "width", {
-            get: function () {
-                return this._width;
-            },
-            set: function (v) {
-                this._width = v;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        TemplatedKnockoutColumnDefinition.prototype.createCell = function (innerHtml) {
-            var el = document.createElement('div');
-            el.className = 'dg_cell';
-            el.innerHTML = innerHtml;
-            return el;
-        };
-        TemplatedKnockoutColumnDefinition.prototype.createCellElement = function (row, rowContext) {
-            var el = this.createCell(this._cellTemplate);
-            ko.applyBindings(rowContext, el);
-            row.appendChild(el);
-            return el;
-        };
-        TemplatedKnockoutColumnDefinition.prototype.createHeaderElement = function (row, rowContext) {
-            var el = this.createCell(this._headerTemplate);
-            if (!!rowContext)
-                ko.applyBindings(rowContext, el);
-            row.appendChild(el);
-            return el;
-        };
-        return TemplatedKnockoutColumnDefinition;
-    })();
-    Controls.TemplatedKnockoutColumnDefinition = TemplatedKnockoutColumnDefinition;
+    Controls.DataGridHeaderasdfa = DataGridHeaderasdfa;
 })(Controls || (Controls = {}));
 var Controls;
 (function (Controls) {
     var DataGridRowEventArgument = (function () {
-        function DataGridRowEventArgument(row, cell) {
+        function DataGridRowEventArgument(row, cell, evt) {
             this._row = row;
             this._cell = cell;
+            this._event = evt;
         }
         Object.defineProperty(DataGridRowEventArgument.prototype, "row", {
             get: function () {
@@ -1431,6 +1808,13 @@ var Controls;
         Object.defineProperty(DataGridRowEventArgument.prototype, "cell", {
             get: function () {
                 return this._cell;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(DataGridRowEventArgument.prototype, "event", {
+            get: function () {
+                return this._event;
             },
             enumerable: true,
             configurable: true
@@ -1447,17 +1831,19 @@ var Controls;
             this._columnDefinitions = null;
             this._calculateDistributedColumns = false;
             this._frozenColumnCount = 0;
-            this.onClicked = new Rx.AsyncSubject();
-            this.onDoubbleClicked = new Rx.AsyncSubject();
+            this.onClicked = new Rx.Subject();
+            this.onDoubleClicked = new Rx.Subject();
             this.onMouseOver = function (event) {
                 var classes = _this._element.className;
                 $(_this._element).addClass("hover");
+                event.stopPropagation();
                 if (_this._frozenElement)
                     $(_this._frozenElement).addClass("hover");
             };
             this.onMouseOut = function (event) {
                 var classes = _this._element.className;
                 $(_this._element).removeClass("hover");
+                event.stopPropagation();
                 if (_this._frozenElement)
                     $(_this._frozenElement).removeClass("hover");
             };
@@ -1465,13 +1851,13 @@ var Controls;
                 if (false == _this.onClicked.hasObservers())
                     return;
                 var cell = $(event.target).hasClass("dg-cell") ? event.target : null;
-                _this.onClicked.onNext(new DataGridRowEventArgument(_this, cell));
+                _this.onClicked.onNext(new DataGridRowEventArgument(_this, cell, event));
             };
             this.onDoubleClick = function (event) {
-                if (false == _this.onDoubbleClicked.hasObservers())
+                if (false == _this.onDoubleClicked.hasObservers())
                     return;
                 var cell = $(event.target).hasClass("dg-cell") ? event.target : null;
-                _this.onDoubbleClicked.onNext(new DataGridRowEventArgument(_this, cell));
+                _this.onDoubleClicked.onNext(new DataGridRowEventArgument(_this, cell, event));
             };
             this._context = context;
             this._id = id;
@@ -1522,6 +1908,8 @@ var Controls;
                 Hammer.off(this._element, "mouseover", this.onMouseOver);
                 Hammer.off(this._element, "mouseout", this.onMouseOut);
             }
+            this.onClicked.dispose();
+            this.onDoubleClicked.dispose();
         };
         DataGridRow.prototype.createRow = function (columnCount) {
             var row = document.createElement("div");
@@ -1546,8 +1934,6 @@ var Controls;
             var singleTap = new Hammer.Tap({ event: 'singletap' });
             var doubleTap = new Hammer.Tap({ event: 'doubletap', taps: 2 });
             hammer.add([doubleTap, singleTap]);
-            doubleTap.recognizeWith(singleTap);
-            singleTap.requireFailure(doubleTap);
             hammer.on("singletap", this.onClick);
             hammer.on("doubletap", this.onDoubleClick);
             Hammer.on(element, "mouseover", this.onMouseOver);
@@ -1557,6 +1943,358 @@ var Controls;
         return DataGridRow;
     })();
     Controls.DataGridRow = DataGridRow;
+})(Controls || (Controls = {}));
+var Controls;
+(function (Controls) {
+    var DataGridSelectionHandlerBase = (function () {
+        function DataGridSelectionHandlerBase() {
+            this._selectedItems = new Array();
+            this.selectionChanged = new Rx.Subject();
+        }
+        Object.defineProperty(DataGridSelectionHandlerBase.prototype, "selectedItems", {
+            get: function () {
+                return this._selectedItems;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        DataGridSelectionHandlerBase.prototype.trySelect = function (itemsSource, rowEvent) {
+            throw "An attempt was made to call an abstract method.";
+        };
+        DataGridSelectionHandlerBase.prototype.onItemsSourceChanged = function (itemsSource) {
+            throw "An attempt was made to call an abstract method.";
+        };
+        DataGridSelectionHandlerBase.prototype.clearSelection = function () {
+            var oldSelection = this._selectedItems.slice();
+            this._selectedItems = new Array();
+            this.raiseSelectionChanged(this._selectedItems, oldSelection);
+        };
+        DataGridSelectionHandlerBase.prototype.raiseSelectionChanged = function (newSelection, oldSelection) {
+            if (this.selectionChanged.hasObservers())
+                this.selectionChanged.onNext({ newSelection: newSelection, oldSelection: oldSelection });
+        };
+        return DataGridSelectionHandlerBase;
+    })();
+    Controls.DataGridSelectionHandlerBase = DataGridSelectionHandlerBase;
+    var DataGridSelectionDisabledSelectionHandler = (function () {
+        function DataGridSelectionDisabledSelectionHandler() {
+            this.selectedItems = Array();
+            this.selectionChanged = new Rx.Subject();
+        }
+        DataGridSelectionDisabledSelectionHandler.prototype.trySelect = function (itemsSource, rowEvent) {
+            return false;
+        };
+        DataGridSelectionDisabledSelectionHandler.prototype.onItemsSourceChanged = function (itemsSource) {
+        };
+        DataGridSelectionDisabledSelectionHandler.prototype.clearSelection = function () {
+        };
+        return DataGridSelectionDisabledSelectionHandler;
+    })();
+    Controls.DataGridSelectionDisabledSelectionHandler = DataGridSelectionDisabledSelectionHandler;
+    var DataGridSingleSelectSelectionHandler = (function (_super) {
+        __extends(DataGridSingleSelectSelectionHandler, _super);
+        function DataGridSingleSelectSelectionHandler() {
+            _super.apply(this, arguments);
+        }
+        DataGridSingleSelectSelectionHandler.prototype.trySelect = function (itemsSource, rowEvent) {
+            if (itemsSource.indexOf(rowEvent.row.context) < 0)
+                return false;
+            var oldSelection = this._selectedItems.slice();
+            this._selectedItems = [rowEvent.row.context];
+            this.raiseSelectionChanged(this._selectedItems, oldSelection);
+            return true;
+        };
+        DataGridSingleSelectSelectionHandler.prototype.onItemsSourceChanged = function (itemsSource) {
+            if (this._selectedItems.length == 0)
+                return;
+            var selectedItem = this._selectedItems[0];
+            var itemIdx = itemsSource().indexOf(selectedItem);
+            if (itemIdx > -1)
+                this.raiseSelectionChanged(this._selectedItems, this._selectedItems);
+            else
+                this.clearSelection();
+        };
+        return DataGridSingleSelectSelectionHandler;
+    })(DataGridSelectionHandlerBase);
+    Controls.DataGridSingleSelectSelectionHandler = DataGridSingleSelectSelectionHandler;
+    var DataGridMultiSelectSelectionHandler = (function (_super) {
+        __extends(DataGridMultiSelectSelectionHandler, _super);
+        function DataGridMultiSelectSelectionHandler() {
+            _super.apply(this, arguments);
+            this._multiSelectFocus = null;
+        }
+        DataGridMultiSelectSelectionHandler.prototype.trySelect = function (itemsSource, rowEvent) {
+            if (rowEvent.event.srcEvent && rowEvent.event.srcEvent.shiftKey)
+                return this.performSelectRange(itemsSource, rowEvent);
+            if (rowEvent.event.srcEvent && (rowEvent.event.srcEvent.metaKey || rowEvent.event.srcEvent.ctrlKey))
+                return this.performAdditiveSelect(itemsSource, rowEvent);
+            return this.performSingleSelect(itemsSource, rowEvent);
+        };
+        DataGridMultiSelectSelectionHandler.prototype.onItemsSourceChanged = function (itemsSource) {
+            var newSelection = Ix.Enumerable.fromArray(this._selectedItems).join(Ix.Enumerable.fromArray(itemsSource()), function (a) { return a; }, function (b) { return b; }, function (a, b) { return a; }).toArray();
+            var oldSelection = this._selectedItems.slice();
+            this._selectedItems = newSelection;
+            this.raiseSelectionChanged(this._selectedItems, oldSelection);
+        };
+        DataGridMultiSelectSelectionHandler.prototype.performSelectRange = function (itemsSource, rowEvent) {
+            if (itemsSource.indexOf(rowEvent.row.context) < 0)
+                return false;
+            if (this._multiSelectFocus == null)
+                return this.performSingleSelect(itemsSource, rowEvent);
+            var from = this._multiSelectFocus;
+            var to = rowEvent.row.context;
+            var fromIdx = itemsSource.indexOf(from);
+            var toIdx = itemsSource.indexOf(to);
+            if (fromIdx < 0 || toIdx < 0)
+                return false;
+            if (fromIdx > toIdx) {
+                var tmpIdx = fromIdx;
+                fromIdx = toIdx;
+                toIdx = tmpIdx;
+            }
+            var newSelection = new Array();
+            var ds = itemsSource();
+            for (var idx = fromIdx; idx < toIdx + 1; ++idx) {
+                newSelection.push(ds[idx]);
+            }
+            var oldSelection = this._selectedItems.slice();
+            this._selectedItems = newSelection;
+            this.raiseSelectionChanged(this._selectedItems, oldSelection);
+            return true;
+        };
+        DataGridMultiSelectSelectionHandler.prototype.performAdditiveSelect = function (itemsSource, rowEvent) {
+            if (itemsSource.indexOf(rowEvent.row.context) < 0)
+                return false;
+            var context = rowEvent.row.context;
+            var oldSelection = this._selectedItems.slice();
+            if (this._selectedItems.indexOf(context) > -1) {
+                this._selectedItems.splice(this._selectedItems.indexOf(context), 1);
+            }
+            else {
+                this._multiSelectFocus = context;
+                this._selectedItems.push(context);
+            }
+            this.raiseSelectionChanged(this._selectedItems, oldSelection);
+            return true;
+        };
+        DataGridMultiSelectSelectionHandler.prototype.performSingleSelect = function (itemsSource, rowEvent) {
+            if (itemsSource.indexOf(rowEvent.row.context) < 0)
+                return false;
+            var oldSelection = this._selectedItems.slice();
+            this._selectedItems = [rowEvent.row.context];
+            this._multiSelectFocus = rowEvent.row.context;
+            this.raiseSelectionChanged(this._selectedItems, oldSelection);
+            return true;
+        };
+        return DataGridMultiSelectSelectionHandler;
+    })(DataGridSelectionHandlerBase);
+    Controls.DataGridMultiSelectSelectionHandler = DataGridMultiSelectSelectionHandler;
+})(Controls || (Controls = {}));
+var Controls;
+(function (Controls) {
+    var DataGridSortingInfo = (function () {
+        function DataGridSortingInfo(definition) {
+            this.isInverted = false;
+            this.definition = definition;
+        }
+        return DataGridSortingInfo;
+    })();
+    Controls.DataGridSortingInfo = DataGridSortingInfo;
+    var DataGridSortingHandler = (function () {
+        function DataGridSortingHandler() {
+            this._isInternalChange = false;
+            this._sortBy = new Array();
+        }
+        Object.defineProperty(DataGridSortingHandler.prototype, "sortBy", {
+            get: function () {
+                return this._sortBy;
+            },
+            set: function (value) {
+                if (value == this._sortBy)
+                    return;
+                this._sortBy = value;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        DataGridSortingHandler.prototype.onItemsSourceChanged = function (itemsSource) {
+            if (this._isInternalChange || this._sortBy.length == 0)
+                return;
+            this.performSort(itemsSource);
+        };
+        DataGridSortingHandler.prototype.onColumnDefinitionsChanged = function (itemsSource, columnDefinitions) {
+            if (this._sortBy.length == 0)
+                return;
+            var newDefs = Ix.Enumerable.fromArray(columnDefinitions());
+            var currentSortDefs = Ix.Enumerable.fromArray(this._sortBy);
+            var newSortDefs = currentSortDefs.join(newDefs, function (a) { return a.definition; }, function (b) { return b; }, function (a, b) { return a; }).toArray();
+            if (newSortDefs.length == this._sortBy.length)
+                return;
+            this._sortBy = newSortDefs;
+            this.performSort(itemsSource);
+        };
+        DataGridSortingHandler.prototype.trySort = function (itemsSource, headerEvent) {
+            if (headerEvent.event.srcEvent && headerEvent.event.srcEvent.shiftKey)
+                return this.tryPerformNestedSort(itemsSource, headerEvent);
+            return this.tryPerformSingleSort(itemsSource, headerEvent);
+        };
+        DataGridSortingHandler.prototype.tryPerformSingleSort = function (itemsSource, headerEvent) {
+            if (this._sortBy.length > 0 && this._sortBy[0].definition == headerEvent.column)
+                this._sortBy[0].isInverted = !(this._sortBy[0].isInverted);
+            else
+                this._sortBy = [new DataGridSortingInfo(headerEvent.column)];
+            this.performSort(itemsSource);
+            return true;
+        };
+        DataGridSortingHandler.prototype.tryPerformNestedSort = function (itemsSource, headerEvent) {
+            var col = headerEvent.column;
+            var sortInfo = Ix.Enumerable.fromArray(this._sortBy).firstOrDefault(function (c) { return c.definition == col; });
+            if (sortInfo != null)
+                sortInfo.isInverted = !(sortInfo.isInverted);
+            else
+                this._sortBy.push(new DataGridSortingInfo(col));
+            this.performSort(itemsSource);
+            return false;
+        };
+        DataGridSortingHandler.prototype.performSort = function (itemsSource) {
+            if (this._sortBy.length == 0)
+                return;
+            var sortBy = this._sortBy;
+            var sortByLength = sortBy.length;
+            this._isInternalChange = true;
+            itemsSource.mergeSort(function (left, right) {
+                var result = 0;
+                var def = null;
+                for (var cIdx = 0; result == 0 && (cIdx < sortByLength); ++cIdx) {
+                    def = sortBy[cIdx].definition;
+                    result = (sortBy[cIdx].isInverted ? -1 : 1) * def.compare(def.getSortValue(left), def.getSortValue(right));
+                }
+                return result;
+            });
+            this._isInternalChange = false;
+        };
+        return DataGridSortingHandler;
+    })();
+    Controls.DataGridSortingHandler = DataGridSortingHandler;
+})(Controls || (Controls = {}));
+var Controls;
+(function (Controls) {
+    var ObservableArrayChangedEventArguments = (function () {
+        function ObservableArrayChangedEventArguments() {
+        }
+        return ObservableArrayChangedEventArguments;
+    })();
+    Controls.ObservableArrayChangedEventArguments = ObservableArrayChangedEventArguments;
+    var ObservableArray = (function () {
+        function ObservableArray() {
+            this._elements = null;
+            this._changed = new Rx.Subject();
+            var initialArray = null;
+            if (arguments.length = 0) {
+                initialArray = new Array();
+            }
+            else if (Array.isArray(arguments[0])) {
+                initialArray = arguments[0];
+            }
+            else if (arguments[0] instanceof Ix.Enumerable) {
+                initialArray = arguments[0].toArray();
+            }
+            if (initialArray == null)
+                throw "ObservableArray constructor was passed faulty arguments.";
+            this._elements = initialArray;
+        }
+        Object.defineProperty(ObservableArray.prototype, "changed", {
+            get: function () {
+                return this._changed;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(ObservableArray.prototype, "bufferChanges", {
+            get: function () {
+                return this._bufferChanges;
+            },
+            set: function (v) {
+                this._bufferChanges = v;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        ObservableArray.prototype.raiseChanged = function () {
+        };
+        ObservableArray.prototype.getElementAt = function (index) {
+            return this._elements[index];
+        };
+        ObservableArray.prototype.contains = function (element) {
+            return -1 < this._elements.indexOf(element);
+        };
+        ObservableArray.prototype.indexOf = function (element) {
+            return this._elements.indexOf(element);
+        };
+        Object.defineProperty(ObservableArray.prototype, "length", {
+            get: function () {
+                return this._elements.length;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        ObservableArray.prototype.toArray = function () {
+            return this._elements.slice(0);
+        };
+        ObservableArray.prototype.toEnumerable = function () {
+            return Ix.Enumerable.fromArray(this._elements);
+        };
+        ObservableArray.prototype.push = function (element) {
+            this._elements.push(element);
+        };
+        ObservableArray.prototype.pushRange = function (elements) {
+            this._elements.concat(elements);
+        };
+        ObservableArray.prototype.setElementAt = function (index, element) {
+            this._elements[index] = element;
+        };
+        ObservableArray.prototype.removeElementAt = function (index) {
+            this._elements.splice(index, 1);
+        };
+        ObservableArray.prototype.removeElement = function (element) {
+            var index = this._elements.indexOf(element);
+            if (index > -1)
+                this.removeElementAt(index);
+        };
+        ObservableArray.prototype.insert = function (index, element) {
+            this._elements.splice(index, 0, element);
+        };
+        ObservableArray.prototype.move = function (oldIndex, newIndex) {
+            this._elements.splice(newIndex, 0, this._elements.splice(oldIndex, 1)[0]);
+        };
+        ObservableArray.prototype.clear = function () {
+            this._elements = new Array();
+        };
+        ObservableArray.prototype.stableSort = function (compare) {
+            if (this._elements.length < 2)
+                return;
+            compare = compare ? compare : function (a, b) { return a < b ? -1 : (a > b ? 1 : 0); };
+            var result = ObservableArray.mergeSort(this._elements, compare);
+        };
+        ObservableArray.mergeSort = function (array, compare) {
+            var mid = ~~(array.length * 0.5);
+            var left = this.mergeSort(array.slice(0, mid), compare);
+            var right = this.mergeSort(array.slice(mid, array.length), compare);
+            return this.merge(left, right, compare);
+        };
+        ObservableArray.merge = function (left, right, compare) {
+            var result = [];
+            while (left.length && right.length)
+                result.push(compare(left[0], right[0]) <= 0 ? left.shift() : right.shift());
+            if (left.length)
+                result.push.apply(result, left);
+            if (right.length)
+                result.push.apply(result, right);
+            return result;
+        };
+        return ObservableArray;
+    })();
+    Controls.ObservableArray = ObservableArray;
 })(Controls || (Controls = {}));
 var startReq = { windowLoaded: false, templatesLoaded: true };
 function tryStartup() {
@@ -1596,7 +2334,7 @@ var Application = (function () {
         var alphabet = new Array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
         var dgReady = function () {
             var cols = new Array(new Controls.TextColumnDefinition("col1", "Column one", "col1", 100), new Controls.TextColumnDefinition("col2", "Column two", "col2", 100), new Controls.TemplatedKnockoutColumnDefinition('<div>' + '   <span class="glyphicon glyphicon-heart" aria-hidden="true"></span>' + '   <span data-bind="text: col3.name">' + '   </span>' + '   <div class="btn-group" style="float: right;">' + '       <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' + '           Action <span class="caret"></span>' + '       </button>' + '       <ul class="dropdown-menu" role="menu">' + '           <li><a href="#">Action</a></li>' + '           <li><a href="#">Another action</a></li> ' + '           <li><a href="#">Something else here</a></li> ' + '           <li class="divider"></li> ' + '           <li><a href="#">Separated link</a></li>' + '       </ul>' + '   </div>' + '</div>', '<span data-bind="text: col3Header"></span>', "col3.name", 140), new Controls.TextColumnDefinition("col4", "Column four", "col4", 100), new Controls.TextColumnDefinition("col5", "Column five", "col5", 100), new Controls.TextColumnDefinition("col6", "Column six", "col6", 100), new Controls.TextColumnDefinition("col7", "Column seven", "col7", 100), new Controls.TextColumnDefinition("col8", "Column eight", "col8", 100), new Controls.TextColumnDefinition("col9", "Column nine", "col9", 100));
-            var data = Ix.Enumerable.range(0, 1).select(function (rIdx) {
+            var data = Ix.Enumerable.range(0, 2000).select(function (rIdx) {
                 var rowItem = new RowItem();
                 rowItem.col1 = '' + rIdx + ' 1';
                 rowItem.col2 = alphabet[rIdx % alphabet.length];
@@ -1614,9 +2352,10 @@ var Application = (function () {
             dg.columnDefinitions = cols;
             var items = ko.observableArray(data);
             dg.itemsSource = items;
+            dg.selectionHandler = new Controls.DataGridMultiSelectSelectionHandler();
             dg.headerContext = { col3Header: "Col 3 Header" };
             var counter = 1;
-            Rx.Observable.interval(50).take(20).subscribe(function (_) {
+            Rx.Observable.interval(2000).take(0).subscribe(function (_) {
                 var newItem = new RowItem();
                 newItem.col1 = '' + counter++;
                 newItem.col2 = alphabet[Math.floor(Math.random() * alphabet.length)];
@@ -1628,11 +2367,6 @@ var Application = (function () {
                 newItem.col8 = 'inserted 8';
                 newItem.col9 = 'inserted 9';
                 items.splice(Math.floor(Math.random() * items().length), 0, newItem);
-            });
-            Rx.Observable.interval(5000).take(20).subscribe(function (_) {
-                items.sort(function (left, right) {
-                    return left.col2 == right.col2 ? 0 : (left.col2 < right.col2 ? -1 : 1);
-                });
             });
         };
         dgControl.addOnInitializedListener(dgReady);

@@ -4,8 +4,8 @@ module Controls {
 
 	export class DataGridRowEventArgument {
 
-    	private _row : DataGridRow;
-    	public get row() : DataGridRow {
+    	private _row : IDataGridRow;
+    	public get row() : IDataGridRow {
     		return this._row;
     	}
 
@@ -14,14 +14,34 @@ module Controls {
     		return this._cell;
     	}
 
-    	constructor(row: DataGridRow, cell: HTMLDivElement) {
+    	private _event : any;
+    	public get event() : any {
+    		return this._event;
+    	}
+
+    	constructor(row: IDataGridRow, cell: HTMLDivElement, evt: any) {
     		
     		this._row = row;
     		this._cell = cell;
+    		this._event = evt;
     	}
     }
 
-    export class DataGridRow {
+    export interface IDataGridRow {
+
+    	id: string;
+    	context: any;
+
+    	onClicked: Rx.Subject<DataGridRowEventArgument>;
+    	onDoubleClicked: Rx.Subject<DataGridRowEventArgument>;
+
+    	getElement() : HTMLDivElement;
+    	getFrozenElement() : HTMLDivElement;
+
+    	dispose() : void;
+    }
+
+    export class DataGridRow implements IDataGridRow {
 
     	private _id : string;
     	public get id() : string {
@@ -44,8 +64,8 @@ module Controls {
     	private _calculateDistributedColumns = false;
     	private _frozenColumnCount = 0;
 
-    	public onClicked = new Rx.AsyncSubject<DataGridRowEventArgument>();
-    	public onDoubbleClicked = new Rx.AsyncSubject<DataGridRowEventArgument>();
+    	public onClicked = new Rx.Subject<DataGridRowEventArgument>();
+    	public onDoubleClicked = new Rx.Subject<DataGridRowEventArgument>();
 
     	constructor(context: any, id: string, 
     		columnDefinitions: Array<IDataGridColumnDefinition>,
@@ -83,7 +103,7 @@ module Controls {
 			return this._frozenElement;
 		}
 
-		public dispose() {
+		public dispose() : void {
 
 			if (this._elementEventManager)
 				this._elementEventManager.destroy();
@@ -100,6 +120,9 @@ module Controls {
 				Hammer.off(this._element, "mouseover", this.onMouseOver);
 				Hammer.off(this._element, "mouseout", this.onMouseOut);
 			}
+
+			this.onClicked.dispose();
+			this.onDoubleClicked.dispose();
 		}
 
 		private createRow(columnCount?: number) : HTMLDivElement {
@@ -140,34 +163,39 @@ module Controls {
 
 			hammer.add([doubleTap, singleTap]);
 
-			doubleTap.recognizeWith(singleTap);
-			singleTap.requireFailure(doubleTap);
+			//doubleTap.recognizeWith(singleTap);
+			//singleTap.requireFailure(doubleTap);
 
 			hammer.on("singletap", this.onClick);
 			hammer.on("doubletap", this.onDoubleClick);
 
-			Hammer.on(element, "mouseover", this.onMouseOver);
-			Hammer.on(element, "mouseout", this.onMouseOut);
+			// element.addEventListener("mouseover", this.onMouseOver);
+			// element.addEventListener("mouseout", this.onMouseOut);
 
 			return hammer;
 		}
 
-		private onMouseOver = (event: any) => {
+
+		private onMouseOver = (event: MouseEvent) => {
 
 			var classes = this._element.className;
 
 			$(this._element).addClass("hover");
 
+			event.stopPropagation();
+
 			if (this._frozenElement)
 				$(this._frozenElement).addClass("hover");
 		}
 
-		private onMouseOut = (event: any) => {
+		private onMouseOut = (event: MouseEvent) => {
 
 			var classes = this._element.className;
 
 			$(this._element).removeClass("hover");
 
+			event.stopPropagation();
+			
 			if (this._frozenElement)
 				$(this._frozenElement).removeClass("hover");
 		}
@@ -179,17 +207,17 @@ module Controls {
 
 			var cell = $(event.target).hasClass("dg-cell") ? <HTMLDivElement>event.target : null;
 			
-			this.onClicked.onNext(new DataGridRowEventArgument(this, cell));
+			this.onClicked.onNext(new DataGridRowEventArgument(this, cell, event));
 		}
 
 		private onDoubleClick = (event: HammerInput) => {
 
-			if (false == this.onDoubbleClicked.hasObservers())
+			if (false == this.onDoubleClicked.hasObservers())
 				return;
 
 			var cell = $(event.target).hasClass("dg-cell") ? <HTMLDivElement>event.target : null;
 			
-			this.onDoubbleClicked.onNext(new DataGridRowEventArgument(this, cell));
+			this.onDoubleClicked.onNext(new DataGridRowEventArgument(this, cell, event));
 		}
     }
 }

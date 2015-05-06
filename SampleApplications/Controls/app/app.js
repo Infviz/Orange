@@ -652,16 +652,16 @@ var Orange;
             function ViewBase(templateName, context) {
                 _super.call(this, new Controls.ScriptTemplateProvider(templateName));
                 this._dataContext = null;
-                this._dataContext = !context ? null : context;
+                if (!!context)
+                    this._dataContext = context;
             }
             Object.defineProperty(ViewBase.prototype, "dataContext", {
                 get: function () {
                     return this._dataContext;
                 },
                 set: function (context) {
-                    if (this._dataContext !== null)
-                        return;
                     this._dataContext = context;
+                    this.onDataContextSet();
                     this.applyBindings();
                 },
                 enumerable: true,
@@ -678,6 +678,8 @@ var Orange;
             };
             ViewBase.prototype.onApplyBindings = function () {
             };
+            ViewBase.prototype.onDataContextSet = function () {
+            };
             return ViewBase;
         })(Controls.TemplatedControl);
         Controls.ViewBase = ViewBase;
@@ -688,14 +690,25 @@ var Orange;
             }
             KnockoutViewBase.prototype.dispose = function () {
                 _super.prototype.dispose.call(this);
-                ko.cleanNode(this.element);
+                this.cleanChildBindings();
             };
             KnockoutViewBase.prototype.onApplyBindings = function () {
                 _super.prototype.onApplyBindings.call(this);
                 if (!this.dataContext)
                     return;
-                ko.cleanNode(this.element);
-                ko.applyBindings(this.dataContext, this.element);
+                ko.applyBindingsToDescendants(this.dataContext, this.element);
+            };
+            KnockoutViewBase.prototype.onDataContextSet = function () {
+                this.cleanChildBindings();
+            };
+            KnockoutViewBase.prototype.cleanChildBindings = function () {
+                var childNodes = this.element.childNodes;
+                for (var cIdx = childNodes.length - 1; cIdx >= 0; cIdx--) {
+                    var childNode = childNodes[cIdx];
+                    if (childNode.nodeType !== 1)
+                        continue;
+                    ko.cleanNode(childNode);
+                }
             };
             return KnockoutViewBase;
         })(ViewBase);
@@ -828,14 +841,15 @@ var Orange;
             };
             ControlManager.createControlsInElement = function (element, container) {
                 var attr = ControlManager.getControlAttribute(element);
-                if (attr == null) {
-                    var children = ControlManager.getChildren(element);
-                    for (var i = 0; i < children.length; i++) {
-                        ControlManager.createControlsInElement(element.children[i], container);
-                    }
+                if (attr != null) {
+                    ControlManager.createControlFromElement(element, container);
                 }
                 else {
-                    ControlManager.createControlFromElement(element, container);
+                    var controls = element.querySelectorAll("[" + this._controlAttributeNames.join("], [") + "]");
+                    for (var ceIdx = 0; ceIdx < controls.length; ++ceIdx) {
+                        var ce = (controls[ceIdx]);
+                        ControlManager.createControlFromElement(ce, container);
+                    }
                 }
             };
             ControlManager.prototype.dispose = function () {
@@ -870,12 +884,11 @@ var Orange;
                 control.element = element;
                 if (!!control.applyTemplate)
                     control.applyTemplate();
-                var children = ControlManager.getChildren(element);
-                for (var i = 0; i < children.length; i++) {
-                    ControlManager.createControlsInElement(children[i], container);
-                }
                 if (!!control.onApplyTemplate)
                     control.onApplyTemplate();
+                var children = ControlManager.getChildren(element);
+                for (var i = 0; i < children.length; i++)
+                    ControlManager.createControlsInElement(children[i], container);
                 orangeElement.isInitialized = true;
                 var listeners = orangeElement._onInitializedListeners;
                 for (var listenerIdx = listeners.length - 1; listenerIdx >= 0; listenerIdx--) {
@@ -924,6 +937,27 @@ var Orange;
                 this.target = target;
                 this.mode = mode;
                 this.propDisposable = null;
+                this.init = function () {
+                    if (!(_this.vm))
+                        throw "No context was pressent for binding to use.";
+                    if (!(_this.vm[_this.property]))
+                        throw "The property " + _this.property + " could not be found.";
+                    if (!(_this.element.orange) || !(_this.element.orange.control))
+                        throw "Attepmt to bind to control on a non controll element.";
+                    var control = _this.element.orange.control;
+                    var pd = Object.getOwnPropertyDescriptor(control, _this.target);
+                    pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), _this.target);
+                    if (!pd && control[_this.target] == "undefined")
+                        throw "The target property " + _this.target + " could not be found.";
+                    if (!!(_this.vm[_this.property].subscribe))
+                        _this.propDisposable = _this.vm[_this.property].subscribe(function (val) { return control[_this.target] = val; });
+                    if (typeof _this.vm[_this.property] === "function")
+                        control[_this.target] = _this.vm[_this.property]();
+                    else
+                        control[_this.target] = _this.vm[_this.property];
+                    if (_this.mode == "twoWay")
+                        control.addPropertyChangedListener(_this.onPropertyChanged);
+                };
                 this.onPropertyChanged = function (propertyName, propertyValue) {
                     if (propertyName != _this.target)
                         return;
@@ -943,26 +977,6 @@ var Orange;
                 else
                     orangeEl.addOnInitializedListener(this.init);
             }
-            ViewModelToControlBinding.prototype.init = function () {
-                var _this = this;
-                if (!(this.vm[this.property]))
-                    throw "The property " + this.property + " could not be found.";
-                if (!(this.element.orange) || !(this.element.orange.control))
-                    throw "Attepmt to bind to control on a non controll element.";
-                var control = this.element.orange.control;
-                var pd = Object.getOwnPropertyDescriptor(control, this.target);
-                pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), this.target);
-                if (!pd && !(control[this.target]))
-                    throw "The target property " + this.target + " could not be found.";
-                if (!!(this.vm[this.property].subscribe))
-                    this.propDisposable = this.vm[this.property].subscribe(function (val) { return control[_this.target] = val; });
-                if (typeof this.vm[this.property] === "function")
-                    control[this.target] = this.vm[this.property]();
-                else
-                    control[this.target] = this.vm[this.property];
-                if (this.mode == "twoWay")
-                    control.addPropertyChangedListener(this.onPropertyChanged);
-            };
             ViewModelToControlBinding.prototype.dispose = function () {
                 if (!!this.propDisposable && !!(this.propDisposable.dispose))
                     this.propDisposable.dispose();
@@ -1024,6 +1038,8 @@ var Orange;
         };
     })(Bindings = Orange.Bindings || (Orange.Bindings = {}));
 })(Orange || (Orange = {}));
+var templates;
+var template = templates["src"]["index"];
 var Controls;
 (function (Controls) {
     var ElementPositioner = (function (_super) {
@@ -1072,8 +1088,7 @@ var Controls;
         ElementPositioner.prototype.onElementSet = function () {
             _super.prototype.onElementSet.call(this);
             var el = this.element;
-            this._positionedTemplate = this.element.innerHTML;
-            this.element.innerHTML = "";
+            this._positionedTemplate = this.element.removeChild(this.element.firstElementChild);
         };
         ElementPositioner.prototype.onApplyTemplate = function () {
             _super.prototype.onApplyTemplate.call(this);
@@ -1084,7 +1099,10 @@ var Controls;
             style.position = "relative";
             style.width = "100%";
             style.height = "100%";
-            this._container.innerHTML = this._positionedTemplate;
+            this._container.appendChild(this._positionedTemplate);
+            if (this._positionedTemplate.querySelectorAll("[data-bind]").length > 0 && !ko.dataFor(this._positionedTemplate)) {
+                ko.applyBindings(this._positionedTemplate);
+            }
             this.recreateGraphics();
         };
         return ElementPositioner;

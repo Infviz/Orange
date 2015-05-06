@@ -64,7 +64,6 @@
 }
 [data-control="Controls.DataGrid"] div.data_grid div.dg_header_container {
   position: absolute;
-  width: 100%;
   top: 0;
   left: 0;
   z-index: 201;
@@ -88,6 +87,22 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   color: black;
+}
+[data-control="Controls.DataGrid"] div.data_grid .dg_cell .dg_sort_icon {
+  display: none;
+  font-size: 10px;
+  margin-right: 5px;
+}
+[data-control="Controls.DataGrid"] div.data_grid .dg_cell .dg_inverted_sort_icon {
+  display: none;
+  font-size: 10px;
+  margin-right: 5px;
+}
+[data-control="Controls.DataGrid"] div.data_grid .dg_cell.sort_by:not(.inverted_sort) .dg_sort_icon {
+  display: inline;
+}
+[data-control="Controls.DataGrid"] div.data_grid .dg_cell.sort_by.inverted_sort .dg_inverted_sort_icon {
+  display: inline;
 }
 [data-control="Controls.DataGrid"][data-grid-column-width="distributed"] div.data_grid div.dg_body_container .dg_body {
   position: static;
@@ -125,7 +140,10 @@
   background-color: #ffffff;
 }
 [data-control="Controls.DataGrid"] div.data_grid .dg_row.hover {
-  background-color: #e1e1f6;
+  background-color: #ddeff9;
+}
+[data-control="Controls.DataGrid"] div.data_grid .dg_row.selected {
+  background-color: #b2dbf1;
 }
 [data-control="Controls.DataGrid"] div.data_grid .dg_header .dg_row {
   border-bottom: 2px solid #303030;

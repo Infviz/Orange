@@ -9,12 +9,14 @@
 
 module Orange.Bindings {
 
-	(<any>ko).bindingHandlers.stopBindings = {
+	var ko = (<any>window).ko;
+
+	ko.bindingHandlers.stopBindings = {
 	    init: () => { return { controlsDescendantBindings: true }; }  
 	};
-	(<any>ko).virtualElements.allowedBindings.stopBindings = true;
+	ko.virtualElements.allowedBindings.stopBindings = true;
 
-	export class ViewModelToControlBinding {
+	class ViewModelToControlBinding {
 
 		private propDisposable: any = null;
 
@@ -33,7 +35,10 @@ module Orange.Bindings {
 				orangeEl.addOnInitializedListener(this.init);
 		}
 
-		private init() : void {
+		private init = () : void => {
+
+			if (!(this.vm)) 
+				throw "No context was pressent for binding to use."; 
 
 			if (!(this.vm[this.property])) 
 				throw "The property " + this.property + " could not be found." 
@@ -47,7 +52,7 @@ module Orange.Bindings {
 
 	        pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), this.target);
 
-	        if (!pd && !(control[this.target])) 
+	        if (!pd && control[this.target] == "undefined") 
 				throw "The target property " + this.target + " could not be found."
 
 	        if (!!(this.vm[this.property].subscribe))

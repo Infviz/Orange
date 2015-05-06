@@ -1,5 +1,12 @@
 /// <reference path="../_references.ts" />
 
+
+var templates: {
+        [src: string]: { [index: string]: any };
+    }
+
+var template = templates["src"]["index"];
+
 module Controls {
 	export class ElementPositioner extends Orange.Controls.TemplatedControl {
 		
@@ -24,7 +31,7 @@ module Controls {
 		}
 
 		private _container: HTMLDivElement = null;
-		private _positionedTemplate: string = null;
+		private _positionedTemplate: HTMLElement = null;
 
 		constructor() {
 			super(new Orange.Controls.StringTemplateProvider(
@@ -50,15 +57,16 @@ module Controls {
 		}
 
 		protected onElementSet() {
+
 			super.onElementSet();
 
 			var el = this.element;
 
-			this._positionedTemplate = this.element.innerHTML;
-			this.element.innerHTML = "";
+			this._positionedTemplate = <HTMLElement>this.element.removeChild(this.element.firstElementChild);
 		}
 
 		protected onApplyTemplate(): void {
+
 			super.onApplyTemplate();
 
 			this._container = <HTMLDivElement>this.element.querySelector(".element_positioner_container");
@@ -71,7 +79,13 @@ module Controls {
 			style.width = "100%";
 			style.height = "100%";
 
-			this._container.innerHTML = this._positionedTemplate;
+			this._container.appendChild(this._positionedTemplate);
+
+			if (this._positionedTemplate.querySelectorAll("[data-bind]").length > 0 && 
+				!ko.dataFor(this._positionedTemplate))
+			{
+				ko.applyBindings(this._positionedTemplate);
+			}
 
 			this.recreateGraphics();
 		}

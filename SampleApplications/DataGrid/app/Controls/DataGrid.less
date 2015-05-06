@@ -82,7 +82,6 @@
 		div.dg_header_container {
 
 			position: absolute;
-			width: 100%;
 			top: 0;
 			left: 0;
 			z-index: 201;
@@ -111,8 +110,30 @@
 				
 				white-space: nowrap;
 				text-overflow: ellipsis;
-
 				.noMarginOrPadding();
+			}
+		}
+
+		.dg_cell {
+
+			.dg_sort_icon {
+				display: none;
+				font-size: 10px;
+				margin-right: 5px;
+			}
+
+			.dg_inverted_sort_icon {
+				display: none;
+				font-size: 10px;
+				margin-right: 5px;
+			}
+			
+			&.sort_by:not(.inverted_sort) .dg_sort_icon {
+				display: inline;
+			}
+
+			&.sort_by.inverted_sort .dg_inverted_sort_icon {
+				display: inline;
 			}
 		}
 	}
@@ -169,10 +190,12 @@
 
 [data-control="Controls.DataGrid"] {
 
-	@evenRowBgColor: #f5f5f5;
-	@oddRowBgColor: #ffffff;
-	@borderColor: #303030;
-	@rowHoverColor: #e1e1f6;
+	@evenRowBgColor: color(#f5f5f5);
+	@oddRowBgColor: color(#ffffff);
+	@borderColor: color(#303030);
+	@rowHoverColor: color(#ddeff9);
+	@rowSelectedColor: darken(@rowHoverColor, 10%);
+	//@rowSelectedColor: #bbddf9;
 
 	.cellPadding(@p: 10px) { padding: @p @p @p @p; }
 
@@ -188,6 +211,10 @@
 
 			&.hover {
 				background-color: @rowHoverColor;
+			}
+
+			&.selected {
+				background-color: @rowSelectedColor;
 			}
 		}
 
@@ -208,6 +235,15 @@
 		        font-size: 14px;
 				line-height: 14px;
 		    }
+
+		 //    &.sort_by {
+		 //    	background-color: red;
+
+		 //    	&::after {
+		 //    		.glyphicon 
+		 //    		.glyphicon-sort-by-attributes
+		 //    	}
+			// }
 		}
 
 		div.dg_body_container .dg_frozen .dg_row {

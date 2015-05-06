@@ -30,6 +30,7 @@
 		div.wrapper {
 			position: relative;
 			left: 100px;
+			top: 100px;
 			width: calc(100% - 100px);
 			background-color: #eeeeee;
 			height: 500px;
@@ -47,105 +48,6 @@
 <div class="wrapper">
 	<div id="my_dg" data-control="Controls.DataGrid"></div>
 </div>
-
-<!-- <div class="wrapper">
-
-	<div class="data_grid">
-
-		<div class="dg_body_container">
-			<div class="dg_rows dg_header">
-				<div class="dg_row"><div class="dg_cell"></div><div class="dg_cell">My first nice header</div><div class="dg_cell">b</div><div class="dg_cell">asdfasdfase</div><div class="dg_cell">b</div><div class="dg_cell">c</div><div class="dg_cell">c</div><div class="dg_cell">c</div><div class="dg_cell">c</div></div>
-			</div>
-
-			<div class="dg_body dg_frozen">
-				<div class="dg_rows dg_frozen">
-					<div class="dg_row">
-						<div class="dg_cell"><span>1</span></div><div class="dg_cell"><span>a</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>2</span></div><div class="dg_cell"><span>a</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>3</span></div><div class="dg_cell"><span>a</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>5</span></div><div class="dg_cell"><span>a</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>6</span></div><div class="dg_cell"><span>a</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>7</span></div><div class="dg_cell"><span>a</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>8</span></div><div class="dg_cell"><span>a</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>9</span></div><div class="dg_cell"><span>a</span></div>
-					</div>
-				</div>	
-			</div>
-
-			<div class="dg_body">
-				<div class="dg_rows">
-					<div class="dg_row">
-						<div class="dg_cell"><span>1</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>2</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>3</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
-					</div>
-
-					<div class="dg_row">
-						<div class="dg_cell"><span>4</span></div><div class="dg_cell"><span>a</span></div><div class="dg_cell"><span>b</span></div><div class="dg_cell"><span>c</span></div><div class="dg_cell"><span>d</span></div><div class="dg_cell"><span>e</span></div><div class="dg_cell"><span>f</span></div><div class="dg_cell"><span>g</span></div><div class="dg_cell"><span>h</span></div>
-					</div>
-				</div>	
-			</div>	
-		</div>
-		<div class="dg_header_container">
-			<div class="dg_rows dg_header">
-				<div class="dg_row">
-					<div class="dg_cell"></div><div class="dg_cell">My first nice header</div><div class="dg_cell">b</div><div class="dg_cell">asdfasdfase</div><div class="dg_cell">b</div><div class="dg_cell">c</div><div class="dg_cell">c</div><div class="dg_cell">c</div><div class="dg_cell">c</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div> -->
 
 <script></script>
 </body>

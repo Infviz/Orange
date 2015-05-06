@@ -91,7 +91,7 @@ class Application {
                     new Controls.TextColumnDefinition("col8","Column eight", "col8", 100),
                     new Controls.TextColumnDefinition("col9","Column nine", "col9", 100));
 
-                var data = Ix.Enumerable.range(0, 1)
+                var data = Ix.Enumerable.range(0, 2000)
                     .select(rIdx => {
                         
                         var rowItem = new RowItem();
@@ -117,14 +117,20 @@ class Application {
                 dg.frozenColumnCount = 2;
                 dg.columnDefinitions = cols;
 
+                // dg.onClicked
+                //     .subscribe((args) => {
+                //         console.log(args);
+                //     });
+
                 var items = ko.observableArray<RowItem>(data);
                 dg.itemsSource = items;
 
+                dg.selectionHandler = new Controls.DataGridMultiSelectSelectionHandler();
                 dg.headerContext = { col3Header: "Col 3 Header"};
 
                 var counter = 1;
-                Rx.Observable.interval(50)
-                    .take(20)
+                Rx.Observable.interval(2000)
+                    .take(0)
                     .subscribe(_ => {
 
                         var newItem = new RowItem();
@@ -143,13 +149,17 @@ class Application {
                         //items.splice(Math.floor(Math.random() * items().length), 1);
                     });
 
-                Rx.Observable.interval(5000)
-                    .take(20)
-                    .subscribe(_ => {
-                            items.sort(function(left, right) { return left.col2 == right.col2 ? 0 : (left.col2 < right.col2 ? -1 : 1) });
-                        
-                    });
+                // Rx.Observable.interval(5000)
+                //     .take(2)
+                //     .subscribe(_ => {
+                //         items.sort(function(left, right) { return left.col2 == right.col2 ? 0 : (left.col2 < right.col2 ? -1 : 1) });
+                //     });
 
+                // Rx.Observable.interval(11000)
+                //     .take(10)
+                //     .subscribe(_ => {
+                //         items.splice(Math.floor(Math.random() * items().length), 1);
+                //     });
             };
 
         dgControl.addOnInitializedListener(dgReady);
