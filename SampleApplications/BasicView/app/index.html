@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Basic Orange MVVM View example</title>
+
+	<script src="bower_components/knockout/dist/knockout.js" type="text/javascript"></script>
+
+	<script src="app.js" type="text/javascript"></script>
+
+	<style>
+
+		body {
+			margin: 0;
+			font-family: sans-serif;
+		}
+
+		div[data-view] {
+			padding: 10px 25px;
+			margin: 10px;
+			background-color: #50bbcc;
+		}
+
+		div[data-view] .small_text {
+			font-size: 10px;
+		}
+
+	</style>
+</head>
+
+<body>
+ 
+<div data-view="MyBasicView.View"></div>
+
+<div data-view="MyBasicViewWithKnockoutBindings.ViewWithKnockoutBindings"></div>
+
+<div data-view="MyBasicViewWithoutViewModel.ViewWithoutViewModel"></div>
+
+<script>
+	TemplateLoader.load([
+		{ path: 'MyBasicView/View.tpl.html', id: 'MyBasicView-View' },
+		{ path: 'MyBasicViewWithKnockoutBindings/ViewWithKnockoutBindings.tpl.html', id: 'MyBasicViewWithKnockoutBindings-ViewWithKnockoutBindings' },
+		{ path: 'MyBasicViewWithoutViewModel/ViewWithoutViewModel.tpl.html', id: 'MyBasicViewWithoutViewModel-ViewWithoutViewModel' }
+	]);
+</script>
+
+</body>
+</html>

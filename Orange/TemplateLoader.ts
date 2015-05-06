@@ -15,19 +15,54 @@ class TemplateLoader {
         for (var i = 0; i < templates.length; i++)
         {
             (function () {
+
                 var tpl = templates[i];
                 var id = tpl.id;
-                $.get(
-                    tpl.path,
-                    tplCode => {
-                        var code = '<script type="text/html" id="' + id + '">' + tplCode + '</script>';
-                        $('body').append(code);
+
+                var xmlhttp = new XMLHttpRequest();
+                xmlhttp.onreadystatechange = 
+                    () => {
+                        if (xmlhttp.readyState !== 4) 
+                            return;
+
+                        if (xmlhttp.status !== 200 && xmlhttp.status !== 0) 
+                            throw "Failed to load template.";
+ 
+                        var scriptEl = document.createElement("script");
+                        
+                        var typeAttr = document.createAttribute("type");
+                        typeAttr.value = "text/html";
+
+                        var idAttr = document.createAttribute("id");
+                        idAttr.value = id;
+
+                        scriptEl.setAttributeNode(typeAttr);
+                        scriptEl.setAttributeNode(idAttr);
+
+                        scriptEl.innerHTML = xmlhttp.responseText;
+                        document.body.appendChild(scriptEl);
+
                         loadedTemplates++;
-                        if (loadedTemplates == templates.length)
-                        {
-                            if (TemplateLoader.onload) TemplateLoader.onload();
-                        }
-                    });
+
+                        if (loadedTemplates == templates.length && TemplateLoader.onload)
+                            TemplateLoader.onload();
+                    };
+
+                xmlhttp.open("GET", tpl.path, true);
+                xmlhttp.send();
+
+                
+                // $.get(
+                //     tpl.path,
+                //     tplCode => {
+                //         var code = '<script type="text/html" id="' + id + '">' + tplCode + '</script>';
+                //         $('body').append(code);
+                //         loadedTemplates++;
+                //         if (loadedTemplates == templates.length)
+                //         {
+                //             if (TemplateLoader.onload) TemplateLoader.onload();
+                //         }
+                //     });
             })();
         };
     }

@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "out": "SampleApplications/DataGrid/app/out.js", 
+        "sourceMap": true, 
+        "target": "es5"
+    }, 
+    "files": [
+        "SampleApplications/DataGrid/app/app.ts"
+    ]
+}
