@@ -1,4 +1,4 @@
-/// <reference path="Reference.d.ts"/>
+/// <reference path="_references.ts"/>
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /*

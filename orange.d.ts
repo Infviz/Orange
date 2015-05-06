@@ -1,4 +1,3 @@
-/// <reference path="Orange/Reference.d.ts" />
 declare module Orange.Modularity {
     interface KeyValuePair {
         key: any;
