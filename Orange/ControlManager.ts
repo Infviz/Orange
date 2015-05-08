@@ -230,7 +230,12 @@ module Orange.Controls {
 			if (orangeElement.isInitialized)
 				return null;
 
-			var constructorFunction = <{ new () }>type.value.split(".").reduce((c, n) => c[n], window);
+			var constructorFunction :{ new () };
+
+			try {
+				constructorFunction = <{ new () }>type.value.split(".").reduce((c, n) => c[n], window);
+			}
+			catch(e) { }
 
 			if (!constructorFunction)
 				constructorFunction = (<any>window).require(type.value);

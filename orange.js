@@ -1048,7 +1048,12 @@ var Orange;
                 var orangeElement = Controls.GetOrangeElement(element);
                 if (orangeElement.isInitialized)
                     return null;
-                var constructorFunction = type.value.split(".").reduce(function (c, n) { return c[n]; }, window);
+                var constructorFunction;
+                try {
+                    constructorFunction = type.value.split(".").reduce(function (c, n) { return c[n]; }, window);
+                }
+                catch (e) {
+                }
                 if (!constructorFunction)
                     constructorFunction = window.require(type.value);
                 var control = (!!container ? container.resolve(constructorFunction) : new constructorFunction());
