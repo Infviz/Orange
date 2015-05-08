@@ -231,6 +231,10 @@ module Orange.Controls {
 				return null;
 
 			var constructorFunction = <{ new () }>type.value.split(".").reduce((c, n) => c[n], window);
+
+			if (!constructorFunction)
+				constructorFunction = (<any>window).require(type.value);
+			
 			var control = <Control>(!!container ? container.resolve(constructorFunction) : new constructorFunction());
 
 			if (false == (control instanceof constructorFunction))
