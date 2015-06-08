@@ -479,10 +479,7 @@ var Orange;
                     throw new Error("failed to resolve type '" + type + "'");
             };
             Container.prototype.applyConstructor = function (ctor, args) {
-                var a = [];
-                for (var i = 0; i < args.length; i++)
-                    a[i] = 'arguments[1][' + i + ']';
-                return eval('new arguments[0](' + a.join() + ')');
+                return new (Function.bind.apply(ctor, [null].concat(args)));
             };
             return Container;
         })();

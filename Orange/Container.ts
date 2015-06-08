@@ -86,10 +86,8 @@ module Orange.Modularity
         }
 
         private applyConstructor(ctor: any, args: Array<any>) {
-            var a: Array<any> = [];
-            for (var i = 0; i < args.length; i++)
-                a[i] = 'arguments[1][' + i + ']';
-            return eval('new arguments[0](' + a.join() + ')');
+            
+            return new (Function.bind.apply(ctor, [null].concat(args)));
         }
     }
 }
