@@ -14,7 +14,7 @@ module Orange.Modularity {
                 }
             }
             else {
-                var view = <any>root["instance"];
+                var view = (<any>root)["instance"];
 		        if (typeof view.dispose === 'function')
                     view.dispose();
             }
@@ -42,7 +42,7 @@ module Orange.Modularity {
                     }
                 }
 
-                root["instance"] = view;
+                (<any>root)["instance"] = view;
             }
         }
     }

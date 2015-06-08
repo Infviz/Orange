@@ -42,7 +42,7 @@ module Orange.Controls {
 
 		protected raisePropertyChanged(propertyName: string) {
 
-			var propertyValue = this[propertyName];
+			var propertyValue = (<any>this)[propertyName];
 
 	        if (propertyValue == null || propertyValue == "undefined")
 	        	throw "trying to access undefined property '" + propertyName + "'.";

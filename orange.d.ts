@@ -1,3 +1,17 @@
+declare module Orange {
+    class Uuid {
+        private static _counter;
+        private _value;
+        value: string;
+        private static _tStart;
+        private static getTime;
+        private static generateV4Uuid();
+        constructor(uuid?: string);
+        static generate(): Uuid;
+        static isUuid(value: string): boolean;
+        sameValueAs(uuid: Uuid): boolean;
+    }
+}
 declare module Orange.Modularity {
     interface KeyValuePair {
         key: any;
@@ -117,8 +131,8 @@ declare module Orange.Controls {
         manage(element: HTMLElement): void;
         private static getChildren(element);
         private static getControlAttribute(element);
-        static createControlsInElement(element: HTMLElement): any;
-        static createControlsInElement(element: HTMLElement, container: Orange.Modularity.Container): any;
+        static createControlsInElement(element: HTMLElement): void;
+        static createControlsInElement(element: HTMLElement, container: Orange.Modularity.Container): void;
         dispose(): void;
         private onMutation;
         static getControlFromElement(element: HTMLElement): Control;
@@ -126,7 +140,8 @@ declare module Orange.Controls {
         static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Controls.Control;
         static createControlFromType(type: string): Controls.Control;
         static createControlFromType(type: string, container: Orange.Modularity.Container): Controls.Control;
-        private static _uniqueIdCounter;
+        private static isValidConstructorFunc(func);
+        private static getConstructorFunction(constructorName);
         private static createControlInternal(element, container);
         private handleMutation;
     }

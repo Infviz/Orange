@@ -52,16 +52,16 @@ module Orange.Bindings {
 
 	        pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), this.target);
 
-	        if (!pd && control[this.target] == "undefined") 
+	        if (!pd && (<any>control)[this.target] == "undefined") 
 				throw "The target property " + this.target + " could not be found."
 
 	        if (!!(this.vm[this.property].subscribe))
-	        	this.propDisposable = this.vm[this.property].subscribe((val) => control[this.target] = val);
+	        	this.propDisposable = this.vm[this.property].subscribe((val: any) => (<any>control)[this.target] = val);
 
 	        if (typeof this.vm[this.property] === "function")
-	        	control[this.target] = this.vm[this.property]();
+	        	(<any>control)[this.target] = this.vm[this.property]();
 	        else 
-	        	control[this.target] = this.vm[this.property];
+	        	(<any>control)[this.target] = this.vm[this.property];
 
 	        if (this.mode == "twoWay")
 	        	control.addPropertyChangedListener(this.onPropertyChanged);

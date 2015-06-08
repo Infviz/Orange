@@ -1,6 +1,8 @@
 
 /// <reference path="MutationObserverPolyfill.ts"/>
 
+/// <reference path="Uuid.ts" />
+
 /// <reference path="Container.ts"/>
 /// <reference path="RegionManager.ts"/>
 /// <reference path="TemplateLoader.ts"/>

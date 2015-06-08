@@ -2,7 +2,7 @@
 
 /// <reference path="bower_components/rxjs/ts/rx.all.d.ts" />
 
-/// <reference path="../../../Orange/Reference.d.ts" />
+/// <reference path="../../../Orange/_references.ts" />
 
 //grunt-start
 /// <reference path="Controls/ElementPositioner.ts" />

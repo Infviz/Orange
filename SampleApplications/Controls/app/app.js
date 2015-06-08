@@ -1,4 +1,5 @@
-if (typeof WeakMap === 'undefined') {
+/// <reference path="_references.ts"/>
+if (typeof window.WeakMap === 'undefined') {
     (function () {
         var defineProperty = Object.defineProperty;
         var counter = Date.now() % 1e9;
@@ -15,7 +16,8 @@ if (typeof WeakMap === 'undefined') {
             },
             get: function (key) {
                 var entry;
-                return (entry = key[this.name]) && entry[0] === key ? entry[1] : undefined;
+                return (entry = key[this.name]) && entry[0] === key ?
+                    entry[1] : undefined;
             },
             delete: function (key) {
                 var entry = key[this.name];
@@ -36,7 +38,7 @@ if (typeof WeakMap === 'undefined') {
     })();
 }
 (function (global) {
-    var registrationsTable = new WeakMap();
+    var registrationsTable = new window.WeakMap();
     var setImmediate = window.msSetImmediate;
     if (!setImmediate) {
         var setImmediateQueue = [];
@@ -65,9 +67,12 @@ if (typeof WeakMap === 'undefined') {
         }
     }
     function wrapIfNeeded(node) {
-        return window.ShadowDOMPolyfill && window.ShadowDOMPolyfill.wrapIfNeeded(node) || node;
+        return window.ShadowDOMPolyfill &&
+            window.ShadowDOMPolyfill.wrapIfNeeded(node) ||
+            node;
     }
     function dispatchCallbacks() {
+        // http://dom.spec.whatwg.org/#mutation-observers
         isScheduled = false;
         var observers = scheduledObservers;
         scheduledObservers = [];
@@ -123,7 +128,11 @@ if (typeof WeakMap === 'undefined') {
     JsMutationObserver.prototype = {
         observe: function (target, options) {
             target = wrapIfNeeded(target);
-            if (!options.childList && !options.attributes && !options.characterData || options.attributeOldValue && !options.attributes || options.attributeFilter && options.attributeFilter.length && !options.attributes || options.characterDataOldValue && !options.characterData) {
+            if (!options.childList && !options.attributes && !options.characterData ||
+                options.attributeOldValue && !options.attributes ||
+                options.attributeFilter && options.attributeFilter.length &&
+                    !options.attributes ||
+                options.characterDataOldValue && !options.characterData) {
                 throw new SyntaxError();
             }
             var registrations = registrationsTable.get(target);
@@ -301,7 +310,9 @@ if (typeof WeakMap === 'undefined') {
                     forEachAncestorAndObserverEnqueueRecord(target, function (options) {
                         if (!options.attributes)
                             return;
-                        if (options.attributeFilter && options.attributeFilter.length && options.attributeFilter.indexOf(name) === -1 && options.attributeFilter.indexOf(namespace) === -1) {
+                        if (options.attributeFilter && options.attributeFilter.length &&
+                            options.attributeFilter.indexOf(name) === -1 &&
+                            options.attributeFilter.indexOf(namespace) === -1) {
                             return;
                         }
                         if (options.attributeOldValue)
@@ -355,6 +366,53 @@ if (typeof WeakMap === 'undefined') {
     if (!global.MutationObserver)
         global.MutationObserver = JsMutationObserver;
 })(this);
+/// <reference path="_references.ts"/>
+var Orange;
+(function (Orange) {
+    var Uuid = (function () {
+        function Uuid(uuid) {
+            if (uuid == null)
+                this._value = Uuid.generateV4Uuid();
+            else if (Uuid.isUuid(uuid))
+                this._value = uuid;
+            else
+                throw "The argument passed to Orange.Uuid() is not a valid Uuid.";
+        }
+        Object.defineProperty(Uuid.prototype, "value", {
+            get: function () { return this._value; },
+            enumerable: true,
+            configurable: true
+        });
+        Uuid.generateV4Uuid = function () {
+            var tc = Uuid.getTime();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+                .replace(/[xy]/g, function (c) {
+                var rnd = (tc + Math.random() * 16) % 16 | 0;
+                tc = Math.floor(tc / 16);
+                return (c == 'x' ? rnd : (rnd & 0x3 | 0x8)).toString(16);
+            });
+        };
+        Uuid.generate = function () {
+            return new Uuid();
+        };
+        Uuid.isUuid = function (value) {
+            var chars = "[0-9a-fA-F]";
+            var pattern = new RegExp(chars + "{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}");
+            return pattern.test(value);
+        };
+        Uuid.prototype.sameValueAs = function (uuid) { return this._value.toLowerCase() === uuid._value.toLowerCase(); };
+        Uuid._counter = 0;
+        Uuid._tStart = Date.now == null ? Date.now() : new Date().getTime();
+        Uuid.getTime = (window.performance == null && window.performance.now == null) ?
+            function () { return Math.round(performance.now() + Uuid._tStart); } :
+            (Date.now == null ?
+                function () { return Date.now(); } :
+                function () { return (new Date()).getTime(); });
+        return Uuid;
+    })();
+    Orange.Uuid = Uuid;
+})(Orange || (Orange = {}));
+/// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
     var Modularity;
@@ -431,6 +489,7 @@ var Orange;
         Modularity.Container = Container;
     })(Modularity = Orange.Modularity || (Orange.Modularity = {}));
 })(Orange || (Orange = {}));
+/// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
     var Modularity;
@@ -494,24 +553,25 @@ var TemplateLoader = (function () {
                 var tpl = templates[i];
                 var id = tpl.id;
                 var xmlhttp = new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function () {
-                    if (xmlhttp.readyState !== 4)
-                        return;
-                    if (xmlhttp.status !== 200 && xmlhttp.status !== 0)
-                        throw "Failed to load template.";
-                    var scriptEl = document.createElement("script");
-                    var typeAttr = document.createAttribute("type");
-                    typeAttr.value = "text/html";
-                    var idAttr = document.createAttribute("id");
-                    idAttr.value = id;
-                    scriptEl.setAttributeNode(typeAttr);
-                    scriptEl.setAttributeNode(idAttr);
-                    scriptEl.innerHTML = xmlhttp.responseText;
-                    document.body.appendChild(scriptEl);
-                    loadedTemplates++;
-                    if (loadedTemplates == templates.length && TemplateLoader.onload)
-                        TemplateLoader.onload();
-                };
+                xmlhttp.onreadystatechange =
+                    function () {
+                        if (xmlhttp.readyState !== 4)
+                            return;
+                        if (xmlhttp.status !== 200 && xmlhttp.status !== 0)
+                            throw "Failed to load template.";
+                        var scriptEl = document.createElement("script");
+                        var typeAttr = document.createAttribute("type");
+                        typeAttr.value = "text/html";
+                        var idAttr = document.createAttribute("id");
+                        idAttr.value = id;
+                        scriptEl.setAttributeNode(typeAttr);
+                        scriptEl.setAttributeNode(idAttr);
+                        scriptEl.innerHTML = xmlhttp.responseText;
+                        document.body.appendChild(scriptEl);
+                        loadedTemplates++;
+                        if (loadedTemplates == templates.length && TemplateLoader.onload)
+                            TemplateLoader.onload();
+                    };
                 xmlhttp.open("GET", tpl.path, true);
                 xmlhttp.send();
             })();
@@ -520,6 +580,7 @@ var TemplateLoader = (function () {
     };
     return TemplateLoader;
 })();
+/// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
     var Controls;
@@ -531,9 +592,7 @@ var Orange;
                 this._propertyChangedListeners = new Array();
             }
             Object.defineProperty(Control.prototype, "element", {
-                get: function () {
-                    return this._element;
-                },
+                get: function () { return this._element; },
                 set: function (element) {
                     if (this._element != null)
                         throw "'element' property can only be set once. ";
@@ -549,8 +608,7 @@ var Orange;
             Control.prototype.dispose = function () {
                 Controls.ControlManager.disposeControl(this);
             };
-            Control.prototype.onElementSet = function () {
-            };
+            Control.prototype.onElementSet = function () { };
             Control.prototype.addPropertyChangedListener = function (listener) {
                 this._propertyChangedListeners.push(listener);
             };
@@ -568,13 +626,13 @@ var Orange;
                     this._propertyChangedListeners[plIdx](propertyName, propertyValue);
                 }
             };
-            Control.prototype.onPropertyChanged = function (propertyName, value) {
-            };
+            Control.prototype.onPropertyChanged = function (propertyName, value) { };
             return Control;
         })();
         Controls.Control = Control;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
+/// <reference path="_references.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -621,17 +679,15 @@ var Orange;
                 this._templateProvider = templateProvider;
             }
             Object.defineProperty(TemplatedControl.prototype, "isTemplateApplied", {
-                get: function () {
-                    return this._isTemplateApplied;
-                },
+                get: function () { return this._isTemplateApplied; },
                 enumerable: true,
                 configurable: true
             });
-            TemplatedControl.prototype.onApplyTemplate = function () {
-            };
+            TemplatedControl.prototype.onApplyTemplate = function () { };
             TemplatedControl.prototype.applyTemplate = function () {
                 var _this = this;
-                this._templateProvider.applyTemplate(this.element, function (success) {
+                this._templateProvider
+                    .applyTemplate(this.element, function (success) {
                     if (success)
                         _this._isTemplateApplied = true;
                     else
@@ -643,6 +699,7 @@ var Orange;
         Controls.TemplatedControl = TemplatedControl;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
+/// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
     var Controls;
@@ -656,9 +713,7 @@ var Orange;
                     this._dataContext = context;
             }
             Object.defineProperty(ViewBase.prototype, "dataContext", {
-                get: function () {
-                    return this._dataContext;
-                },
+                get: function () { return this._dataContext; },
                 set: function (context) {
                     this._dataContext = context;
                     this.onDataContextSet();
@@ -676,10 +731,8 @@ var Orange;
                     return;
                 this.onApplyBindings();
             };
-            ViewBase.prototype.onApplyBindings = function () {
-            };
-            ViewBase.prototype.onDataContextSet = function () {
-            };
+            ViewBase.prototype.onApplyBindings = function () { };
+            ViewBase.prototype.onDataContextSet = function () { };
             return ViewBase;
         })(Controls.TemplatedControl);
         Controls.ViewBase = ViewBase;
@@ -696,7 +749,7 @@ var Orange;
                 _super.prototype.onApplyBindings.call(this);
                 if (!this.dataContext)
                     return;
-                ko.applyBindingsToDescendants(this.dataContext, this.element);
+                window.ko.applyBindingsToDescendants(this.dataContext, this.element);
             };
             KnockoutViewBase.prototype.onDataContextSet = function () {
                 this.cleanChildBindings();
@@ -707,7 +760,7 @@ var Orange;
                     var childNode = childNodes[cIdx];
                     if (childNode.nodeType !== 1)
                         continue;
-                    ko.cleanNode(childNode);
+                    window.ko.cleanNode(childNode);
                 }
             };
             return KnockoutViewBase;
@@ -715,6 +768,7 @@ var Orange;
         Controls.KnockoutViewBase = KnockoutViewBase;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
+/// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
     var Controls;
@@ -773,9 +827,7 @@ var Orange;
                 this._container = container;
             }
             Object.defineProperty(ControlManager.prototype, "containter", {
-                get: function () {
-                    return this._container;
-                },
+                get: function () { return this._container; },
                 enumerable: true,
                 configurable: true
             });
@@ -869,18 +921,36 @@ var Orange;
                 element.setAttribute(ControlManager._controlAttributeNames[0], type);
                 return ControlManager.createControlInternal(element, container);
             };
+            ControlManager.isValidConstructorFunc = function (func) {
+                return func != null && (typeof (func) == "function");
+            };
+            ControlManager.getConstructorFunction = function (constructorName) {
+                var path = constructorName.split(".");
+                var func = window;
+                for (var _i = 0; _i < path.length; _i++) {
+                    var fragment = path[_i];
+                    if (func[fragment] == null)
+                        break;
+                    func = func[fragment];
+                }
+                if (ControlManager.isValidConstructorFunc(func))
+                    return func;
+                func = window.require(constructorName);
+                if (ControlManager.isValidConstructorFunc(func))
+                    return func;
+                throw new ReferenceError('No constructor identified by "' + constructorName + '"" could be found');
+            };
             ControlManager.createControlInternal = function (element, container) {
                 var type = ControlManager.getControlAttribute(element);
                 var orangeElement = Controls.GetOrangeElement(element);
                 if (orangeElement.isInitialized)
                     return null;
-                var constructorFunction = type.value.split(".").reduce(function (c, n) { return c[n]; }, window);
+                var constructorFunction = ControlManager.getConstructorFunction(type.value);
                 var control = (!!container ? container.resolve(constructorFunction) : new constructorFunction());
                 if (false == (control instanceof constructorFunction))
                     throw "ControlManager.createControl: instance of constructed object is not of the correct type.";
                 orangeElement.control = control;
-                var uid = "o-uid-" + (ControlManager._uniqueIdCounter++);
-                element.setAttribute(type.attributeType + "-id", uid);
+                element.setAttribute(type.attributeType + "-id", Orange.Uuid.generate().value);
                 control.element = element;
                 if (!!control.applyTemplate)
                     control.applyTemplate();
@@ -906,12 +976,12 @@ var Orange;
                 characterDataOldValue: false,
             };
             ControlManager._controlAttributeNames = ["data-control", "data-view"];
-            ControlManager._uniqueIdCounter = 0;
             return ControlManager;
         })();
         Controls.ControlManager = ControlManager;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
+/// <reference path="_references.ts"/>
 (function () {
     if (!window.ko) {
         window.ko = {};
@@ -922,10 +992,9 @@ var Orange;
 (function (Orange) {
     var Bindings;
     (function (Bindings) {
+        var ko = window.ko;
         ko.bindingHandlers.stopBindings = {
-            init: function () {
-                return { controlsDescendantBindings: true };
-            }
+            init: function () { return { controlsDescendantBindings: true }; }
         };
         ko.virtualElements.allowedBindings.stopBindings = true;
         var ViewModelToControlBinding = (function () {
@@ -988,7 +1057,6 @@ var Orange;
             };
             return ViewModelToControlBinding;
         })();
-        Bindings.ViewModelToControlBinding = ViewModelToControlBinding;
         ko.bindingHandlers.bindings = {
             init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
                 var bindings = new Array();
@@ -1010,7 +1078,9 @@ var Orange;
                     var targetProp = Object.getOwnPropertyDescriptor(value, sourceProp).value;
                     bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, sourceProp, targetProp, mode));
                 }
-                ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                ko.utils
+                    .domNodeDisposal
+                    .addDisposeCallback(element, function () {
                     for (var bIdx = bindings.length - 1; bIdx >= 0; bIdx--) {
                         bindings[bIdx].dispose();
                     }
@@ -1033,13 +1103,25 @@ var Orange;
                     onInitialized();
                 else
                     orangeEl.addOnInitializedListener(onInitialized);
-                ko.utils.domNodeDisposal.addDisposeCallback(element, function () { return orangeEl.removeOnInitializedListener(onInitialized); });
+                ko.utils
+                    .domNodeDisposal
+                    .addDisposeCallback(element, function () { return orangeEl.removeOnInitializedListener(onInitialized); });
             }
         };
     })(Bindings = Orange.Bindings || (Orange.Bindings = {}));
 })(Orange || (Orange = {}));
+/// <reference path="MutationObserverPolyfill.ts"/>
+/// <reference path="Uuid.ts" />
+/// <reference path="Container.ts"/>
+/// <reference path="RegionManager.ts"/>
+/// <reference path="TemplateLoader.ts"/>
+/// <reference path="Control.ts"/>
+/// <reference path="TemplatedControl.ts"/>
+/// <reference path="ViewBase.ts"/>
+/// <reference path="ControlManager.ts"/>
+/// <reference path="Bindings.ts" />
+/// <reference path="../_references.ts" />
 var templates;
-var template = templates["src"]["index"];
 var Controls;
 (function (Controls) {
     var ElementPositioner = (function (_super) {
@@ -1100,7 +1182,8 @@ var Controls;
             style.width = "100%";
             style.height = "100%";
             this._container.appendChild(this._positionedTemplate);
-            if (this._positionedTemplate.querySelectorAll("[data-bind]").length > 0 && !ko.dataFor(this._positionedTemplate)) {
+            if (this._positionedTemplate.querySelectorAll("[data-bind]").length > 0 &&
+                !ko.dataFor(this._positionedTemplate)) {
                 ko.applyBindings(this._positionedTemplate);
             }
             this.recreateGraphics();
@@ -1109,6 +1192,7 @@ var Controls;
     })(Orange.Controls.TemplatedControl);
     Controls.ElementPositioner = ElementPositioner;
 })(Controls || (Controls = {}));
+/// <reference path="../_references.ts" />
 var Controls;
 (function (Controls) {
     var SmartInput = (function (_super) {
@@ -1148,6 +1232,7 @@ var Controls;
     })(Orange.Controls.TemplatedControl);
     Controls.SmartInput = SmartInput;
 })(Controls || (Controls = {}));
+/// <reference path="../../_references.ts" />
 var Views;
 (function (Views) {
     var MainContainer;
@@ -1172,6 +1257,7 @@ var Views;
         MainContainer.MainContainerView = MainContainerView;
     })(MainContainer = Views.MainContainer || (Views.MainContainer = {}));
 })(Views || (Views = {}));
+/// <reference path="../../_references.ts" />
 var Views;
 (function (Views) {
     var MainContainer;
@@ -1193,21 +1279,21 @@ var Views;
             }
             MainContainerViewModel.prototype.init = function () {
                 var _this = this;
-                Rx.Observable.timer(100, 1000).timeInterval().subscribe(function (interval) {
+                Rx.Observable
+                    .timer(100, 1000)
+                    .timeInterval()
+                    .subscribe(function (interval) {
                     _this.vmX(Math.random());
                     _this.vmY.onNext(Math.random());
-                }, function (err) {
-                }, function () {
-                });
-                this.name.subscribe(function (val) {
-                    console.log(val);
-                });
+                }, function (err) { }, function () { });
+                this.name.subscribe(function (val) { console.log(val); });
             };
             return MainContainerViewModel;
         })();
         MainContainer.MainContainerViewModel = MainContainerViewModel;
     })(MainContainer = Views.MainContainer || (Views.MainContainer = {}));
 })(Views || (Views = {}));
+/// <reference path="_references.ts" />
 var startReq = { windowLoaded: false, templatesLoaded: false };
 function tryStartup() {
     if (!startReq.windowLoaded || !startReq.templatesLoaded)
@@ -1234,4 +1320,12 @@ var Application = (function () {
     };
     return Application;
 })();
+/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="bower_components/rxjs/ts/rx.all.d.ts" />
+/// <reference path="../../../Orange/_references.ts" />
+/// <reference path="Controls/ElementPositioner.ts" />
+/// <reference path="Controls/SmartInput.ts" />
+/// <reference path="Views/MainContainer/MainContainerView.ts" />
+/// <reference path="Views/MainContainer/MainContainerViewModel.ts" />
+/// <reference path="app.ts" />
 //# sourceMappingURL=app.js.map

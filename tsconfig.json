@@ -1,10 +1,13 @@
 {
     "compilerOptions": {
-        "out": "SampleApplications/DataGrid/app/out.js", 
+        "out": "orange.js", 
         "sourceMap": true, 
-        "target": "es5"
+        "declaration": true,
+        "target": "es5",
+        "noImplicitAny": true,
+        "removeComments": true
     }, 
     "files": [
-        "SampleApplications/DataGrid/app/app.ts"
+        "Orange/_references.ts"
     ]
 }

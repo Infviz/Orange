@@ -1,6 +1,6 @@
 /// <reference path="../typings/tsd.d.ts" />
 
-/// <reference path="../../../Orange/Reference.d.ts" />
+/// <reference path="../../../Orange/_references.ts" />
 ///// <reference path="bower_components/orange/ts/Reference.d.ts" />
 
 /// <reference path="UI/ViewBase.ts" />

@@ -5,7 +5,7 @@ var templates: {
         [src: string]: { [index: string]: any };
     }
 
-var template = templates["src"]["index"];
+//var template = templates["src"]["index"];
 
 module Controls {
 	export class ElementPositioner extends Orange.Controls.TemplatedControl {

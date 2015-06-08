@@ -6,7 +6,7 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "knockout/knockout.d.ts": {
-      "commit": "bba34156c1eaad788fa8996f7d30b54c4fce5ffe"
+      "commit": "8ebc099072402b1a80d205c3eece59bed963ad87"
     }
   }
 }

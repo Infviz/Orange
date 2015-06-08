@@ -55,14 +55,14 @@ module Orange.Modularity
             }
         }
 
-        private createInstance(resolvedType) {
-            var instance;
+        private createInstance(resolvedType: any) {
+            var instance: any;
             var depCount = resolvedType.dependencies ? resolvedType.dependencies().length : 0;
             if (depCount == 0) {
                 instance = new resolvedType();
             }
             else {
-                var ctrArgs = [];
+                var ctrArgs: Array<any> = [];
 
                 var deps = resolvedType.dependencies();
 
@@ -77,7 +77,7 @@ module Orange.Modularity
             return instance;
         }
 
-        private checkArity(type) {
+        private checkArity(type: any) {
             var depCount = type.dependencies ? type.dependencies().length : 0;
             var ctrCount = <number>(type.length || type.arity || 0);
 
@@ -85,8 +85,8 @@ module Orange.Modularity
                 throw new Error("failed to resolve type '" + type + "'");
         }
 
-        private applyConstructor(ctor, args) {
-            var a = [];
+        private applyConstructor(ctor: any, args: Array<any>) {
+            var a: Array<any> = [];
             for (var i = 0; i < args.length; i++)
                 a[i] = 'arguments[1][' + i + ']';
             return eval('new arguments[0](' + a.join() + ')');

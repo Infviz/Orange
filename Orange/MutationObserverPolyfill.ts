@@ -35,7 +35,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-if (typeof WeakMap === 'undefined') {
+if (typeof (<any>window).WeakMap === 'undefined') {
     (function () {
         var defineProperty = Object.defineProperty;
         var counter = Date.now() % 1e9;
@@ -45,26 +45,26 @@ if (typeof WeakMap === 'undefined') {
         };
 
         WeakMap.prototype = {
-            set: function (key, value) {
+            set: function (key: any, value: any) {
                 var entry = key[this.name];
                 if (entry && entry[0] === key)
                     entry[1] = value;
                 else
                     defineProperty(key, this.name, { value: [key, value], writable: true });
             },
-            get: function (key) {
-                var entry;
+            get: function (key: any) {
+                var entry: any;
                 return (entry = key[this.name]) && entry[0] === key ?
                     entry[1] : undefined;
             },
-            delete: function (key) {
+            delete: function (key: any) {
                 var entry = key[this.name];
                 if (!entry) return false;
                 var hasValue = entry[0] === key;
                 entry[0] = entry[1] = undefined;
                 return hasValue;
             },
-            has: function (key) {
+            has: function (key: any) {
                 var entry = key[this.name];
                 if (!entry) return false;
                 return entry[0] === key;
@@ -75,27 +75,27 @@ if (typeof WeakMap === 'undefined') {
     })();
 }
 
-(function (global) {
+(function (global: any) {
 
-    var registrationsTable = new WeakMap();
+    var registrationsTable = new (<any>window).WeakMap();
 
     // We use setImmediate or postMessage for our future callback.
     var setImmediate: any = window.msSetImmediate;
 
     // Use post message to emulate setImmediate.
     if (!setImmediate) {
-        var setImmediateQueue = [];
+        var setImmediateQueue: any = [];
         var sentinel = String(Math.random());
         window.addEventListener('message', function (e) {
             if (e.data === sentinel) {
                 var queue = setImmediateQueue;
                 setImmediateQueue = [];
-                queue.forEach(function (func) {
+                queue.forEach(function (func: any) {
                     func();
                 });
             }
         });
-        setImmediate = function (func) {
+        setImmediate = function (func: any) {
             setImmediateQueue.push(func);
             window.postMessage(sentinel, '*');
         };
@@ -105,13 +105,13 @@ if (typeof WeakMap === 'undefined') {
     var isScheduled = false;
 
     // Keep track of observers that needs to be notified next time.
-    var scheduledObservers = [];
+    var scheduledObservers: any = [];
 
     /**
      * Schedules |dispatchCallback| to be called in the future.
      * @param {MutationObserver} observer
      */
-    function scheduleCallback(observer) {
+    function scheduleCallback(observer: any) {
         scheduledObservers.push(observer);
         if (!isScheduled) {
             isScheduled = true;
@@ -119,7 +119,7 @@ if (typeof WeakMap === 'undefined') {
         }
     }
 
-    function wrapIfNeeded(node) {
+    function wrapIfNeeded(node: any) {
         return (<any>window).ShadowDOMPolyfill &&
             (<any>window).ShadowDOMPolyfill.wrapIfNeeded(node) ||
             node;
@@ -133,12 +133,12 @@ if (typeof WeakMap === 'undefined') {
         var observers = scheduledObservers;
         scheduledObservers = [];
         // Sort observers based on their creation UID (incremental).
-        observers.sort(function (o1, o2) {
+        observers.sort(function (o1: any, o2: any) {
             return o1.uid_ - o2.uid_;
         });
 
         var anyNonEmpty = false;
-        observers.forEach(function (observer) {
+        observers.forEach(function (observer: any) {
 
             // 2.1, 2.2
             var queue = observer.takeRecords();
@@ -157,12 +157,12 @@ if (typeof WeakMap === 'undefined') {
             dispatchCallbacks();
     }
 
-    function removeTransientObserversFor(observer) {
-        observer.nodes_.forEach(function (node) {
+    function removeTransientObserversFor(observer: any) {
+        observer.nodes_.forEach(function (node: any) {
             var registrations = registrationsTable.get(node);
             if (!registrations)
                 return;
-            (<any>registrations).forEach(function (registration) {
+            (<any>registrations).forEach(function (registration: any) {
                 if (registration.observer === observer)
                     registration.removeTransientObservers();
             });
@@ -181,7 +181,7 @@ if (typeof WeakMap === 'undefined') {
      * @param {Node} target
      * @param {function(MutationObserverInit):MutationRecord} callback
      */
-    function forEachAncestorAndObserverEnqueueRecord(target, callback) {
+    function forEachAncestorAndObserverEnqueueRecord(target: any, callback: any) {
         for (var node = target; node; node = node.parentNode) {
             var registrations = registrationsTable.get(node);
 
@@ -209,7 +209,7 @@ if (typeof WeakMap === 'undefined') {
      * @param {Function} callback.
      * @constructor
      */
-    function JsMutationObserver(callback) {
+    function JsMutationObserver(callback: any) {
         this.callback_ = callback;
         this.nodes_ = [];
         this.records_ = [];
@@ -217,7 +217,7 @@ if (typeof WeakMap === 'undefined') {
     }
 
     JsMutationObserver.prototype = {
-        observe: function (target, options) {
+        observe: function (target: any, options: any) {
             target = wrapIfNeeded(target);
 
             // 1.1
@@ -244,7 +244,7 @@ if (typeof WeakMap === 'undefined') {
             // If target's list of registered observers already includes a registered
             // observer associated with the context object, replace that registered
             // observer's options with options.
-            var registration;
+            var registration: any;
             for (var i = 0; i < (<any>registrations).length; i++) {
                 if (registrations[i].observer === this) {
                     registration = registrations[i];
@@ -260,7 +260,7 @@ if (typeof WeakMap === 'undefined') {
             // options, and add target to context object's list of nodes on which it
             // is registered.
             if (!registration) {
-                registration = new Registration(this, target, options);
+                registration = new (<any>Registration)(this, target, options);
                 (<any>registrations).push(registration);
                 this.nodes_.push(target);
             }
@@ -269,7 +269,7 @@ if (typeof WeakMap === 'undefined') {
         },
 
         disconnect: function () {
-            this.nodes_.forEach(function (node) {
+            this.nodes_.forEach(function (node: any) {
                 var registrations = registrationsTable.get(node);
                 for (var i = 0; i < (<any>registrations).length; i++) {
                     var registration = registrations[i];
@@ -297,7 +297,7 @@ if (typeof WeakMap === 'undefined') {
      * @param {Node} target
      * @constructor
      */
-    function MutationRecord(type, target) {
+    function MutationRecord(type: any, target: any) {
         this.type = type;
         this.target = target;
         this.addedNodes = [];
@@ -309,8 +309,8 @@ if (typeof WeakMap === 'undefined') {
         this.oldValue = null;
     }
 
-    function copyMutationRecord(original) {
-        var record = new MutationRecord(original.type, original.target);
+    function copyMutationRecord(original: any) {
+        var record: any = new (<any>MutationRecord)(original.type, original.target);
         record.addedNodes = original.addedNodes.slice();
         record.removedNodes = original.removedNodes.slice();
         record.previousSibling = original.previousSibling;
@@ -322,7 +322,7 @@ if (typeof WeakMap === 'undefined') {
     };
 
     // We keep track of the two (possibly one) records used in a single mutation.
-    var currentRecord, recordWithOldValue;
+    var currentRecord: any, recordWithOldValue: any;
 
     /**
      * Creates a record without |oldValue| and caches it as |currentRecord| for
@@ -330,8 +330,8 @@ if (typeof WeakMap === 'undefined') {
      * @param {string} oldValue
      * @return {MutationRecord}
      */
-    function getRecord(type, target) {
-        return currentRecord = new MutationRecord(type, target);
+    function getRecord(type: any, target: any) {
+        return currentRecord = new (<any>MutationRecord)(type, target);
     }
 
     /**
@@ -339,7 +339,7 @@ if (typeof WeakMap === 'undefined') {
      * @param {string} oldValue
      * @return {MutationRecord}
      */
-    function getRecordWithOldValue(oldValue) {
+    function getRecordWithOldValue(oldValue: any) {
         if (recordWithOldValue)
             return recordWithOldValue;
         recordWithOldValue = copyMutationRecord(currentRecord);
@@ -356,7 +356,7 @@ if (typeof WeakMap === 'undefined') {
      * @return {boolean} Whether the record represents a record from the current
      * mutation event.
      */
-    function recordRepresentsCurrentMutation(record) {
+    function recordRepresentsCurrentMutation(record: any) {
         return record === recordWithOldValue || record === currentRecord;
     }
 
@@ -368,7 +368,7 @@ if (typeof WeakMap === 'undefined') {
      * @param {MutationRecord} newRecord
      * @param {MutationRecord}
      */
-    function selectRecord(lastRecord, newRecord) {
+    function selectRecord(lastRecord: any, newRecord: any) {
         if (lastRecord === newRecord)
             return lastRecord;
 
@@ -387,7 +387,7 @@ if (typeof WeakMap === 'undefined') {
      * @param {MutationObserverInit} options
      * @constructor
      */
-    function Registration(observer, target, options) {
+    function Registration(observer: any, target: any, options: any) {
         this.observer = observer;
         this.target = target;
         this.options = options;
@@ -395,7 +395,7 @@ if (typeof WeakMap === 'undefined') {
     }
 
     Registration.prototype = {
-        enqueue: function (record) {
+        enqueue: function (record: any) {
             var records = this.observer.records_;
             var length = records.length;
 
@@ -421,7 +421,7 @@ if (typeof WeakMap === 'undefined') {
             this.addListeners_(this.target);
         },
 
-        addListeners_: function (node) {
+        addListeners_: function (node: any) {
             var options = this.options;
             if (options.attributes)
                 node.addEventListener('DOMAttrModified', this, true);
@@ -440,7 +440,7 @@ if (typeof WeakMap === 'undefined') {
             this.removeListeners_(this.target);
         },
 
-        removeListeners_: function (node) {
+        removeListeners_: function (node: any) {
             var options = this.options;
             if (options.attributes)
                 node.removeEventListener('DOMAttrModified', this, true);
@@ -460,7 +460,7 @@ if (typeof WeakMap === 'undefined') {
          * next time we deliver the change records.
          * @param {Node} node
          */
-        addTransientObserver: function (node) {
+        addTransientObserver: function (node: any) {
             // Don't add transient observers on the target itself. We already have all
             // the required listeners set up on the target.
             if (node === this.target)
@@ -481,7 +481,7 @@ if (typeof WeakMap === 'undefined') {
             var transientObservedNodes = this.transientObservedNodes;
             this.transientObservedNodes = [];
 
-            transientObservedNodes.forEach(function (node) {
+            transientObservedNodes.forEach(function (node: any) {
                 // Transient observers are never added to the target.
                 this.removeListeners_(node);
 
@@ -497,7 +497,7 @@ if (typeof WeakMap === 'undefined') {
             }, this);
         },
 
-        handleEvent: function (e) {
+        handleEvent: function (e: any) {
             // Stop propagation since we are managing the propagation manually.
             // This means that other mutation events on the page will not work
             // correctly but that is by design.
@@ -520,7 +520,7 @@ if (typeof WeakMap === 'undefined') {
                     var oldValue =
                         e.attrChange === MutationEvent.ADDITION ? null : e.prevValue;
 
-                    forEachAncestorAndObserverEnqueueRecord(target, function (options) {
+                    forEachAncestorAndObserverEnqueueRecord(target, function (options: any) {
                         // 3.1, 4.2
                         if (!options.attributes)
                             return;
@@ -552,7 +552,7 @@ if (typeof WeakMap === 'undefined') {
                     var oldValue = e.prevValue;
 
 
-                    forEachAncestorAndObserverEnqueueRecord(target, function (options) {
+                    forEachAncestorAndObserverEnqueueRecord(target, function (options: any) {
                         // 3.1, 4.2
                         if (!options.characterData)
                             return;
@@ -574,7 +574,7 @@ if (typeof WeakMap === 'undefined') {
                     // http://dom.spec.whatwg.org/#concept-mo-queue-childlist
                     var target = e.relatedNode;
                     var changedNode = e.target;
-                    var addedNodes, removedNodes;
+                    var addedNodes: any, removedNodes: any;
                     if (e.type === 'DOMNodeInserted') {
                         addedNodes = [changedNode];
                         removedNodes = [];
@@ -593,7 +593,7 @@ if (typeof WeakMap === 'undefined') {
                     record.previousSibling = previousSibling;
                     record.nextSibling = nextSibling;
 
-                    forEachAncestorAndObserverEnqueueRecord(target, function (options) {
+                    forEachAncestorAndObserverEnqueueRecord(target, function (options: any) {
                         // 2.1, 3.2
                         if (!options.childList)
                             return;

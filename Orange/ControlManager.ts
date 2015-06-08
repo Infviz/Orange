@@ -36,7 +36,7 @@ module Orange.Controls {
 			if (!((<any>element).orange)) {
 				
 				var orangeEl = new OrangeElementExtension();;
-				element["orange"] = orangeEl;
+				(<any>element)["orange"] = orangeEl;
 				return orangeEl;
 			}
 
@@ -149,7 +149,7 @@ module Orange.Controls {
 
 		private static getControlAttribute(element: HTMLElement) : { attributeType: string; value: string; } {
 
-			var attr = null;
+			var attr: string = null;
 			var anIdx = 0;
 			while ((!attr || attr == "") && anIdx < ControlManager._controlAttributeNames.length) {
 				attr = element.getAttribute(ControlManager._controlAttributeNames[anIdx++]);
@@ -166,9 +166,9 @@ module Orange.Controls {
 			}
 		}
 
-		public static createControlsInElement(element: HTMLElement);
-		public static createControlsInElement(element: HTMLElement, container: Orange.Modularity.Container);
-		public static createControlsInElement(element: HTMLElement, container?: Orange.Modularity.Container) {
+		public static createControlsInElement(element: HTMLElement): void;
+		public static createControlsInElement(element: HTMLElement, container: Orange.Modularity.Container): void;
+		public static createControlsInElement(element: HTMLElement, container?: Orange.Modularity.Container): void {
 
 			var attr = ControlManager.getControlAttribute(element);
 
@@ -196,10 +196,10 @@ module Orange.Controls {
 
 		public static getControlFromElement(element: HTMLElement): Control {
 
-			if (!element["orange"] || !(element["orange"]["control"]))
+			if (!(<any>element)["orange"] || !((<any>element)["orange"]["control"]))
 				throw "ViewBase.getControlFromElement: the element has no control conected to it.";
 
-			return <Control>(element["orange"]["control"]);
+			return <Control>((<any>element)["orange"]["control"]);
 		}
 
 		public static createControlFromElement(controlElement: HTMLElement): Controls.Control;
@@ -218,8 +218,37 @@ module Orange.Controls {
 			return ControlManager.createControlInternal(element, container);
 		}
 
-		// TODO: Replace with decent id generation later
-		private static _uniqueIdCounter: number = 0;
+		private static isValidConstructorFunc(func: any) : boolean {
+
+			return func != null && (typeof(func) == "function");
+		}
+
+		private static getConstructorFunction(constructorName: string) : { new (): Control } {
+
+			var path = constructorName.split(".");
+
+			// Try to construct a valid constructorfunction based from window.
+			var func: any = window;
+			for (var fragment of path) {
+
+				if (func[fragment] == null)
+					break;
+
+				func = func[fragment];
+			}
+
+			if (ControlManager.isValidConstructorFunc(func))
+				return <{ new (): Control }>func;
+
+			// If the constructor was now found on window, try to require it.
+			// NOTE: This is done to support browserify modules.
+			func = (<any>window).require(constructorName);
+
+			if (ControlManager.isValidConstructorFunc(func))
+				return <{ new (): Control }>func;
+
+			throw new ReferenceError('No constructor identified by "' + constructorName + '"" could be found');
+		}
 
 		private static createControlInternal(element: HTMLElement, container: Orange.Modularity.Container): Controls.Control {
 
@@ -230,15 +259,7 @@ module Orange.Controls {
 			if (orangeElement.isInitialized)
 				return null;
 
-			var constructorFunction :{ new () };
-
-			try {
-				constructorFunction = <{ new () }>type.value.split(".").reduce((c, n) => c[n], window);
-			}
-			catch(e) { }
-
-			if (!constructorFunction)
-				constructorFunction = (<any>window).require(type.value);
+			var constructorFunction = ControlManager.getConstructorFunction(type.value);
 			
 			var control = <Control>(!!container ? container.resolve(constructorFunction) : new constructorFunction());
 
@@ -247,9 +268,7 @@ module Orange.Controls {
 
 			orangeElement.control = control;
 
-			// TODO: Improve the id generation
-			var uid = "o-uid-" + (ControlManager._uniqueIdCounter++);
-			element.setAttribute(type.attributeType + "-id", uid);
+			element.setAttribute(type.attributeType + "-id", Orange.Uuid.generate().value);
 
 			control.element = element;
 

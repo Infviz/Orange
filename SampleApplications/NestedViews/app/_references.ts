@@ -1,6 +1,6 @@
 /// <reference path="../typings/tsd.d.ts" />
 
-/// <reference path="../../../Orange/Reference.d.ts" />
+/// <reference path="../../../Orange/_references.ts" />
 
 //grunt-start
 /// <reference path="Views/FeedbackLoop/FeedbackLoopView.ts" />

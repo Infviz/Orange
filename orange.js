@@ -1,39 +1,5 @@
 /// <reference path="_references.ts"/>
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/*
- * Copyright 2012 The Polymer Authors. All rights reserved.
- * Use of this source code is governed by this BSD-style
- * license that can be found in the license below.
- *
- * Copyright (c) 2014 The Polymer Authors. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
- *
- *    * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above
- * copyright notice, this list of conditions and the following disclaimer
- * in the documentation and/or other materials provided with the
- * distribution.
- *    * Neither the name of Google Inc. nor the names of its
- * contributors may be used to endorse or promote products derived from
- * this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-if (typeof WeakMap === 'undefined') {
+if (typeof window.WeakMap === 'undefined') {
     (function () {
         var defineProperty = Object.defineProperty;
         var counter = Date.now() % 1e9;
@@ -50,7 +16,8 @@ if (typeof WeakMap === 'undefined') {
             },
             get: function (key) {
                 var entry;
-                return (entry = key[this.name]) && entry[0] === key ? entry[1] : undefined;
+                return (entry = key[this.name]) && entry[0] === key ?
+                    entry[1] : undefined;
             },
             delete: function (key) {
                 var entry = key[this.name];
@@ -71,10 +38,8 @@ if (typeof WeakMap === 'undefined') {
     })();
 }
 (function (global) {
-    var registrationsTable = new WeakMap();
-    // We use setImmediate or postMessage for our future callback.
+    var registrationsTable = new window.WeakMap();
     var setImmediate = window.msSetImmediate;
-    // Use post message to emulate setImmediate.
     if (!setImmediate) {
         var setImmediateQueue = [];
         var sentinel = String(Math.random());
@@ -92,14 +57,8 @@ if (typeof WeakMap === 'undefined') {
             window.postMessage(sentinel, '*');
         };
     }
-    // This is used to ensure that we never schedule 2 callas to setImmediate
     var isScheduled = false;
-    // Keep track of observers that needs to be notified next time.
     var scheduledObservers = [];
-    /**
-     * Schedules |dispatchCallback| to be called in the future.
-     * @param {MutationObserver} observer
-     */
     function scheduleCallback(observer) {
         scheduledObservers.push(observer);
         if (!isScheduled) {
@@ -108,30 +67,27 @@ if (typeof WeakMap === 'undefined') {
         }
     }
     function wrapIfNeeded(node) {
-        return window.ShadowDOMPolyfill && window.ShadowDOMPolyfill.wrapIfNeeded(node) || node;
+        return window.ShadowDOMPolyfill &&
+            window.ShadowDOMPolyfill.wrapIfNeeded(node) ||
+            node;
     }
     function dispatchCallbacks() {
         // http://dom.spec.whatwg.org/#mutation-observers
-        isScheduled = false; // Used to allow a new setImmediate call above.
+        isScheduled = false;
         var observers = scheduledObservers;
         scheduledObservers = [];
-        // Sort observers based on their creation UID (incremental).
         observers.sort(function (o1, o2) {
             return o1.uid_ - o2.uid_;
         });
         var anyNonEmpty = false;
         observers.forEach(function (observer) {
-            // 2.1, 2.2
             var queue = observer.takeRecords();
-            // 2.3. Remove all transient registered observers whose observer is mo.
             removeTransientObserversFor(observer);
-            // 2.4
             if (queue.length) {
                 observer.callback_(queue, observer);
                 anyNonEmpty = true;
             }
         });
-        // 3.
         if (anyNonEmpty)
             dispatchCallbacks();
     }
@@ -146,18 +102,6 @@ if (typeof WeakMap === 'undefined') {
             });
         });
     }
-    /**
-     * This function is used for the "For each registered observer observer (with
-     * observer's options as options) in target's list of registered observers,
-     * run these substeps:" and the "For each ancestor ancestor of target, and for
-     * each registered observer observer (with options options) in ancestor's list
-     * of registered observers, run these substeps:" part of the algorithms. The
-     * |options.subtree| is checked to ensure that the callback is called
-     * correctly.
-     *
-     * @param {Node} target
-     * @param {function(MutationObserverInit):MutationRecord} callback
-     */
     function forEachAncestorAndObserverEnqueueRecord(target, callback) {
         for (var node = target; node; node = node.parentNode) {
             var registrations = registrationsTable.get(node);
@@ -165,7 +109,6 @@ if (typeof WeakMap === 'undefined') {
                 for (var j = 0; j < registrations.length; j++) {
                     var registration = registrations[j];
                     var options = registration.options;
-                    // Only target ignores subtree.
                     if (node !== target && !options.subtree)
                         continue;
                     var record = callback(options);
@@ -176,11 +119,6 @@ if (typeof WeakMap === 'undefined') {
         }
     }
     var uidCounter = 0;
-    /**
-     * The class that maps to the DOM MutationObserver interface.
-     * @param {Function} callback.
-     * @constructor
-     */
     function JsMutationObserver(callback) {
         this.callback_ = callback;
         this.nodes_ = [];
@@ -190,17 +128,16 @@ if (typeof WeakMap === 'undefined') {
     JsMutationObserver.prototype = {
         observe: function (target, options) {
             target = wrapIfNeeded(target);
-            // 1.1
-            if (!options.childList && !options.attributes && !options.characterData || options.attributeOldValue && !options.attributes || options.attributeFilter && options.attributeFilter.length && !options.attributes || options.characterDataOldValue && !options.characterData) {
+            if (!options.childList && !options.attributes && !options.characterData ||
+                options.attributeOldValue && !options.attributes ||
+                options.attributeFilter && options.attributeFilter.length &&
+                    !options.attributes ||
+                options.characterDataOldValue && !options.characterData) {
                 throw new SyntaxError();
             }
             var registrations = registrationsTable.get(target);
             if (!registrations)
                 registrationsTable.set(target, registrations = []);
-            // 2
-            // If target's list of registered observers already includes a registered
-            // observer associated with the context object, replace that registered
-            // observer's options with options.
             var registration;
             for (var i = 0; i < registrations.length; i++) {
                 if (registrations[i].observer === this) {
@@ -210,11 +147,6 @@ if (typeof WeakMap === 'undefined') {
                     break;
                 }
             }
-            // 3.
-            // Otherwise, add a new registered observer to target's list of registered
-            // observers with the context object as the observer and options as the
-            // options, and add target to context object's list of nodes on which it
-            // is registered.
             if (!registration) {
                 registration = new Registration(this, target, options);
                 registrations.push(registration);
@@ -242,11 +174,6 @@ if (typeof WeakMap === 'undefined') {
             return copyOfRecords;
         }
     };
-    /**
-     * @param {string} type
-     * @param {Node} target
-     * @constructor
-     */
     function MutationRecord(type, target) {
         this.type = type;
         this.target = target;
@@ -270,22 +197,10 @@ if (typeof WeakMap === 'undefined') {
         return record;
     }
     ;
-    // We keep track of the two (possibly one) records used in a single mutation.
     var currentRecord, recordWithOldValue;
-    /**
-     * Creates a record without |oldValue| and caches it as |currentRecord| for
-     * later use.
-     * @param {string} oldValue
-     * @return {MutationRecord}
-     */
     function getRecord(type, target) {
         return currentRecord = new MutationRecord(type, target);
     }
-    /**
-     * Gets or creates a record with |oldValue| based in the |currentRecord|
-     * @param {string} oldValue
-     * @return {MutationRecord}
-     */
     function getRecordWithOldValue(oldValue) {
         if (recordWithOldValue)
             return recordWithOldValue;
@@ -296,38 +211,16 @@ if (typeof WeakMap === 'undefined') {
     function clearRecords() {
         currentRecord = recordWithOldValue = undefined;
     }
-    /**
-     * @param {MutationRecord} record
-     * @return {boolean} Whether the record represents a record from the current
-     * mutation event.
-     */
     function recordRepresentsCurrentMutation(record) {
         return record === recordWithOldValue || record === currentRecord;
     }
-    /**
-     * Selects which record, if any, to replace the last record in the queue.
-     * This returns |null| if no record should be replaced.
-     *
-     * @param {MutationRecord} lastRecord
-     * @param {MutationRecord} newRecord
-     * @param {MutationRecord}
-     */
     function selectRecord(lastRecord, newRecord) {
         if (lastRecord === newRecord)
             return lastRecord;
-        // Check if the the record we are adding represents the same record. If
-        // so, we keep the one with the oldValue in it.
         if (recordWithOldValue && recordRepresentsCurrentMutation(lastRecord))
             return recordWithOldValue;
         return null;
     }
-    /**
-     * Class used to represent a registered observer.
-     * @param {MutationObserver} observer
-     * @param {Node} target
-     * @param {MutationObserverInit} options
-     * @constructor
-     */
     function Registration(observer, target, options) {
         this.observer = observer;
         this.target = target;
@@ -338,10 +231,6 @@ if (typeof WeakMap === 'undefined') {
         enqueue: function (record) {
             var records = this.observer.records_;
             var length = records.length;
-            // There are cases where we replace the last record with the new record.
-            // For example if the record represents the same mutation we need to use
-            // the one with the oldValue. If we get same record (this can happen as we
-            // walk up the tree) we ignore the new record.
             if (records.length > 0) {
                 var lastRecord = records[length - 1];
                 var recordToReplaceLast = selectRecord(lastRecord, record);
@@ -383,14 +272,7 @@ if (typeof WeakMap === 'undefined') {
             if (options.childList || options.subtree)
                 node.removeEventListener('DOMNodeRemoved', this, true);
         },
-        /**
-         * Adds a transient observer on node. The transient observer gets removed
-         * next time we deliver the change records.
-         * @param {Node} node
-         */
         addTransientObserver: function (node) {
-            // Don't add transient observers on the target itself. We already have all
-            // the required listeners set up on the target.
             if (node === this.target)
                 return;
             this.addListeners_(node);
@@ -398,15 +280,12 @@ if (typeof WeakMap === 'undefined') {
             var registrations = registrationsTable.get(node);
             if (!registrations)
                 registrationsTable.set(node, registrations = []);
-            // We know that registrations does not contain this because we already
-            // checked if node === this.target.
             registrations.push(this);
         },
         removeTransientObservers: function () {
             var transientObservedNodes = this.transientObservedNodes;
             this.transientObservedNodes = [];
             transientObservedNodes.forEach(function (node) {
-                // Transient observers are never added to the target.
                 this.removeListeners_(node);
                 var registrations = registrationsTable.get(node);
                 for (var i = 0; i < registrations.length; i++) {
@@ -418,59 +297,44 @@ if (typeof WeakMap === 'undefined') {
             }, this);
         },
         handleEvent: function (e) {
-            // Stop propagation since we are managing the propagation manually.
-            // This means that other mutation events on the page will not work
-            // correctly but that is by design.
             e.stopImmediatePropagation();
             switch (e.type) {
                 case 'DOMAttrModified':
-                    // http://dom.spec.whatwg.org/#concept-mo-queue-attributes
                     var name = e.attrName;
                     var namespace = e.relatedNode.namespaceURI;
                     var target = e.target;
-                    // 1.
                     var record = new getRecord('attributes', target);
                     record.attributeName = name;
                     record.attributeNamespace = namespace;
-                    // 2.
                     var oldValue = e.attrChange === MutationEvent.ADDITION ? null : e.prevValue;
                     forEachAncestorAndObserverEnqueueRecord(target, function (options) {
-                        // 3.1, 4.2
                         if (!options.attributes)
                             return;
-                        // 3.2, 4.3
-                        if (options.attributeFilter && options.attributeFilter.length && options.attributeFilter.indexOf(name) === -1 && options.attributeFilter.indexOf(namespace) === -1) {
+                        if (options.attributeFilter && options.attributeFilter.length &&
+                            options.attributeFilter.indexOf(name) === -1 &&
+                            options.attributeFilter.indexOf(namespace) === -1) {
                             return;
                         }
-                        // 3.3, 4.4
                         if (options.attributeOldValue)
                             return getRecordWithOldValue(oldValue);
-                        // 3.4, 4.5
                         return record;
                     });
                     break;
                 case 'DOMCharacterDataModified':
-                    // http://dom.spec.whatwg.org/#concept-mo-queue-characterdata
                     var target = e.target;
-                    // 1.
                     var record = getRecord('characterData', target);
-                    // 2.
                     var oldValue = e.prevValue;
                     forEachAncestorAndObserverEnqueueRecord(target, function (options) {
-                        // 3.1, 4.2
                         if (!options.characterData)
                             return;
-                        // 3.2, 4.3
                         if (options.characterDataOldValue)
                             return getRecordWithOldValue(oldValue);
-                        // 3.3, 4.4
                         return record;
                     });
                     break;
                 case 'DOMNodeRemoved':
                     this.addTransientObserver(e.target);
                 case 'DOMNodeInserted':
-                    // http://dom.spec.whatwg.org/#concept-mo-queue-childlist
                     var target = e.relatedNode;
                     var changedNode = e.target;
                     var addedNodes, removedNodes;
@@ -484,17 +348,14 @@ if (typeof WeakMap === 'undefined') {
                     }
                     var previousSibling = changedNode.previousSibling;
                     var nextSibling = changedNode.nextSibling;
-                    // 1.
                     var record = getRecord('childList', target);
                     record.addedNodes = addedNodes;
                     record.removedNodes = removedNodes;
                     record.previousSibling = previousSibling;
                     record.nextSibling = nextSibling;
                     forEachAncestorAndObserverEnqueueRecord(target, function (options) {
-                        // 2.1, 3.2
                         if (!options.childList)
                             return;
-                        // 2.2, 3.3
                         return record;
                     });
             }
@@ -505,7 +366,52 @@ if (typeof WeakMap === 'undefined') {
     if (!global.MutationObserver)
         global.MutationObserver = JsMutationObserver;
 })(this);
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/// <reference path="_references.ts"/>
+var Orange;
+(function (Orange) {
+    var Uuid = (function () {
+        function Uuid(uuid) {
+            if (uuid == null)
+                this._value = Uuid.generateV4Uuid();
+            else if (Uuid.isUuid(uuid))
+                this._value = uuid;
+            else
+                throw "The argument passed to Orange.Uuid() is not a valid Uuid.";
+        }
+        Object.defineProperty(Uuid.prototype, "value", {
+            get: function () { return this._value; },
+            enumerable: true,
+            configurable: true
+        });
+        Uuid.generateV4Uuid = function () {
+            var tc = Uuid.getTime();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+                .replace(/[xy]/g, function (c) {
+                var rnd = (tc + Math.random() * 16) % 16 | 0;
+                tc = Math.floor(tc / 16);
+                return (c == 'x' ? rnd : (rnd & 0x3 | 0x8)).toString(16);
+            });
+        };
+        Uuid.generate = function () {
+            return new Uuid();
+        };
+        Uuid.isUuid = function (value) {
+            var chars = "[0-9a-fA-F]";
+            var pattern = new RegExp(chars + "{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}");
+            return pattern.test(value);
+        };
+        Uuid.prototype.sameValueAs = function (uuid) { return this._value.toLowerCase() === uuid._value.toLowerCase(); };
+        Uuid._counter = 0;
+        Uuid._tStart = Date.now == null ? Date.now() : new Date().getTime();
+        Uuid.getTime = (window.performance == null && window.performance.now == null) ?
+            function () { return Math.round(performance.now() + Uuid._tStart); } :
+            (Date.now == null ?
+                function () { return Date.now(); } :
+                function () { return (new Date()).getTime(); });
+        return Uuid;
+    })();
+    Orange.Uuid = Uuid;
+})(Orange || (Orange = {}));
 /// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
@@ -647,37 +553,27 @@ var TemplateLoader = (function () {
                 var tpl = templates[i];
                 var id = tpl.id;
                 var xmlhttp = new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function () {
-                    if (xmlhttp.readyState !== 4)
-                        return;
-                    if (xmlhttp.status !== 200 && xmlhttp.status !== 0)
-                        throw "Failed to load template.";
-                    var scriptEl = document.createElement("script");
-                    var typeAttr = document.createAttribute("type");
-                    typeAttr.value = "text/html";
-                    var idAttr = document.createAttribute("id");
-                    idAttr.value = id;
-                    scriptEl.setAttributeNode(typeAttr);
-                    scriptEl.setAttributeNode(idAttr);
-                    scriptEl.innerHTML = xmlhttp.responseText;
-                    document.body.appendChild(scriptEl);
-                    loadedTemplates++;
-                    if (loadedTemplates == templates.length && TemplateLoader.onload)
-                        TemplateLoader.onload();
-                };
+                xmlhttp.onreadystatechange =
+                    function () {
+                        if (xmlhttp.readyState !== 4)
+                            return;
+                        if (xmlhttp.status !== 200 && xmlhttp.status !== 0)
+                            throw "Failed to load template.";
+                        var scriptEl = document.createElement("script");
+                        var typeAttr = document.createAttribute("type");
+                        typeAttr.value = "text/html";
+                        var idAttr = document.createAttribute("id");
+                        idAttr.value = id;
+                        scriptEl.setAttributeNode(typeAttr);
+                        scriptEl.setAttributeNode(idAttr);
+                        scriptEl.innerHTML = xmlhttp.responseText;
+                        document.body.appendChild(scriptEl);
+                        loadedTemplates++;
+                        if (loadedTemplates == templates.length && TemplateLoader.onload)
+                            TemplateLoader.onload();
+                    };
                 xmlhttp.open("GET", tpl.path, true);
                 xmlhttp.send();
-                // $.get(
-                //     tpl.path,
-                //     tplCode => {
-                //         var code = '<script type="text/html" id="' + id + '">' + tplCode + '</script>';
-                //         $('body').append(code);
-                //         loadedTemplates++;
-                //         if (loadedTemplates == templates.length)
-                //         {
-                //             if (TemplateLoader.onload) TemplateLoader.onload();
-                //         }
-                //     });
             })();
         }
         ;
@@ -696,9 +592,7 @@ var Orange;
                 this._propertyChangedListeners = new Array();
             }
             Object.defineProperty(Control.prototype, "element", {
-                get: function () {
-                    return this._element;
-                },
+                get: function () { return this._element; },
                 set: function (element) {
                     if (this._element != null)
                         throw "'element' property can only be set once. ";
@@ -714,8 +608,7 @@ var Orange;
             Control.prototype.dispose = function () {
                 Controls.ControlManager.disposeControl(this);
             };
-            Control.prototype.onElementSet = function () {
-            };
+            Control.prototype.onElementSet = function () { };
             Control.prototype.addPropertyChangedListener = function (listener) {
                 this._propertyChangedListeners.push(listener);
             };
@@ -733,8 +626,7 @@ var Orange;
                     this._propertyChangedListeners[plIdx](propertyName, propertyValue);
                 }
             };
-            Control.prototype.onPropertyChanged = function (propertyName, value) {
-            };
+            Control.prototype.onPropertyChanged = function (propertyName, value) { };
             return Control;
         })();
         Controls.Control = Control;
@@ -787,17 +679,15 @@ var Orange;
                 this._templateProvider = templateProvider;
             }
             Object.defineProperty(TemplatedControl.prototype, "isTemplateApplied", {
-                get: function () {
-                    return this._isTemplateApplied;
-                },
+                get: function () { return this._isTemplateApplied; },
                 enumerable: true,
                 configurable: true
             });
-            TemplatedControl.prototype.onApplyTemplate = function () {
-            };
+            TemplatedControl.prototype.onApplyTemplate = function () { };
             TemplatedControl.prototype.applyTemplate = function () {
                 var _this = this;
-                this._templateProvider.applyTemplate(this.element, function (success) {
+                this._templateProvider
+                    .applyTemplate(this.element, function (success) {
                     if (success)
                         _this._isTemplateApplied = true;
                     else
@@ -823,9 +713,7 @@ var Orange;
                     this._dataContext = context;
             }
             Object.defineProperty(ViewBase.prototype, "dataContext", {
-                get: function () {
-                    return this._dataContext;
-                },
+                get: function () { return this._dataContext; },
                 set: function (context) {
                     this._dataContext = context;
                     this.onDataContextSet();
@@ -843,10 +731,8 @@ var Orange;
                     return;
                 this.onApplyBindings();
             };
-            ViewBase.prototype.onApplyBindings = function () {
-            };
-            ViewBase.prototype.onDataContextSet = function () {
-            };
+            ViewBase.prototype.onApplyBindings = function () { };
+            ViewBase.prototype.onDataContextSet = function () { };
             return ViewBase;
         })(Controls.TemplatedControl);
         Controls.ViewBase = ViewBase;
@@ -872,7 +758,6 @@ var Orange;
                 var childNodes = this.element.childNodes;
                 for (var cIdx = childNodes.length - 1; cIdx >= 0; cIdx--) {
                     var childNode = childNodes[cIdx];
-                    // 1 == ELEMENT_NODE
                     if (childNode.nodeType !== 1)
                         continue;
                     window.ko.cleanNode(childNode);
@@ -927,7 +812,6 @@ var Orange;
                     var addedNodes = mutation.addedNodes;
                     for (var i = 0; i < addedNodes.length; i++) {
                         var node = addedNodes[i];
-                        // 1 == ELEMENT_NODE
                         if (node.nodeType !== 1)
                             continue;
                         ControlManager.createControlsInElement(node, _this._container);
@@ -935,7 +819,6 @@ var Orange;
                     var removedNodes = mutation.removedNodes;
                     for (var i = 0; i < removedNodes.length; i++) {
                         var node = removedNodes[i];
-                        // 1 == ELEMENT_NODE
                         if (node.nodeType !== 1)
                             continue;
                         ControlManager.disposeDescendants(node);
@@ -944,9 +827,7 @@ var Orange;
                 this._container = container;
             }
             Object.defineProperty(ControlManager.prototype, "containter", {
-                get: function () {
-                    return this._container;
-                },
+                get: function () { return this._container; },
                 enumerable: true,
                 configurable: true
             });
@@ -965,10 +846,8 @@ var Orange;
             ControlManager.disposeControl = function (control) {
                 if (!control)
                     return;
-                // Clear information stored on element.
                 if (!!(control.element))
                     control.element.orange = null;
-                // NOTE: disposables is private..
                 var disposables = control.disposables;
                 for (var dIdx = disposables.length - 1; dIdx >= 0; dIdx--) {
                     disposables[dIdx].dispose();
@@ -1042,27 +921,36 @@ var Orange;
                 element.setAttribute(ControlManager._controlAttributeNames[0], type);
                 return ControlManager.createControlInternal(element, container);
             };
+            ControlManager.isValidConstructorFunc = function (func) {
+                return func != null && (typeof (func) == "function");
+            };
+            ControlManager.getConstructorFunction = function (constructorName) {
+                var path = constructorName.split(".");
+                var func = window;
+                for (var _i = 0; _i < path.length; _i++) {
+                    var fragment = path[_i];
+                    if (func[fragment] == null)
+                        break;
+                    func = func[fragment];
+                }
+                if (ControlManager.isValidConstructorFunc(func))
+                    return func;
+                func = window.require(constructorName);
+                if (ControlManager.isValidConstructorFunc(func))
+                    return func;
+                throw new ReferenceError('No constructor identified by "' + constructorName + '"" could be found');
+            };
             ControlManager.createControlInternal = function (element, container) {
                 var type = ControlManager.getControlAttribute(element);
-                // The element already has a controll connected to it.
                 var orangeElement = Controls.GetOrangeElement(element);
                 if (orangeElement.isInitialized)
                     return null;
-                var constructorFunction;
-                try {
-                    constructorFunction = type.value.split(".").reduce(function (c, n) { return c[n]; }, window);
-                }
-                catch (e) {
-                }
-                if (!constructorFunction)
-                    constructorFunction = window.require(type.value);
+                var constructorFunction = ControlManager.getConstructorFunction(type.value);
                 var control = (!!container ? container.resolve(constructorFunction) : new constructorFunction());
                 if (false == (control instanceof constructorFunction))
                     throw "ControlManager.createControl: instance of constructed object is not of the correct type.";
                 orangeElement.control = control;
-                // TODO: Improve the id generation
-                var uid = "o-uid-" + (ControlManager._uniqueIdCounter++);
-                element.setAttribute(type.attributeType + "-id", uid);
+                element.setAttribute(type.attributeType + "-id", Orange.Uuid.generate().value);
                 control.element = element;
                 if (!!control.applyTemplate)
                     control.applyTemplate();
@@ -1080,26 +968,14 @@ var Orange;
             };
             ControlManager.dependencies = function () { return [Orange.Modularity.Container]; };
             ControlManager._mutationObserverConfig = {
-                // Set to true if additions and removals of the target node's child elements 
-                // (including text nodes) are to be observed.
                 childList: true,
-                // Set to true if mutations to target's attributes are to be observed.
                 attributes: false,
-                // Set to true if mutations to target's data are to be observed.
                 characterData: false,
-                // Set to true if mutations to not just target, but also target's descendants 
-                // are to be observed.
                 subtree: true,
-                // Set to true if attributes is set to true and target's attribute value 
-                // before the mutation needs to be recorded.
                 attributeOldValue: false,
-                // Set to true if characterData is set to true and target's data before the 
-                // mutation needs to be recorded.
                 characterDataOldValue: false,
             };
             ControlManager._controlAttributeNames = ["data-control", "data-view"];
-            // TODO: Replace with decent id generation later
-            ControlManager._uniqueIdCounter = 0;
             return ControlManager;
         })();
         Controls.ControlManager = ControlManager;
@@ -1118,9 +994,7 @@ var Orange;
     (function (Bindings) {
         var ko = window.ko;
         ko.bindingHandlers.stopBindings = {
-            init: function () {
-                return { controlsDescendantBindings: true };
-            }
+            init: function () { return { controlsDescendantBindings: true }; }
         };
         ko.virtualElements.allowedBindings.stopBindings = true;
         var ViewModelToControlBinding = (function () {
@@ -1156,12 +1030,10 @@ var Orange;
                 this.onPropertyChanged = function (propertyName, propertyValue) {
                     if (propertyName != _this.target)
                         return;
-                    // if Rx.Observable
                     if (_this.vm[_this.property].onNext) {
                         _this.vm[_this.property].onNext(propertyValue);
                     }
                     else if (typeof _this.vm[_this.property] === "function") {
-                        //console.log("Binding two way to knockout observable. (" + property.value + ")");
                         _this.vm[_this.property](propertyValue);
                     }
                     else {
@@ -1186,8 +1058,7 @@ var Orange;
             return ViewModelToControlBinding;
         })();
         ko.bindingHandlers.bindings = {
-            init: function (element, valueAccessor, allBindingsAccessor, viewModel, // Deprecated, use bindingContext.$data or .rawData instead
-                bindingContext) {
+            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
                 var bindings = new Array();
                 var values = (valueAccessor());
                 if (Array.isArray(values) == false)
@@ -1207,7 +1078,9 @@ var Orange;
                     var targetProp = Object.getOwnPropertyDescriptor(value, sourceProp).value;
                     bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, sourceProp, targetProp, mode));
                 }
-                ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                ko.utils
+                    .domNodeDisposal
+                    .addDisposeCallback(element, function () {
                     for (var bIdx = bindings.length - 1; bIdx >= 0; bIdx--) {
                         bindings[bIdx].dispose();
                     }
@@ -1215,8 +1088,7 @@ var Orange;
             }
         };
         ko.bindingHandlers.orangeView = {
-            init: function (element, valueAccessor, allBindingsAccessor, viewModel, // Deprecated, use bindingContext.$data or .rawData instead
-                bindingContext) {
+            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
                 var value = valueAccessor();
                 var dataViweAttr = document.createAttribute("data-view");
                 dataViweAttr.value = value;
@@ -1231,12 +1103,15 @@ var Orange;
                     onInitialized();
                 else
                     orangeEl.addOnInitializedListener(onInitialized);
-                ko.utils.domNodeDisposal.addDisposeCallback(element, function () { return orangeEl.removeOnInitializedListener(onInitialized); });
+                ko.utils
+                    .domNodeDisposal
+                    .addDisposeCallback(element, function () { return orangeEl.removeOnInitializedListener(onInitialized); });
             }
         };
     })(Bindings = Orange.Bindings || (Orange.Bindings = {}));
 })(Orange || (Orange = {}));
 /// <reference path="MutationObserverPolyfill.ts"/>
+/// <reference path="Uuid.ts" />
 /// <reference path="Container.ts"/>
 /// <reference path="RegionManager.ts"/>
 /// <reference path="TemplateLoader.ts"/>
