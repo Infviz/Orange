@@ -13,3 +13,5 @@
 /// <reference path="ControlManager.ts"/>
 
 /// <reference path="Bindings.ts" />
+
+/// <reference path="Router.ts" />

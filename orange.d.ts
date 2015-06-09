@@ -146,5 +146,15 @@ declare module Orange.Controls {
         private handleMutation;
     }
 }
+declare module Orange.Routing {
+    class Router {
+        private paths;
+        route(path: string, handler: Function): void;
+        default(handler: Function): void;
+        run(): void;
+        navigate(path: string, state: any): void;
+        private handleRoute(path);
+    }
+}
 declare module Orange.Bindings {
 }

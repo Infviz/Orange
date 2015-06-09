@@ -1,0 +1,14 @@
+{
+  "name": "orange-router-example",
+  "version": "0.0.0",
+  "description": "Router example",
+  "main": "server.js",
+  "author": {
+    "name": "Markus Johnsson",
+    "email": "markus.johnsson@infviz.com"
+  },
+  "dependencies": {
+    "express": "^4.12.3",
+    "express-livereload": "0.0.24"
+  }
+}
