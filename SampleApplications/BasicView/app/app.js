@@ -369,6 +369,52 @@ if (typeof window.WeakMap === 'undefined') {
 /// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
+    var Uuid = (function () {
+        function Uuid(uuid) {
+            if (uuid == null)
+                this._value = Uuid.generateV4Uuid();
+            else if (Uuid.isUuid(uuid))
+                this._value = uuid;
+            else
+                throw "The argument passed to Orange.Uuid() is not a valid Uuid.";
+        }
+        Object.defineProperty(Uuid.prototype, "value", {
+            get: function () { return this._value; },
+            enumerable: true,
+            configurable: true
+        });
+        Uuid.generateV4Uuid = function () {
+            var tc = Uuid.getTime();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+                .replace(/[xy]/g, function (c) {
+                var rnd = (tc + Math.random() * 16) % 16 | 0;
+                tc = Math.floor(tc / 16);
+                return (c == 'x' ? rnd : (rnd & 0x3 | 0x8)).toString(16);
+            });
+        };
+        Uuid.generate = function () {
+            return new Uuid();
+        };
+        Uuid.isUuid = function (value) {
+            var chars = "[0-9a-fA-F]";
+            var pattern = new RegExp(chars + "{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89ab][0-9a-fA-F]{3}-[0-9a-fA-F]{12}");
+            return pattern.test(value);
+        };
+        Uuid.prototype.sameValueAs = function (uuid) { return this._value.toLowerCase() === uuid._value.toLowerCase(); };
+        Uuid._counter = 0;
+        Uuid._tStart = Date.now == null ? Date.now() : new Date().getTime();
+        Uuid.getTime = (window.performance == null && window.performance.now == null) ?
+            function () { return Math.round(performance.now() + Uuid._tStart); } :
+            (Date.now == null ?
+                function () { return Date.now(); } :
+                function () { return (new Date()).getTime(); });
+        return Uuid;
+    })();
+    Orange.Uuid = Uuid;
+})(Orange || (Orange = {}));
+/// <reference path="_references.ts"/>
+var Orange;
+(function (Orange) {
     var Modularity;
     (function (Modularity) {
         var Container = (function () {
@@ -385,15 +431,17 @@ var Orange;
             };
             Container.prototype.resolve = function (type, register) {
                 if (register === void 0) { register = false; }
+                if (typeof type === "string")
+                    type = Container.getConstructorFromString(type);
                 var instance = this.lookup(this.instances, type);
-                if (instance)
+                if (instance != null)
                     return instance;
                 var resolvedType = this.lookup(this.typeMap, type) || type;
+                Container.validateConstructor(resolvedType);
                 this.checkArity(resolvedType);
                 instance = this.createInstance(resolvedType);
-                if (register === true) {
+                if (register === true)
                     this.registerInstance(type, instance);
-                }
                 return instance;
             };
             Container.prototype.resolveWithOverride = function (type, overrides) {
@@ -402,9 +450,25 @@ var Orange;
                 sub.instances = overrides.concat(this.instances);
                 return sub.resolve(type, false);
             };
+            Container.getConstructorFromString = function (constructorName) {
+                var path = constructorName.split(".");
+                var func = window;
+                for (var _i = 0; _i < path.length; _i++) {
+                    var fragment = path[_i];
+                    if (func[fragment] == null)
+                        break;
+                    func = func[fragment];
+                }
+                Container.isValidConstructor(func);
+                return func;
+                func = window.require(constructorName);
+                if (Container.isValidConstructor(func))
+                    return func;
+                throw new ReferenceError("No constructor identified by \"" + constructorName + "\" could be found");
+            };
             Container.prototype.lookup = function (dict, key) {
-                for (var i = 0; i < dict.length; i++) {
-                    var kvp = dict[i];
+                for (var _i = 0; _i < dict.length; _i++) {
+                    var kvp = dict[_i];
                     if (kvp.key === key)
                         return kvp.value;
                 }
@@ -418,8 +482,8 @@ var Orange;
                 else {
                     var ctrArgs = [];
                     var deps = resolvedType.dependencies();
-                    for (var d = 0; d < deps.length; d++) {
-                        var dep = deps[d];
+                    for (var _i = 0; _i < deps.length; _i++) {
+                        var dep = deps[_i];
                         ctrArgs.push(this.resolve(dep));
                     }
                     instance = this.applyConstructor(resolvedType, ctrArgs);
@@ -430,13 +494,17 @@ var Orange;
                 var depCount = type.dependencies ? type.dependencies().length : 0;
                 var ctrCount = (type.length || type.arity || 0);
                 if (depCount != ctrCount)
-                    throw new Error("failed to resolve type '" + type + "'");
+                    throw new Error("Orange.Modularity.Container failed to resolve type \"" + type + "\"");
+            };
+            Container.isValidConstructor = function (type) {
+                return type != null && (typeof (type) == "function");
+            };
+            Container.validateConstructor = function (type) {
+                if (false == Container.isValidConstructor(type))
+                    throw new Error("Orange.Modularity.Container failed to resolve type \"" + type + "\"");
             };
             Container.prototype.applyConstructor = function (ctor, args) {
-                var a = [];
-                for (var i = 0; i < args.length; i++)
-                    a[i] = 'arguments[1][' + i + ']';
-                return eval('new arguments[0](' + a.join() + ')');
+                return new (Function.bind.apply(ctor, [null].concat(args)));
             };
             return Container;
         })();
@@ -875,37 +943,14 @@ var Orange;
                 element.setAttribute(ControlManager._controlAttributeNames[0], type);
                 return ControlManager.createControlInternal(element, container);
             };
-            ControlManager.isValidConstructorFunc = function (func) {
-                return func != null && (typeof (func) == "function");
-            };
-            ControlManager.getConstructorFunction = function (constructorName) {
-                var path = constructorName.split(".");
-                var func = window;
-                for (var _i = 0; _i < path.length; _i++) {
-                    var fragment = path[_i];
-                    if (func[fragment] == null)
-                        break;
-                    func = func[fragment];
-                }
-                if (ControlManager.isValidConstructorFunc(func))
-                    return func;
-                func = window.require(constructorName);
-                if (ControlManager.isValidConstructorFunc(func))
-                    return func;
-                throw new ReferenceError('No constructor identified by "' + constructorName + '"" could be found');
-            };
             ControlManager.createControlInternal = function (element, container) {
                 var type = ControlManager.getControlAttribute(element);
                 var orangeElement = Controls.GetOrangeElement(element);
                 if (orangeElement.isInitialized)
                     return null;
-                var constructorFunction = ControlManager.getConstructorFunction(type.value);
-                var control = (!!container ? container.resolve(constructorFunction) : new constructorFunction());
-                if (false == (control instanceof constructorFunction))
-                    throw "ControlManager.createControl: instance of constructed object is not of the correct type.";
+                var control = container.resolve(type.value);
                 orangeElement.control = control;
-                var uid = "o-uid-" + (ControlManager._uniqueIdCounter++);
-                element.setAttribute(type.attributeType + "-id", uid);
+                element.setAttribute(type.attributeType + "-id", Orange.Uuid.generate().value);
                 control.element = element;
                 if (!!control.applyTemplate)
                     control.applyTemplate();
@@ -931,28 +976,23 @@ var Orange;
                 characterDataOldValue: false,
             };
             ControlManager._controlAttributeNames = ["data-control", "data-view"];
-            ControlManager._uniqueIdCounter = 0;
             return ControlManager;
         })();
         Controls.ControlManager = ControlManager;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
 /// <reference path="_references.ts"/>
-(function () {
-    if (!window.ko) {
-        window.ko = {};
-        window.ko.bindingHandlers = {};
-    }
-}());
 var Orange;
 (function (Orange) {
     var Bindings;
     (function (Bindings) {
         var ko = window.ko;
-        ko.bindingHandlers.stopBindings = {
-            init: function () { return { controlsDescendantBindings: true }; }
-        };
-        ko.virtualElements.allowedBindings.stopBindings = true;
+        if (ko) {
+            ko.bindingHandlers.stopBindings = {
+                init: function () { return { controlsDescendantBindings: true }; }
+            };
+            ko.virtualElements.allowedBindings.stopBindings = true;
+        }
         var ViewModelToControlBinding = (function () {
             function ViewModelToControlBinding(vm, element, property, target, mode) {
                 var _this = this;
@@ -1013,60 +1053,126 @@ var Orange;
             };
             return ViewModelToControlBinding;
         })();
-        ko.bindingHandlers.bindings = {
-            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-                var bindings = new Array();
-                var values = (valueAccessor());
-                if (Array.isArray(values) == false)
-                    values = [values];
-                for (var vIdx = values.length - 1; vIdx >= 0; vIdx--) {
-                    var value = values[vIdx];
-                    var propertyNames = Object.getOwnPropertyNames(value);
-                    if (propertyNames.length > 2)
-                        throw "Faulty binding, should be {vmProp:ctrlProp [, mode: m]}, were m can be 'oneWay' or 'twoWay'.";
-                    var mode = 'oneWay';
-                    if (propertyNames.length == 2) {
-                        mode = Object.getOwnPropertyDescriptor(value, "mode").value;
-                        if (mode != 'oneWay' && mode != 'twoWay')
-                            throw "Binding mode has to be 'oneWay' or 'twoWay'.";
+        if (ko) {
+            ko.bindingHandlers.bindings = {
+                init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                    var bindings = new Array();
+                    var values = (valueAccessor());
+                    if (Array.isArray(values) == false)
+                        values = [values];
+                    for (var vIdx = values.length - 1; vIdx >= 0; vIdx--) {
+                        var value = values[vIdx];
+                        var propertyNames = Object.getOwnPropertyNames(value);
+                        if (propertyNames.length > 2)
+                            throw "Faulty binding, should be {vmProp:ctrlProp [, mode: m]}, were m can be 'oneWay' or 'twoWay'.";
+                        var mode = 'oneWay';
+                        if (propertyNames.length == 2) {
+                            mode = Object.getOwnPropertyDescriptor(value, "mode").value;
+                            if (mode != 'oneWay' && mode != 'twoWay')
+                                throw "Binding mode has to be 'oneWay' or 'twoWay'.";
+                        }
+                        var sourceProp = propertyNames.filter(function (v) { return v != "mode"; })[0];
+                        var targetProp = Object.getOwnPropertyDescriptor(value, sourceProp).value;
+                        bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, sourceProp, targetProp, mode));
                     }
-                    var sourceProp = propertyNames.filter(function (v) { return v != "mode"; })[0];
-                    var targetProp = Object.getOwnPropertyDescriptor(value, sourceProp).value;
-                    bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, sourceProp, targetProp, mode));
+                    ko.utils
+                        .domNodeDisposal
+                        .addDisposeCallback(element, function () {
+                        for (var bIdx = bindings.length - 1; bIdx >= 0; bIdx--) {
+                            bindings[bIdx].dispose();
+                        }
+                    });
                 }
-                ko.utils
-                    .domNodeDisposal
-                    .addDisposeCallback(element, function () {
-                    for (var bIdx = bindings.length - 1; bIdx >= 0; bIdx--) {
-                        bindings[bIdx].dispose();
-                    }
-                });
-            }
-        };
-        ko.bindingHandlers.orangeView = {
-            init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-                var value = valueAccessor();
-                var dataViweAttr = document.createAttribute("data-view");
-                dataViweAttr.value = value;
-                var orangeEl = Orange.Controls.GetOrangeElement(element);
-                element.setAttributeNode(dataViweAttr);
-                var onInitialized = function () {
-                    if (orangeEl.control.dataContext != null)
-                        return;
-                    orangeEl.control.dataContext = bindingContext.$data;
-                };
-                if (orangeEl.isInitialized == true)
-                    onInitialized();
-                else
-                    orangeEl.addOnInitializedListener(onInitialized);
-                ko.utils
-                    .domNodeDisposal
-                    .addDisposeCallback(element, function () { return orangeEl.removeOnInitializedListener(onInitialized); });
-            }
-        };
+            };
+            ko.bindingHandlers.orangeView = {
+                init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                    var value = valueAccessor();
+                    var dataViweAttr = document.createAttribute("data-view");
+                    dataViweAttr.value = value;
+                    var orangeEl = Orange.Controls.GetOrangeElement(element);
+                    element.setAttributeNode(dataViweAttr);
+                    var onInitialized = function () {
+                        if (orangeEl.control.dataContext != null)
+                            return;
+                        orangeEl.control.dataContext = bindingContext.$data;
+                    };
+                    if (orangeEl.isInitialized == true)
+                        onInitialized();
+                    else
+                        orangeEl.addOnInitializedListener(onInitialized);
+                    ko.utils
+                        .domNodeDisposal
+                        .addDisposeCallback(element, function () { return orangeEl.removeOnInitializedListener(onInitialized); });
+                }
+            };
+        }
     })(Bindings = Orange.Bindings || (Orange.Bindings = {}));
 })(Orange || (Orange = {}));
+var Orange;
+(function (Orange) {
+    var Routing;
+    (function (Routing) {
+        var PathHandler = (function () {
+            function PathHandler(path, handler) {
+                this.path = path;
+                this.handler = handler;
+            }
+            PathHandler.prototype.tryMatch = function (path) {
+                if (this.path == "*")
+                    return {};
+                return this.path == path ? {} : null;
+            };
+            return PathHandler;
+        })();
+        var Router = (function () {
+            function Router() {
+                this.paths = [];
+            }
+            Router.prototype.route = function (path, handler) {
+                this.paths.push(new PathHandler(path, handler));
+            };
+            Router.prototype.default = function (handler) {
+                this.route("*", handler);
+            };
+            Router.prototype.run = function () {
+                var _this = this;
+                window.addEventListener("popstate", function (e) {
+                    _this.handleRoute(location.pathname);
+                });
+                window.addEventListener("click", function (e) {
+                    var elem = e.srcElement;
+                    if (elem.tagName === "A" &&
+                        elem.target === "" &&
+                        elem.hostname === location.hostname) {
+                        e.preventDefault();
+                        _this.navigate(elem.pathname, null);
+                    }
+                });
+                this.handleRoute(location.pathname);
+            };
+            Router.prototype.navigate = function (path, state) {
+                if (path === location.pathname)
+                    return;
+                history.pushState(state, null, path);
+                this.handleRoute(path);
+            };
+            Router.prototype.handleRoute = function (path) {
+                for (var _i = 0, _a = this.paths; _i < _a.length; _i++) {
+                    var p = _a[_i];
+                    var match = p.tryMatch(path);
+                    if (match) {
+                        p.handler();
+                        return;
+                    }
+                }
+            };
+            return Router;
+        })();
+        Routing.Router = Router;
+    })(Routing = Orange.Routing || (Orange.Routing = {}));
+})(Orange || (Orange = {}));
 /// <reference path="MutationObserverPolyfill.ts"/>
+/// <reference path="Uuid.ts" />
 /// <reference path="Container.ts"/>
 /// <reference path="RegionManager.ts"/>
 /// <reference path="TemplateLoader.ts"/>
@@ -1075,6 +1181,7 @@ var Orange;
 /// <reference path="ViewBase.ts"/>
 /// <reference path="ControlManager.ts"/>
 /// <reference path="Bindings.ts" />
+/// <reference path="Router.ts" />
 /// <reference path="../_references.ts" />
 var MyBasicView;
 (function (MyBasicView) {

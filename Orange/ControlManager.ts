@@ -218,38 +218,6 @@ module Orange.Controls {
 			return ControlManager.createControlInternal(element, container);
 		}
 
-		private static isValidConstructorFunc(func: any) : boolean {
-
-			return func != null && (typeof(func) == "function");
-		}
-
-		private static getConstructorFunction(constructorName: string) : { new (): Control } {
-
-			var path = constructorName.split(".");
-
-			// Try to construct a valid constructorfunction based from window.
-			var func: any = window;
-			for (var fragment of path) {
-
-				if (func[fragment] == null)
-					break;
-
-				func = func[fragment];
-			}
-
-			if (ControlManager.isValidConstructorFunc(func))
-				return <{ new (): Control }>func;
-
-			// If the constructor was now found on window, try to require it.
-			// NOTE: This is done to support browserify modules.
-			func = (<any>window).require(constructorName);
-
-			if (ControlManager.isValidConstructorFunc(func))
-				return <{ new (): Control }>func;
-
-			throw new ReferenceError('No constructor identified by "' + constructorName + '"" could be found');
-		}
-
 		private static createControlInternal(element: HTMLElement, container: Orange.Modularity.Container): Controls.Control {
 
 			var type = ControlManager.getControlAttribute(element);
@@ -259,12 +227,7 @@ module Orange.Controls {
 			if (orangeElement.isInitialized)
 				return null;
 
-			var constructorFunction = ControlManager.getConstructorFunction(type.value);
-			
-			var control = <Control>(!!container ? container.resolve(constructorFunction) : new constructorFunction());
-
-			if (false == (control instanceof constructorFunction))
-				throw "ControlManager.createControl: instance of constructed object is not of the correct type."
+			var control = container.resolve(type.value);
 
 			orangeElement.control = control;
 
