@@ -459,8 +459,8 @@ var Orange;
                         break;
                     func = func[fragment];
                 }
-                Container.isValidConstructor(func);
-                return func;
+                if (Container.isValidConstructor(func))
+                    return func;
                 func = window.require(constructorName);
                 if (Container.isValidConstructor(func))
                     return func;
