@@ -23,7 +23,7 @@ module Orange.Bindings {
 			private target: string,
 			private mode: string) {
 
-			var orangeEl = Orange.Controls.GetOrangeElement(element);
+			var orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
 
 			if (orangeEl.isInitialized)
 				this.init();
@@ -176,7 +176,7 @@ module Orange.Bindings {
 				var dataViweAttr = document.createAttribute("data-view");
 				dataViweAttr.value = value;
 
-				var orangeEl = Orange.Controls.GetOrangeElement(element);
+				var orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
 
 				element.setAttributeNode(dataViweAttr);
 

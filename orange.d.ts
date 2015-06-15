@@ -119,7 +119,7 @@ declare module Orange.Controls {
         addOnInitializedListener(callback: () => void): void;
         removeOnInitializedListener(callback: () => void): void;
     }
-    var GetOrangeElement: (element: HTMLElement) => IOrangeElementExtension;
+    var GetOrInitializeOrangeElement: (element: HTMLElement) => IOrangeElementExtension;
     class ControlManager {
         static dependencies: () => any;
         private _container;
@@ -138,7 +138,6 @@ declare module Orange.Controls {
         static createControlsInElement(element: HTMLElement, container: Orange.Modularity.Container): void;
         dispose(): void;
         private onMutation;
-        static getControlFromElement(element: HTMLElement): Control;
         static createControlFromElement(controlElement: HTMLElement): Controls.Control;
         static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Controls.Control;
         static createControlFromType(type: string): Controls.Control;
