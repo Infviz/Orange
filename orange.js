@@ -461,7 +461,8 @@ var Orange;
                 }
                 if (Container.isValidConstructor(func))
                     return func;
-                func = window.require(constructorName);
+                if (window.require != null)
+                    func = window.require(constructorName);
                 if (Container.isValidConstructor(func))
                     return func;
                 throw new ReferenceError("No constructor identified by \"" + constructorName + "\" could be found");
