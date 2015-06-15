@@ -812,7 +812,7 @@ var Orange;
             };
             return OrangeElementExtension;
         })();
-        Controls.GetOrangeElement = function (element) {
+        Controls.GetOrInitializeOrangeElement = function (element) {
             if (!(element.orange)) {
                 var orangeEl = new OrangeElementExtension();
                 ;
@@ -863,7 +863,9 @@ var Orange;
                     }
                 }
                 else {
-                    ControlManager.getControlFromElement(root).dispose();
+                    var orangeEl = Controls.GetOrInitializeOrangeElement(root);
+                    if (orangeEl.control != null)
+                        orangeEl.control.dispose();
                 }
             };
             ControlManager.disposeControl = function (control) {
@@ -931,11 +933,6 @@ var Orange;
                 this._observer.disconnect();
                 this._observer = null;
             };
-            ControlManager.getControlFromElement = function (element) {
-                if (!element["orange"] || !(element["orange"]["control"]))
-                    throw "ViewBase.getControlFromElement: the element has no control conected to it.";
-                return (element["orange"]["control"]);
-            };
             ControlManager.createControlFromElement = function (controlElement, container) {
                 return ControlManager.createControlInternal(controlElement, container);
             };
@@ -946,7 +943,7 @@ var Orange;
             };
             ControlManager.createControlInternal = function (element, container) {
                 var type = ControlManager.getControlAttribute(element);
-                var orangeElement = Controls.GetOrangeElement(element);
+                var orangeElement = Controls.GetOrInitializeOrangeElement(element);
                 if (orangeElement.isInitialized)
                     return null;
                 var control = container.resolve(type.value);
@@ -1037,7 +1034,7 @@ var Orange;
                         _this.vm[_this.property] = propertyValue;
                     }
                 };
-                var orangeEl = Orange.Controls.GetOrangeElement(element);
+                var orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
                 if (orangeEl.isInitialized)
                     this.init();
                 else
@@ -1090,7 +1087,7 @@ var Orange;
                     var value = valueAccessor();
                     var dataViweAttr = document.createAttribute("data-view");
                     dataViweAttr.value = value;
-                    var orangeEl = Orange.Controls.GetOrangeElement(element);
+                    var orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
                     element.setAttributeNode(dataViweAttr);
                     var onInitialized = function () {
                         if (orangeEl.control.dataContext != null)

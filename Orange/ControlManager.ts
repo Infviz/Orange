@@ -30,7 +30,7 @@ module Orange.Controls {
 		}
 	}
 
-	export var GetOrangeElement = 
+	export var GetOrInitializeOrangeElement = 
 		(element: HTMLElement) : IOrangeElementExtension => {
 
 			if (!((<any>element).orange)) {
@@ -93,7 +93,9 @@ module Orange.Controls {
 				}
 			}
 			else {
-				ControlManager.getControlFromElement(root).dispose();
+				var orangeEl = GetOrInitializeOrangeElement(root);
+				if (orangeEl.control != null) 
+					orangeEl.control.dispose();
 			}
 		}
 
@@ -194,14 +196,6 @@ module Orange.Controls {
 			mut.forEach(this.handleMutation);
 		}
 
-		public static getControlFromElement(element: HTMLElement): Control {
-
-			if (!(<any>element)["orange"] || !((<any>element)["orange"]["control"]))
-				throw "ViewBase.getControlFromElement: the element has no control conected to it.";
-
-			return <Control>((<any>element)["orange"]["control"]);
-		}
-
 		public static createControlFromElement(controlElement: HTMLElement): Controls.Control;
 		public static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Controls.Control;
 		public static createControlFromElement(controlElement: HTMLElement, container?: Orange.Modularity.Container): Controls.Control {
@@ -223,7 +217,7 @@ module Orange.Controls {
 			var type = ControlManager.getControlAttribute(element);
 
 			// The element already has a controll connected to it.
-			var orangeElement = GetOrangeElement(element);
+			var orangeElement = GetOrInitializeOrangeElement(element);
 			if (orangeElement.isInitialized)
 				return null;
 
