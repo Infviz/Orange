@@ -69,7 +69,8 @@ module Orange.Modularity
 
             // If the constructor was now found on window, try to require it.
             // NOTE: This is done to support browserify modules.
-            func = (<any>window).require(constructorName);
+            if ((<any>window).require != null)
+                func = (<any>window).require(constructorName);
 
             if (Container.isValidConstructor(func))
                 return func;
