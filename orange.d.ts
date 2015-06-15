@@ -23,11 +23,14 @@ declare module Orange.Modularity {
         constructor();
         registerInstance(type: any, instance: any): void;
         registerType(type: any, instance: any): void;
-        resolve(type: any, register?: boolean): any;
+        resolve(type: any | string, register?: boolean): any;
         resolveWithOverride(type: any, overrides: Array<KeyValuePair>): any;
+        private static getConstructorFromString(constructorName);
         private lookup(dict, key);
         private createInstance(resolvedType);
         private checkArity(type);
+        private static isValidConstructor(type);
+        private static validateConstructor(type);
         private applyConstructor(ctor, args);
     }
 }
@@ -140,11 +143,11 @@ declare module Orange.Controls {
         static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Controls.Control;
         static createControlFromType(type: string): Controls.Control;
         static createControlFromType(type: string, container: Orange.Modularity.Container): Controls.Control;
-        private static isValidConstructorFunc(func);
-        private static getConstructorFunction(constructorName);
         private static createControlInternal(element, container);
         private handleMutation;
     }
+}
+declare module Orange.Bindings {
 }
 declare module Orange.Routing {
     class Router {
@@ -155,6 +158,4 @@ declare module Orange.Routing {
         navigate(path: string, state: any): void;
         private handleRoute(path);
     }
-}
-declare module Orange.Bindings {
 }

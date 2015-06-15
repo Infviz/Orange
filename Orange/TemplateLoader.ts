@@ -50,19 +50,6 @@ class TemplateLoader {
 
                 xmlhttp.open("GET", tpl.path, true);
                 xmlhttp.send();
-
-                
-                // $.get(
-                //     tpl.path,
-                //     tplCode => {
-                //         var code = '<script type="text/html" id="' + id + '">' + tplCode + '</script>';
-                //         $('body').append(code);
-                //         loadedTemplates++;
-                //         if (loadedTemplates == templates.length)
-                //         {
-                //             if (TemplateLoader.onload) TemplateLoader.onload();
-                //         }
-                //     });
             })();
         };
     }
