@@ -70,7 +70,7 @@ declare module Orange.Controls {
 }
 declare module Orange.Controls {
     interface ITemplatedControlTemplateProvider {
-        applyTemplate(element: HTMLElement, onTemplateAppliedCallback: (success: boolean) => void): void;
+        applyTemplate(element: HTMLElement, onTemplateAppliedCallback: (success: boolean, error?: string) => void): void;
     }
     class StringTemplateProvider implements ITemplatedControlTemplateProvider {
         private _template;
@@ -81,7 +81,7 @@ declare module Orange.Controls {
         private _templateName;
         private _context;
         constructor(templateName: string);
-        applyTemplate(element: HTMLElement, onTemplateAppliedCallback: (success: boolean) => void): void;
+        applyTemplate(element: HTMLElement, onTemplateAppliedCallback: (success: boolean, error?: string) => void): void;
     }
     class TemplatedControl extends Control {
         private _templateProvider;

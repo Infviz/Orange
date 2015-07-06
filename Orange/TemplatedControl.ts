@@ -3,7 +3,7 @@
 module Orange.Controls {
 
 	export interface ITemplatedControlTemplateProvider {
-		applyTemplate(element: HTMLElement, onTemplateAppliedCallback: (success: boolean) => void): void;
+		applyTemplate(element: HTMLElement, onTemplateAppliedCallback: (success: boolean, error?: string) => void): void;
 	}
 
 	export class StringTemplateProvider implements ITemplatedControlTemplateProvider {
@@ -30,17 +30,17 @@ module Orange.Controls {
 			this._templateName = templateName;
 		}
 
-		public applyTemplate(element: HTMLElement, onTemplateAppliedCallback: (success: boolean) => void): void {
+		public applyTemplate(element: HTMLElement, onTemplateAppliedCallback: (success: boolean, error?: string) => void): void {
 
 			var template = <HTMLElement>document.body.querySelector("#" + this._templateName);
 
 			if (template == null) {
-				onTemplateAppliedCallback(false);
-				return;	
+				onTemplateAppliedCallback(false, `No script tag with id='${this._templateName}' found`);
+				return;
 			}
 
 			element.innerHTML = template.innerHTML;
-			
+
 			onTemplateAppliedCallback(true);
 		}
 	}
@@ -48,13 +48,13 @@ module Orange.Controls {
 	export class TemplatedControl extends Control {
 
 		private _templateProvider: ITemplatedControlTemplateProvider = null;
-		
+
 		private _isTemplateApplied: boolean = false;
 		public get isTemplateApplied(): boolean { return this._isTemplateApplied; }
 
 		constructor(templateProvider: ITemplatedControlTemplateProvider) {
 			super();
-			this._templateProvider = templateProvider;	
+			this._templateProvider = templateProvider;
 		}
 
 		protected onApplyTemplate(): void { }
@@ -63,12 +63,12 @@ module Orange.Controls {
 
 			this._templateProvider
 			.applyTemplate(
-				this.element, 
-				success => {
+				this.element,
+				(success, error) => {
 					if (success)
 						this._isTemplateApplied = true;
 					else
-						throw "TemplatedControl.applyTemplate: A template provider failed to apply its template.";
+						throw ("TemplatedControl.applyTemplate: A template provider failed to apply its template: " + (error || "").toString());
 				});
 		}
 	}

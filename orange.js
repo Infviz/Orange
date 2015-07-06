@@ -656,7 +656,7 @@ var Orange;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
 /// <reference path="_references.ts"/>
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -684,7 +684,7 @@ var Orange;
             ScriptTemplateProvider.prototype.applyTemplate = function (element, onTemplateAppliedCallback) {
                 var template = document.body.querySelector("#" + this._templateName);
                 if (template == null) {
-                    onTemplateAppliedCallback(false);
+                    onTemplateAppliedCallback(false, "No script tag with id='" + this._templateName + "' found");
                     return;
                 }
                 element.innerHTML = template.innerHTML;
@@ -710,11 +710,11 @@ var Orange;
             TemplatedControl.prototype.applyTemplate = function () {
                 var _this = this;
                 this._templateProvider
-                    .applyTemplate(this.element, function (success) {
+                    .applyTemplate(this.element, function (success, error) {
                     if (success)
                         _this._isTemplateApplied = true;
                     else
-                        throw "TemplatedControl.applyTemplate: A template provider failed to apply its template.";
+                        throw ("TemplatedControl.applyTemplate: A template provider failed to apply its template: " + (error || "").toString());
                 });
             };
             return TemplatedControl;
