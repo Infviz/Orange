@@ -75,6 +75,11 @@ module Orange.Modularity
             if (Container.isValidConstructor(func))
                 return func;
 
+            // Require can return an object containing several exported classes, in that case 
+            // we check for a default exported class and return it if it exists. 
+            if (func.default != null && Container.isValidConstructor(func.default))
+                return func.default;
+
             throw new ReferenceError(`No constructor identified by "${constructorName}" could be found`);
         }
 

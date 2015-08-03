@@ -465,6 +465,8 @@ var Orange;
                     func = window.require(constructorName);
                 if (Container.isValidConstructor(func))
                     return func;
+                if (func.default != null && Container.isValidConstructor(func.default))
+                    return func.default;
                 throw new ReferenceError("No constructor identified by \"" + constructorName + "\" could be found");
             };
             Container.prototype.lookup = function (dict, key) {
@@ -656,7 +658,7 @@ var Orange;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
 /// <reference path="_references.ts"/>
-var __extends = this.__extends || function (d, b) {
+var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
