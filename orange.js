@@ -465,6 +465,8 @@ var Orange;
                     func = window.require(constructorName);
                 if (Container.isValidConstructor(func))
                     return func;
+                if (func.default != null && Container.isValidConstructor(func.default))
+                    return func.default;
                 throw new ReferenceError("No constructor identified by \"" + constructorName + "\" could be found");
             };
             Container.prototype.lookup = function (dict, key) {
