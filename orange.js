@@ -613,6 +613,7 @@ var Orange;
         var Control = (function () {
             function Control() {
                 this._element = null;
+                this._id = null;
                 this.disposables = new Array();
                 this._propertyChangedListeners = new Array();
             }
@@ -620,9 +621,21 @@ var Orange;
                 get: function () { return this._element; },
                 set: function (element) {
                     if (this._element != null)
-                        throw "'element' property can only be set once. ";
+                        throw "The 'element' property can only ever be set once.";
                     this._element = element;
                     this.onElementSet();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Control.prototype, "id", {
+                get: function () {
+                    return this._id;
+                },
+                set: function (v) {
+                    if (this._id != null)
+                        throw "The 'id' property can only ever be set once. ";
+                    this._id = v;
                 },
                 enumerable: true,
                 configurable: true
@@ -734,8 +747,7 @@ var Orange;
             function ViewBase(templateName, context) {
                 _super.call(this, new Controls.ScriptTemplateProvider(templateName));
                 this._dataContext = null;
-                if (!!context)
-                    this._dataContext = context;
+                this._dataContext = context == null ? null : context;
             }
             Object.defineProperty(ViewBase.prototype, "dataContext", {
                 get: function () { return this._dataContext; },
@@ -747,6 +759,12 @@ var Orange;
                 enumerable: true,
                 configurable: true
             });
+            ViewBase.prototype.getControl = function (selector) {
+                var element = this.element.querySelector(selector);
+                if (element == null || (element.orange) == null || (element.orange).control == null)
+                    return null;
+                return ((element.orange).control);
+            };
             ViewBase.prototype.onApplyTemplate = function () {
                 _super.prototype.onApplyTemplate.call(this);
                 this.applyBindings();
@@ -772,7 +790,7 @@ var Orange;
             };
             KnockoutViewBase.prototype.onApplyBindings = function () {
                 _super.prototype.onApplyBindings.call(this);
-                if (!this.dataContext)
+                if (this.dataContext == null)
                     return;
                 window.ko.applyBindingsToDescendants(this.dataContext, this.element);
             };
@@ -815,7 +833,7 @@ var Orange;
             return OrangeElementExtension;
         })();
         Controls.GetOrInitializeOrangeElement = function (element) {
-            if (!(element.orange)) {
+            if ((element.orange) == null) {
                 var orangeEl = new OrangeElementExtension();
                 ;
                 element["orange"] = orangeEl;
@@ -871,22 +889,24 @@ var Orange;
                 }
             };
             ControlManager.disposeControl = function (control) {
-                if (!control)
+                if (control == null)
                     return;
-                if (!!(control.element))
-                    control.element.orange = null;
+                var element = control.element;
+                if (element != null)
+                    element.orange = null;
                 var disposables = control.disposables;
                 for (var dIdx = disposables.length - 1; dIdx >= 0; dIdx--) {
                     disposables[dIdx].dispose();
                 }
-                if (typeof control.element.children !== "undefined") {
-                    for (var i = 0; i < control.element.children.length; i++) {
-                        ControlManager.disposeDescendants(control.element.children[i]);
+                if (typeof element.children !== "undefined") {
+                    var children = element.children;
+                    for (var cIdx = 0; cIdx < children.length; cIdx++) {
+                        ControlManager.disposeDescendants(children[cIdx]);
                     }
                 }
             };
             ControlManager.prototype.manage = function (element) {
-                if (this._observer !== null)
+                if (this._observer != null)
                     this.dispose();
                 this._element = element;
                 this._observer = new MutationObserver(this.onMutation);
@@ -895,7 +915,7 @@ var Orange;
             };
             ControlManager.getChildren = function (element) {
                 var result = new Array();
-                if (typeof element.children !== "undefined") {
+                if (typeof element.children != null) {
                     for (var i = 0; i < element.children.length; i++) {
                         result.push(element.children[i]);
                     }
@@ -905,18 +925,14 @@ var Orange;
             ControlManager.getControlAttribute = function (element) {
                 var attr = null;
                 var anIdx = 0;
-                while ((!attr || attr == "") && anIdx < ControlManager._controlAttributeNames.length) {
+                while ((attr == null || attr == "") && anIdx < ControlManager._controlAttributeNames.length)
                     attr = element.getAttribute(ControlManager._controlAttributeNames[anIdx++]);
-                }
-                if (!attr || attr == "") {
+                if (attr == null || attr == "")
                     return null;
-                }
-                else {
-                    return {
-                        attributeType: ControlManager._controlAttributeNames[anIdx - 1],
-                        value: attr
-                    };
-                }
+                return {
+                    attributeType: ControlManager._controlAttributeNames[anIdx - 1],
+                    value: attr
+                };
             };
             ControlManager.createControlsInElement = function (element, container) {
                 var attr = ControlManager.getControlAttribute(element);
@@ -950,7 +966,9 @@ var Orange;
                     return null;
                 var control = container.resolve(type.value);
                 orangeElement.control = control;
-                element.setAttribute(type.attributeType + "-id", Orange.Uuid.generate().value);
+                var controlId = Orange.Uuid.generate();
+                element.setAttribute('data-control-id', controlId.value);
+                control.id = controlId;
                 control.element = element;
                 if (!!control.applyTemplate)
                     control.applyTemplate();

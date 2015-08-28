@@ -7,13 +7,18 @@ module Orange.Controls {
 		private _element: HTMLElement = null;
 		public get element(): HTMLElement { return this._element; }
 		public set element(element: HTMLElement) {
-
-			if (this._element != null) 
-				throw "'element' property can only be set once. ";
-
+			if (this._element != null) throw "The 'element' property can only ever be set once.";
 			this._element = element;
-
 			this.onElementSet();
+		}
+
+		private _id: Orange.Uuid = null;
+		public get id(): Orange.Uuid {
+			return this._id;
+		}
+		public set id(v: Orange.Uuid) {
+			if (this._id != null) throw "The 'id' property can only ever be set once. "
+			this._id = v;
 		}
 
 		private disposables = new Array<{ dispose(): void}>();

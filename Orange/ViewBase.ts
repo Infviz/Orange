@@ -2,84 +2,91 @@
 
 module Orange.Controls {
 
-	export class ViewBase extends TemplatedControl {
+    export class ViewBase extends TemplatedControl {
 
-		private _dataContext: any = null;
-		public get dataContext(): any { return this._dataContext; }
-		public set dataContext(context: any) {
+        private _dataContext: any = null;
+        public get dataContext(): any { return this._dataContext; }
+        public set dataContext(context: any) {
 
-			this._dataContext = context;
-			this.onDataContextSet();
-			this.applyBindings();
-		}
+            this._dataContext = context;
+            this.onDataContextSet();
+            this.applyBindings();
+        }
 
-		constructor(templateName: string);
-		constructor(templateName: string, context: any);
-		constructor(templateName: string, context?: any) {
+        constructor(templateName: string);
+        constructor(templateName: string, context: any);
+        constructor(templateName: string, context?: any) {
 
-			super(new ScriptTemplateProvider(templateName));
+            super(new ScriptTemplateProvider(templateName));
 
-			if (!!context)
-				this._dataContext = context;
-		}
+            this._dataContext = context == null ? null : context;
+        }
 
-		protected onApplyTemplate(): void {
-			super.onApplyTemplate();
-			this.applyBindings();
-		}
+        public getControl<T>(selector: string): T {
+            let element = <HTMLElement>this.element.querySelector(selector);
 
-		private applyBindings(): void {
+            if (element == null || ((<any>element).orange) == null || ((<any>element).orange).control == null)
+                return null;
 
-			if (false == this.isTemplateApplied) return;
+            return <T>(((<any>element).orange).control);
+        }
 
-			this.onApplyBindings();
-		}
+        protected onApplyTemplate(): void {
+            super.onApplyTemplate();
+            this.applyBindings();
+        }
 
-		protected onApplyBindings(): void { }
-		protected onDataContextSet(): void { }
-	}
+        private applyBindings(): void {
 
-	export class KnockoutViewBase extends ViewBase {
+            if (false == this.isTemplateApplied) return;
 
-		constructor(templateName: string);
-		constructor(templateName: string, context: any);
-		constructor(templateName: string, context?: any) {
+            this.onApplyBindings();
+        }
 
-			super(templateName, context);
-		}
+        protected onApplyBindings(): void { }
+        protected onDataContextSet(): void { }
+    }
 
-		public dispose(): void {
-			super.dispose();
-			this.cleanChildBindings();
-		}
+    export class KnockoutViewBase extends ViewBase {
 
+        constructor(templateName: string);
+        constructor(templateName: string, context: any);
+        constructor(templateName: string, context?: any) {
 
-		protected onApplyBindings(): void {
-			super.onApplyBindings();
+            super(templateName, context);
+        }
 
-			if (!this.dataContext)
-				return;
+        public dispose(): void {
+            super.dispose();
+            this.cleanChildBindings();
+        }
 
-			(<any>window).ko.applyBindingsToDescendants(this.dataContext, this.element);
-		}
+        protected onApplyBindings(): void {
+            super.onApplyBindings();
 
-		protected onDataContextSet(): void {
-			this.cleanChildBindings();
-		}
+            if (this.dataContext == null)
+                return;
 
-		private cleanChildBindings() : void {
+            (<any>window).ko.applyBindingsToDescendants(this.dataContext, this.element);
+        }
 
-			var childNodes = this.element.childNodes;
+        protected onDataContextSet(): void {
+            this.cleanChildBindings();
+        }
 
-			for (var cIdx = childNodes.length - 1; cIdx >= 0; cIdx--) {
+        private cleanChildBindings() : void {
 
-				var childNode = childNodes[cIdx];
+            let childNodes = this.element.childNodes;
 
-				// 1 == ELEMENT_NODE
-				if (childNode.nodeType !== 1) continue;
+            for (var cIdx = childNodes.length - 1; cIdx >= 0; cIdx--) {
 
-				(<any>window).ko.cleanNode(<HTMLElement>childNode);
-			}
-		}
-	}
+                let childNode = childNodes[cIdx];
+
+                // 1 == ELEMENT_NODE
+                if (childNode.nodeType !== 1) continue;
+
+                (<any>window).ko.cleanNode(<HTMLElement>childNode);
+            }
+        }
+    }
 }

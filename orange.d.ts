@@ -55,6 +55,8 @@ declare module Orange.Controls {
     class Control {
         private _element;
         element: HTMLElement;
+        private _id;
+        id: Orange.Uuid;
         private disposables;
         addDisposable(disposable: {
             dispose(): void;
@@ -98,6 +100,7 @@ declare module Orange.Controls {
         dataContext: any;
         constructor(templateName: string);
         constructor(templateName: string, context: any);
+        getControl<T>(selector: string): T;
         protected onApplyTemplate(): void;
         private applyBindings();
         protected onApplyBindings(): void;

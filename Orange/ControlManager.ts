@@ -33,7 +33,7 @@ module Orange.Controls {
 	export var GetOrInitializeOrangeElement = 
 		(element: HTMLElement) : IOrangeElementExtension => {
 
-			if (!((<any>element).orange)) {
+			if (((<any>element).orange) == null) {
 				
 				var orangeEl = new OrangeElementExtension();;
 				(<any>element)["orange"] = orangeEl;
@@ -101,11 +101,12 @@ module Orange.Controls {
 
 		public static disposeControl(control: Controls.Control) {
 
-			if (!control) return;
+			if (control == null) return;
 
+			let element = control.element;
 			// Clear information stored on element.
-			if (!!(control.element))
-				(<any>control.element).orange = null;
+			if (element != null)
+				(<any>element).orange = null;
 
 			// NOTE: disposables is private..
 			var disposables = <Array<{ dispose(): void; }>>(<any>control).disposables;
@@ -113,9 +114,10 @@ module Orange.Controls {
 				disposables[dIdx].dispose();
 			}
 
-			if (typeof control.element.children !== "undefined") {
-				for (var i = 0; i < control.element.children.length; i++) {
-					ControlManager.disposeDescendants(<HTMLElement>control.element.children[i]);
+			if (typeof element.children !== "undefined") {
+				let children = element.children;
+				for (var cIdx = 0; cIdx < children.length; cIdx++) {
+					ControlManager.disposeDescendants(<HTMLElement>children[cIdx]);
 				}
 			}
 		}
@@ -127,7 +129,7 @@ module Orange.Controls {
 
 		public manage(element: HTMLElement) {
 
-			if (this._observer !== null)
+			if (this._observer != null)
 				this.dispose();
 
 			this._element = element;
@@ -140,7 +142,7 @@ module Orange.Controls {
 
 			var result = new Array<HTMLElement>();
 
-			if (typeof element.children !== "undefined") {
+			if (typeof element.children != null) {
 				for (var i = 0; i < element.children.length; i++) {
 					result.push(<HTMLElement>element.children[i]);
 				}
@@ -153,19 +155,16 @@ module Orange.Controls {
 
 			var attr: string = null;
 			var anIdx = 0;
-			while ((!attr || attr == "") && anIdx < ControlManager._controlAttributeNames.length) {
+			while ((attr == null || attr == "") && anIdx < ControlManager._controlAttributeNames.length)
 				attr = element.getAttribute(ControlManager._controlAttributeNames[anIdx++]);
-			}
 
-			if (!attr || attr == "") {
+			if (attr == null || attr == "")
 				return null;
-			}
-			else {
-				return {
-					attributeType: ControlManager._controlAttributeNames[anIdx - 1], 
-					value: attr
-				};
-			}
+			
+			return {
+				attributeType: ControlManager._controlAttributeNames[anIdx - 1], 
+				value: attr
+			};
 		}
 
 		public static createControlsInElement(element: HTMLElement): void;
@@ -225,8 +224,10 @@ module Orange.Controls {
 
 			orangeElement.control = control;
 
-			element.setAttribute(type.attributeType + "-id", Orange.Uuid.generate().value);
+			let controlId = Orange.Uuid.generate();
+			element.setAttribute('data-control-id', controlId.value);
 
+			control.id = controlId;
 			control.element = element;
 
 			if (!!(<any>control).applyTemplate)
