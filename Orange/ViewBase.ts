@@ -83,7 +83,7 @@ module Orange.Controls {
                 let childNode = childNodes[cIdx];
 
                 // 1 == ELEMENT_NODE
-                if (childNode.nodeType !== 1) continue;
+                //if (childNode.nodeType !== 1) continue;
 
                 (<any>window).ko.cleanNode(<HTMLElement>childNode);
             }

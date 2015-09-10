@@ -171,16 +171,16 @@ module Orange.Bindings {
 				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
 				bindingContext: any) => {
 
-				var value = valueAccessor();
+				let value = valueAccessor();
 
-				var dataViweAttr = document.createAttribute("data-view");
+				let dataViweAttr = document.createAttribute("data-view");
 				dataViweAttr.value = value;
 
-				var orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
+				let orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
 
 				element.setAttributeNode(dataViweAttr);
 
-				var onInitialized =
+				let onInitialized =
 					() => {
 
 						if((<any>orangeEl.control).dataContext != null)
@@ -189,15 +189,17 @@ module Orange.Bindings {
 						(<any>orangeEl.control).dataContext = bindingContext.$data;
 					};
 
-				if (orangeEl.isInitialized == true)
+				if (orangeEl.isInitialized == true) {
 					onInitialized();
-				else
+				}
+				else {
 					orangeEl.addOnInitializedListener(onInitialized);
 
-				 ko.utils
-		        	.domNodeDisposal
-		        	.addDisposeCallback(element,
+					ko.utils
+		        		.domNodeDisposal
+		        		.addDisposeCallback(element,
 			        		() => orangeEl.removeOnInitializedListener(onInitialized));
+		        }
 		    }
 		};
 	}

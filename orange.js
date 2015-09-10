@@ -801,8 +801,6 @@ var Orange;
                 var childNodes = this.element.childNodes;
                 for (var cIdx = childNodes.length - 1; cIdx >= 0; cIdx--) {
                     var childNode = childNodes[cIdx];
-                    if (childNode.nodeType !== 1)
-                        continue;
                     window.ko.cleanNode(childNode);
                 }
             };
@@ -1114,13 +1112,15 @@ var Orange;
                             return;
                         orangeEl.control.dataContext = bindingContext.$data;
                     };
-                    if (orangeEl.isInitialized == true)
+                    if (orangeEl.isInitialized == true) {
                         onInitialized();
-                    else
+                    }
+                    else {
                         orangeEl.addOnInitializedListener(onInitialized);
-                    ko.utils
-                        .domNodeDisposal
-                        .addDisposeCallback(element, function () { return orangeEl.removeOnInitializedListener(onInitialized); });
+                        ko.utils
+                            .domNodeDisposal
+                            .addDisposeCallback(element, function () { return orangeEl.removeOnInitializedListener(onInitialized); });
+                    }
                 }
             };
         }
