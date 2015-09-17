@@ -753,7 +753,7 @@ var Orange;
                 get: function () { return this._dataContext; },
                 set: function (context) {
                     this._dataContext = context;
-                    this.onDataContextSet();
+                    this.applyTemplate();
                     this.applyBindings();
                 },
                 enumerable: true,
@@ -765,6 +765,12 @@ var Orange;
                     return null;
                 return ((element.orange).control);
             };
+            ViewBase.prototype.applyTemplate = function () {
+                if (null == this.element)
+                    return;
+                this.element.innerHTML = "";
+                _super.prototype.applyTemplate.call(this);
+            };
             ViewBase.prototype.onApplyTemplate = function () {
                 _super.prototype.onApplyTemplate.call(this);
                 this.applyBindings();
@@ -775,7 +781,6 @@ var Orange;
                 this.onApplyBindings();
             };
             ViewBase.prototype.onApplyBindings = function () { };
-            ViewBase.prototype.onDataContextSet = function () { };
             return ViewBase;
         })(Controls.TemplatedControl);
         Controls.ViewBase = ViewBase;
@@ -786,23 +791,12 @@ var Orange;
             }
             KnockoutViewBase.prototype.dispose = function () {
                 _super.prototype.dispose.call(this);
-                this.cleanChildBindings();
             };
             KnockoutViewBase.prototype.onApplyBindings = function () {
                 _super.prototype.onApplyBindings.call(this);
                 if (this.dataContext == null)
                     return;
                 window.ko.applyBindingsToDescendants(this.dataContext, this.element);
-            };
-            KnockoutViewBase.prototype.onDataContextSet = function () {
-                this.cleanChildBindings();
-            };
-            KnockoutViewBase.prototype.cleanChildBindings = function () {
-                var childNodes = this.element.childNodes;
-                for (var cIdx = childNodes.length - 1; cIdx >= 0; cIdx--) {
-                    var childNode = childNodes[cIdx];
-                    window.ko.cleanNode(childNode);
-                }
             };
             return KnockoutViewBase;
         })(ViewBase);

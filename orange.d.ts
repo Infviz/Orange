@@ -91,7 +91,7 @@ declare module Orange.Controls {
         isTemplateApplied: boolean;
         constructor(templateProvider: ITemplatedControlTemplateProvider);
         protected onApplyTemplate(): void;
-        private applyTemplate();
+        protected applyTemplate(): void;
     }
 }
 declare module Orange.Controls {
@@ -101,18 +101,16 @@ declare module Orange.Controls {
         constructor(templateName: string);
         constructor(templateName: string, context: any);
         getControl<T>(selector: string): T;
+        protected applyTemplate(): void;
         protected onApplyTemplate(): void;
         private applyBindings();
         protected onApplyBindings(): void;
-        protected onDataContextSet(): void;
     }
     class KnockoutViewBase extends ViewBase {
         constructor(templateName: string);
         constructor(templateName: string, context: any);
         dispose(): void;
         protected onApplyBindings(): void;
-        protected onDataContextSet(): void;
-        private cleanChildBindings();
     }
 }
 declare module Orange.Controls {
