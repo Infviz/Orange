@@ -59,7 +59,7 @@ module Orange.Controls {
 
 		protected onApplyTemplate(): void { }
 
-		private applyTemplate(): void {
+		protected applyTemplate(): void {
 
 			this._templateProvider
 			.applyTemplate(

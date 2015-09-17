@@ -9,7 +9,7 @@ module Orange.Controls {
         public set dataContext(context: any) {
 
             this._dataContext = context;
-            this.onDataContextSet();
+            this.applyTemplate();
             this.applyBindings();
         }
 
@@ -30,7 +30,17 @@ module Orange.Controls {
 
             return <T>(((<any>element).orange).control);
         }
-
+        
+        protected applyTemplate(): void {
+            
+            if (null == this.element)
+                return;
+                
+            this.element.innerHTML = "";
+            
+            super.applyTemplate();    
+        }
+        
         protected onApplyTemplate(): void {
             super.onApplyTemplate();
             this.applyBindings();
@@ -44,7 +54,6 @@ module Orange.Controls {
         }
 
         protected onApplyBindings(): void { }
-        protected onDataContextSet(): void { }
     }
 
     export class KnockoutViewBase extends ViewBase {
@@ -58,7 +67,6 @@ module Orange.Controls {
 
         public dispose(): void {
             super.dispose();
-            this.cleanChildBindings();
         }
 
         protected onApplyBindings(): void {
@@ -68,25 +76,6 @@ module Orange.Controls {
                 return;
 
             (<any>window).ko.applyBindingsToDescendants(this.dataContext, this.element);
-        }
-
-        protected onDataContextSet(): void {
-            this.cleanChildBindings();
-        }
-
-        private cleanChildBindings() : void {
-
-            let childNodes = this.element.childNodes;
-
-            for (var cIdx = childNodes.length - 1; cIdx >= 0; cIdx--) {
-
-                let childNode = childNodes[cIdx];
-
-                // 1 == ELEMENT_NODE
-                //if (childNode.nodeType !== 1) continue;
-
-                (<any>window).ko.cleanNode(<HTMLElement>childNode);
-            }
         }
     }
 }
