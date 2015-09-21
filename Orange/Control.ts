@@ -1,9 +1,9 @@
 /// <reference path="_references.ts"/>
 
 module Orange.Controls {
-
+	
 	export class Control {
-
+		
 		private _element: HTMLElement = null;
 		public get element(): HTMLElement { return this._element; }
 		public set element(element: HTMLElement) {
@@ -11,54 +11,65 @@ module Orange.Controls {
 			this._element = element;
 			this.onElementSet();
 		}
-
+		
 		private _id: Orange.Uuid = null;
-		public get id(): Orange.Uuid {
-			return this._id;
-		}
+		public get id(): Orange.Uuid { return this._id; }
 		public set id(v: Orange.Uuid) {
-			if (this._id != null) throw "The 'id' property can only ever be set once. "
+			if (this._id != null) throw "The 'id' property can only ever be set once."
 			this._id = v;
 		}
 
 		private disposables = new Array<{ dispose(): void}>();
-		public addDisposable(disposable: { dispose(): void }) {
+		public addDisposable(disposable: { dispose(): void }): void {
 			this.disposables.push(disposable);
 		}
 
-		public dispose() {
+		public dispose(): void {
 			ControlManager.disposeControl(this);
 		}
-
-		protected onElementSet(): void { }
-
-		private _propertyChangedListeners = new Array<(propertyName: string, value: any) => void>();
 		
+		private _propertyChangedListeners = new Array<(propertyName: string, value: any) => void>();
 		public addPropertyChangedListener(listener: (propertyName: string, value: any) => void) {
 			this._propertyChangedListeners.push(listener);
 		}
 
-		public removePropertyChangedListener(listener: (propertyName: string, value: any) => void) {
-
-			var idx = this._propertyChangedListeners.indexOf(listener);
-			if (idx > -1)
-				this._propertyChangedListeners.splice(idx, 1);
+		public removePropertyChangedListener(listener: (propertyName: string, value: any) => void): void {
+			let idx = this._propertyChangedListeners.indexOf(listener);
+			if (idx > -1) this._propertyChangedListeners.splice(idx, 1);
 		}
+		
+		private static propertyRegex = /return _this.([a-zA-Z0-9]+);/;
+		private static getPropertyName<T>(property: () => T) {
+            return Control.propertyRegex.exec(String(property))[1];
+        }
 
-		protected raisePropertyChanged(propertyName: string) {
+		protected raisePropertyChanged(property: string): void;
+		protected raisePropertyChanged<T>(property: () => T): void;
+		protected raisePropertyChanged(property: any): void {
+			
+			var propertyName: string = null;
+			if (typeof property === "string") {
+				propertyName = property;
+			}
+			else if (typeof property === "function"){
+				propertyName = Control.getPropertyName(property);
+			}
+			else {
+				throw "Invalid argument passed to raisePropertyChanged";
+			}
+			
+			if (typeof ((<any>this)[propertyName]) === "undefined")
+	        	throw "Attempt to access undefined property '" + propertyName + "' was made.";
+			
+			let value: any = (<any>this)[propertyName];
 
-			var propertyValue = (<any>this)[propertyName];
+	        this.onPropertyChanged(propertyName, value);
 
-	        if (propertyValue == null || propertyValue == "undefined")
-	        	throw "trying to access undefined property '" + propertyName + "'.";
-	        
-	        this.onPropertyChanged(propertyName, propertyValue);
-
-	        for (var plIdx = this._propertyChangedListeners.length - 1; plIdx >= 0; plIdx--) {
-	        	this._propertyChangedListeners[plIdx](propertyName, propertyValue);
-	        }
+	        for (let plIdx = this._propertyChangedListeners.length - 1; plIdx >= 0; plIdx--)
+	        	this._propertyChangedListeners[plIdx](propertyName, value);
 		}
-
+		
+		protected onElementSet(): void { }
 		protected onPropertyChanged(propertyName: string, value: any): void { }
 	}
 }

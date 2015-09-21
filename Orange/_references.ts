@@ -12,6 +12,7 @@
 /// <reference path="ViewBase.ts"/>
 /// <reference path="ControlManager.ts"/>
 
-/// <reference path="Bindings.ts" />
-
 /// <reference path="Router.ts" />
+
+/// <reference path="Knockout/KnockoutViewBase.ts" />
+/// <reference path="Knockout/KnockoutBindings.ts" />

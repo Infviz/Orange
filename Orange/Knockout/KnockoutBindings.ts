@@ -1,14 +1,11 @@
-/// <reference path="_references.ts"/>
-
+/// <reference path="../_references.ts"/>
 
 module Orange.Bindings {
 
-	var ko = (<any>window).ko;
+	let ko = (<any>window).ko;
 
 	if (ko) {
-		ko.bindingHandlers.stopBindings = {
-		    init: () => { return { controlsDescendantBindings: true }; }
-		};
+		ko.bindingHandlers.stopBindings = { init: () => ({ controlsDescendantBindings: true }) };
 		ko.virtualElements.allowedBindings.stopBindings = true;
 	}
 
@@ -23,7 +20,7 @@ module Orange.Bindings {
 			private target: string,
 			private mode: string) {
 
-			var orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
+			let orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
 
 			if (orangeEl.isInitialized)
 				this.init();
@@ -42,46 +39,45 @@ module Orange.Bindings {
 	        if (!((<any>this.element).orange) || !((<any>this.element).orange.control))
 	        	throw "Attepmt to bind to control on a non controll element.";
 
-	        var control = <Orange.Controls.Control>(<any>this.element).orange.control;
-
-	        var pd = Object.getOwnPropertyDescriptor(control, this.target);
+	        let control = <Orange.Controls.Control>(<any>this.element).orange.control;
+	        let pd = Object.getOwnPropertyDescriptor(control, this.target);
 
 	        pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), this.target);
 
 	        if (!pd && (<any>control)[this.target] == "undefined")
 				throw "The target property " + this.target + " could not be found."
+				
+			let prop = this.vm[this.property];
+			
+	        if (!!(prop.subscribe))
+	        	this.propDisposable = prop.subscribe((val: any) => (<any>control)[this.target] = val);
 
-	        if (!!(this.vm[this.property].subscribe))
-	        	this.propDisposable = this.vm[this.property].subscribe((val: any) => (<any>control)[this.target] = val);
-
-	        if (typeof this.vm[this.property] === "function")
-	        	(<any>control)[this.target] = this.vm[this.property]();
-	        else
-	        	(<any>control)[this.target] = this.vm[this.property];
-
-	        if (this.mode == "twoWay")
-	        	control.addPropertyChangedListener(this.onPropertyChanged);
+	        if (ko.isObservable(prop) || ko.isComputed(prop))
+	        	(<any>control)[this.target] = prop();
+	        else 
+	        	(<any>control)[this.target] = prop;
+				
+			if (this.mode == "twoWay")
+				control.addPropertyChangedListener(this.onPropertyChanged);
 		}
 
 		private onPropertyChanged = (propertyName: string, propertyValue: any) => {
 
 			if (propertyName != this.target)
 				return;
-
+				
+			let prop = this.vm[this.property];
+			
 			// if Rx.Observable
-			if (this.vm[this.property].onNext)
-			{
-				this.vm[this.property].onNext(propertyValue);
+			if (prop.onNext) {
+				prop.onNext(propertyValue);
 			}
-			// might have a knockout observable..
-			// TODO: Is there a better way to check this?
-			else if (typeof this.vm[this.property] === "function")
-			{
-				//console.log("Binding two way to knockout observable. (" + property.value + ")");
-				this.vm[this.property](propertyValue);
+			// if knockout observable
+			else if (ko.isObservable(prop) || ko.isComputed(prop)) {
+				prop(propertyValue);
 			}
-			else
-			{
+			// if field or property
+			else {
 				this.vm[this.property] = propertyValue;
 			}
 		}
@@ -96,7 +92,6 @@ module Orange.Bindings {
 
 	        	if (!!((<any>this.element).orange).control)
 	        		(<Orange.Controls.Control>((<any>this.element).orange).control).removePropertyChangedListener(this.onPropertyChanged);
-
 	        }
 		}
 	}
@@ -108,7 +103,7 @@ module Orange.Bindings {
 	}
 
 	if (ko) {
-		(<any>ko).bindingHandlers.bindings = {
+		ko.bindingHandlers.bindings = {
 
 			init: (element: HTMLElement,
 				valueAccessor: () => any,
@@ -116,22 +111,21 @@ module Orange.Bindings {
 				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
 				bindingContext: any) => {
 
-				var bindings = new Array<ViewModelToControlBinding>();
-
-				var values = <Array<any>>(valueAccessor());
+				let bindings = new Array<ViewModelToControlBinding>();
+				let values = <Array<any>>(valueAccessor());
 
 				if (Array.isArray(values) == false)
 					values = [values];
 
-				for (var vIdx = values.length - 1; vIdx >= 0; vIdx--) {
-					var value = values[vIdx];
+				for (let vIdx = values.length - 1; vIdx >= 0; vIdx--) {
+					let value = values[vIdx];
 
-					var propertyNames = Object.getOwnPropertyNames(value);
+					let propertyNames = Object.getOwnPropertyNames(value);
 
 					if (propertyNames.length > 2)
 						throw "Faulty binding, should be {vmProp:ctrlProp [, mode: m]}, were m can be 'oneWay' or 'twoWay'.";
 
-					var mode = 'oneWay';
+					let mode = 'oneWay';
 					if (propertyNames.length == 2) {
 						mode = Object.getOwnPropertyDescriptor(value, "mode").value;
 
@@ -139,8 +133,8 @@ module Orange.Bindings {
 							throw "Binding mode has to be 'oneWay' or 'twoWay'.";
 					}
 
-					var sourceProp = propertyNames.filter(v => v != "mode")[0];
-					var targetProp = Object.getOwnPropertyDescriptor(value, sourceProp).value;
+					let sourceProp = propertyNames.filter(v => v != "mode")[0];
+					let targetProp = Object.getOwnPropertyDescriptor(value, sourceProp).value;
 
 					bindings.push(
 						new ViewModelToControlBinding(
@@ -151,19 +145,18 @@ module Orange.Bindings {
 							mode));
 				}
 
-		        (<any>ko).utils
+		        ko.utils
 		        	.domNodeDisposal
 		        	.addDisposeCallback(element,
 		        		() => {
-
-		            	for (var bIdx = bindings.length - 1; bIdx >= 0; bIdx--) {
-		            		bindings[bIdx].dispose();
+							for (let bIdx = bindings.length - 1; bIdx >= 0; bIdx--) {
+								bindings[bIdx].dispose();
 		            	}
 		        	});
 		    }
 		};
 
-		(<any>ko).bindingHandlers.orangeView = {
+		ko.bindingHandlers.orangeView = {
 
 			init: (element: HTMLElement,
 				valueAccessor: () => any,
@@ -182,7 +175,6 @@ module Orange.Bindings {
 
 				let onInitialized =
 					() => {
-
 						if((<any>orangeEl.control).dataContext != null)
 							return;
 
@@ -201,6 +193,41 @@ module Orange.Bindings {
 			        		() => orangeEl.removeOnInitializedListener(onInitialized));
 		        }
 		    }
+		};
+		
+		ko.bindingHandlers['orange-vm'] = {
+			
+			init: (element: HTMLElement,
+				valueAccessor: () => any,
+				allBindingsAccessor: any,
+				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+				bindingContext: any) => {
+					return { controlsDescendantBindings: true };
+				},
+				
+			update: (element: HTMLElement,
+				valueAccessor: () => any,
+				allBindingsAccessor: any,
+				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+				bindingContext: any) => {
+				
+				let orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
+				let value = ko.unwrap(valueAccessor());
+				let onInitialized =
+					 () => (<any>orangeEl.control).dataContext = value;
+		
+				if (orangeEl.isInitialized == true){
+					onInitialized();
+				}
+				else {
+					orangeEl.addOnInitializedListener(onInitialized);
+					
+					ko.utils
+						.domNodeDisposal
+						.addDisposeCallback(element,
+							function() { orangeEl.removeOnInitializedListener(onInitialized); } );
+				}
+			}
 		};
 	}
 }

@@ -55,27 +55,4 @@ module Orange.Controls {
 
         protected onApplyBindings(): void { }
     }
-
-    export class KnockoutViewBase extends ViewBase {
-
-        constructor(templateName: string);
-        constructor(templateName: string, context: any);
-        constructor(templateName: string, context?: any) {
-
-            super(templateName, context);
-        }
-
-        public dispose(): void {
-            super.dispose();
-        }
-
-        protected onApplyBindings(): void {
-            super.onApplyBindings();
-
-            if (this.dataContext == null)
-                return;
-
-            (<any>window).ko.applyBindingsToDescendants(this.dataContext, this.element);
-        }
-    }
 }
