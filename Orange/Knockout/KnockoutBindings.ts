@@ -40,11 +40,8 @@ module Orange.Bindings {
 	        	throw "Attepmt to bind to control on a non controll element.";
 
 	        let control = <Orange.Controls.Control>(<any>this.element).orange.control;
-	        let pd = Object.getOwnPropertyDescriptor(control, this.target);
-
-	        pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), this.target);
-
-	        if (!pd && (<any>control)[this.target] == "undefined")
+	       	
+	        if ((<any>control)[this.target] == "undefined")
 				throw "The target property " + this.target + " could not be found."
 				
 			let prop = this.vm[this.property];

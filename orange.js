@@ -1095,9 +1095,7 @@ var Orange;
                     if (!(_this.element.orange) || !(_this.element.orange.control))
                         throw "Attepmt to bind to control on a non controll element.";
                     var control = _this.element.orange.control;
-                    var pd = Object.getOwnPropertyDescriptor(control, _this.target);
-                    pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), _this.target);
-                    if (!pd && control[_this.target] == "undefined")
+                    if (control[_this.target] == "undefined")
                         throw "The target property " + _this.target + " could not be found.";
                     var prop = _this.vm[_this.property];
                     if (!!(prop.subscribe))
