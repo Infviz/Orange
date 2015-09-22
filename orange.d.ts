@@ -62,11 +62,14 @@ declare module Orange.Controls {
             dispose(): void;
         }): void;
         dispose(): void;
-        protected onElementSet(): void;
         private _propertyChangedListeners;
         addPropertyChangedListener(listener: (propertyName: string, value: any) => void): void;
         removePropertyChangedListener(listener: (propertyName: string, value: any) => void): void;
-        protected raisePropertyChanged(propertyName: string): void;
+        private static propertyRegex;
+        private static getPropertyName<T>(property);
+        protected raisePropertyChanged(property: string): void;
+        protected raisePropertyChanged<T>(property: () => T): void;
+        protected onElementSet(): void;
         protected onPropertyChanged(propertyName: string, value: any): void;
     }
 }
@@ -106,12 +109,6 @@ declare module Orange.Controls {
         private applyBindings();
         protected onApplyBindings(): void;
     }
-    class KnockoutViewBase extends ViewBase {
-        constructor(templateName: string);
-        constructor(templateName: string, context: any);
-        dispose(): void;
-        protected onApplyBindings(): void;
-    }
 }
 declare module Orange.Controls {
     interface IOrangeElementExtension {
@@ -147,8 +144,6 @@ declare module Orange.Controls {
         private handleMutation;
     }
 }
-declare module Orange.Bindings {
-}
 declare module Orange.Routing {
     class Router {
         private paths;
@@ -158,4 +153,13 @@ declare module Orange.Routing {
         navigate(path: string, state: any): void;
         private handleRoute(path);
     }
+}
+declare module Orange.Controls {
+    class KnockoutViewBase extends ViewBase {
+        constructor(templateName: string);
+        constructor(templateName: string, context: any);
+        protected onApplyBindings(): void;
+    }
+}
+declare module Orange.Bindings {
 }

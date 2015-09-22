@@ -629,12 +629,10 @@ var Orange;
                 configurable: true
             });
             Object.defineProperty(Control.prototype, "id", {
-                get: function () {
-                    return this._id;
-                },
+                get: function () { return this._id; },
                 set: function (v) {
                     if (this._id != null)
-                        throw "The 'id' property can only ever be set once. ";
+                        throw "The 'id' property can only ever be set once.";
                     this._id = v;
                 },
                 enumerable: true,
@@ -646,7 +644,6 @@ var Orange;
             Control.prototype.dispose = function () {
                 Controls.ControlManager.disposeControl(this);
             };
-            Control.prototype.onElementSet = function () { };
             Control.prototype.addPropertyChangedListener = function (listener) {
                 this._propertyChangedListeners.push(listener);
             };
@@ -655,16 +652,30 @@ var Orange;
                 if (idx > -1)
                     this._propertyChangedListeners.splice(idx, 1);
             };
-            Control.prototype.raisePropertyChanged = function (propertyName) {
-                var propertyValue = this[propertyName];
-                if (propertyValue == null || propertyValue == "undefined")
-                    throw "trying to access undefined property '" + propertyName + "'.";
-                this.onPropertyChanged(propertyName, propertyValue);
-                for (var plIdx = this._propertyChangedListeners.length - 1; plIdx >= 0; plIdx--) {
-                    this._propertyChangedListeners[plIdx](propertyName, propertyValue);
-                }
+            Control.getPropertyName = function (property) {
+                return Control.propertyRegex.exec(String(property))[1];
             };
+            Control.prototype.raisePropertyChanged = function (property) {
+                var propertyName = null;
+                if (typeof property === "string") {
+                    propertyName = property;
+                }
+                else if (typeof property === "function") {
+                    propertyName = Control.getPropertyName(property);
+                }
+                else {
+                    throw "Invalid argument passed to raisePropertyChanged";
+                }
+                if (typeof (this[propertyName]) === "undefined")
+                    throw "Attempt to access undefined property '" + propertyName + "' was made.";
+                var value = this[propertyName];
+                this.onPropertyChanged(propertyName, value);
+                for (var plIdx = this._propertyChangedListeners.length - 1; plIdx >= 0; plIdx--)
+                    this._propertyChangedListeners[plIdx](propertyName, value);
+            };
+            Control.prototype.onElementSet = function () { };
             Control.prototype.onPropertyChanged = function (propertyName, value) { };
+            Control.propertyRegex = /return _this.([a-zA-Z0-9]+);/;
             return Control;
         })();
         Controls.Control = Control;
@@ -674,8 +685,7 @@ var Orange;
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Orange;
 (function (Orange) {
@@ -784,23 +794,6 @@ var Orange;
             return ViewBase;
         })(Controls.TemplatedControl);
         Controls.ViewBase = ViewBase;
-        var KnockoutViewBase = (function (_super) {
-            __extends(KnockoutViewBase, _super);
-            function KnockoutViewBase(templateName, context) {
-                _super.call(this, templateName, context);
-            }
-            KnockoutViewBase.prototype.dispose = function () {
-                _super.prototype.dispose.call(this);
-            };
-            KnockoutViewBase.prototype.onApplyBindings = function () {
-                _super.prototype.onApplyBindings.call(this);
-                if (this.dataContext == null)
-                    return;
-                window.ko.applyBindingsToDescendants(this.dataContext, this.element);
-            };
-            return KnockoutViewBase;
-        })(ViewBase);
-        Controls.KnockoutViewBase = KnockoutViewBase;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
 /// <reference path="_references.ts"/>
@@ -991,16 +984,98 @@ var Orange;
         Controls.ControlManager = ControlManager;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
-/// <reference path="_references.ts"/>
+var Orange;
+(function (Orange) {
+    var Routing;
+    (function (Routing) {
+        var PathHandler = (function () {
+            function PathHandler(path, handler) {
+                this.path = path;
+                this.handler = handler;
+            }
+            PathHandler.prototype.tryMatch = function (path) {
+                if (this.path == "*")
+                    return {};
+                return this.path == path ? {} : null;
+            };
+            return PathHandler;
+        })();
+        var Router = (function () {
+            function Router() {
+                this.paths = [];
+            }
+            Router.prototype.route = function (path, handler) {
+                this.paths.push(new PathHandler(path, handler));
+            };
+            Router.prototype.default = function (handler) {
+                this.route("*", handler);
+            };
+            Router.prototype.run = function () {
+                var _this = this;
+                window.addEventListener("popstate", function (e) {
+                    _this.handleRoute(location.pathname);
+                });
+                window.addEventListener("click", function (e) {
+                    var elem = e.srcElement;
+                    if (elem.tagName === "A" &&
+                        elem.target === "" &&
+                        elem.hostname === location.hostname) {
+                        e.preventDefault();
+                        _this.navigate(elem.pathname, null);
+                    }
+                });
+                this.handleRoute(location.pathname);
+            };
+            Router.prototype.navigate = function (path, state) {
+                if (path === location.pathname)
+                    return;
+                history.pushState(state, null, path);
+                this.handleRoute(path);
+            };
+            Router.prototype.handleRoute = function (path) {
+                for (var _i = 0, _a = this.paths; _i < _a.length; _i++) {
+                    var p = _a[_i];
+                    var match = p.tryMatch(path);
+                    if (match) {
+                        p.handler();
+                        return;
+                    }
+                }
+            };
+            return Router;
+        })();
+        Routing.Router = Router;
+    })(Routing = Orange.Routing || (Orange.Routing = {}));
+})(Orange || (Orange = {}));
+/// <reference path="../_references.ts"/>
+var Orange;
+(function (Orange) {
+    var Controls;
+    (function (Controls) {
+        var KnockoutViewBase = (function (_super) {
+            __extends(KnockoutViewBase, _super);
+            function KnockoutViewBase(templateName, context) {
+                _super.call(this, templateName, context);
+            }
+            KnockoutViewBase.prototype.onApplyBindings = function () {
+                _super.prototype.onApplyBindings.call(this);
+                if (this.dataContext == null)
+                    return;
+                window.ko.applyBindingsToDescendants(this.dataContext, this.element);
+            };
+            return KnockoutViewBase;
+        })(Controls.ViewBase);
+        Controls.KnockoutViewBase = KnockoutViewBase;
+    })(Controls = Orange.Controls || (Orange.Controls = {}));
+})(Orange || (Orange = {}));
+/// <reference path="../_references.ts"/>
 var Orange;
 (function (Orange) {
     var Bindings;
     (function (Bindings) {
         var ko = window.ko;
         if (ko) {
-            ko.bindingHandlers.stopBindings = {
-                init: function () { return { controlsDescendantBindings: true }; }
-            };
+            ko.bindingHandlers.stopBindings = { init: function () { return ({ controlsDescendantBindings: true }); } };
             ko.virtualElements.allowedBindings.stopBindings = true;
         }
         var ViewModelToControlBinding = (function () {
@@ -1020,27 +1095,27 @@ var Orange;
                     if (!(_this.element.orange) || !(_this.element.orange.control))
                         throw "Attepmt to bind to control on a non controll element.";
                     var control = _this.element.orange.control;
-                    var pd = Object.getOwnPropertyDescriptor(control, _this.target);
-                    pd = !!pd ? pd : Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), _this.target);
-                    if (!pd && control[_this.target] == "undefined")
+                    if (control[_this.target] == "undefined")
                         throw "The target property " + _this.target + " could not be found.";
-                    if (!!(_this.vm[_this.property].subscribe))
-                        _this.propDisposable = _this.vm[_this.property].subscribe(function (val) { return control[_this.target] = val; });
-                    if (typeof _this.vm[_this.property] === "function")
-                        control[_this.target] = _this.vm[_this.property]();
+                    var prop = _this.vm[_this.property];
+                    if (!!(prop.subscribe))
+                        _this.propDisposable = prop.subscribe(function (val) { return control[_this.target] = val; });
+                    if (ko.isObservable(prop) || ko.isComputed(prop))
+                        control[_this.target] = prop();
                     else
-                        control[_this.target] = _this.vm[_this.property];
+                        control[_this.target] = prop;
                     if (_this.mode == "twoWay")
                         control.addPropertyChangedListener(_this.onPropertyChanged);
                 };
                 this.onPropertyChanged = function (propertyName, propertyValue) {
                     if (propertyName != _this.target)
                         return;
-                    if (_this.vm[_this.property].onNext) {
-                        _this.vm[_this.property].onNext(propertyValue);
+                    var prop = _this.vm[_this.property];
+                    if (prop.onNext) {
+                        prop.onNext(propertyValue);
                     }
-                    else if (typeof _this.vm[_this.property] === "function") {
-                        _this.vm[_this.property](propertyValue);
+                    else if (ko.isObservable(prop) || ko.isComputed(prop)) {
+                        prop(propertyValue);
                     }
                     else {
                         _this.vm[_this.property] = propertyValue;
@@ -1117,71 +1192,27 @@ var Orange;
                     }
                 }
             };
-        }
-    })(Bindings = Orange.Bindings || (Orange.Bindings = {}));
-})(Orange || (Orange = {}));
-var Orange;
-(function (Orange) {
-    var Routing;
-    (function (Routing) {
-        var PathHandler = (function () {
-            function PathHandler(path, handler) {
-                this.path = path;
-                this.handler = handler;
-            }
-            PathHandler.prototype.tryMatch = function (path) {
-                if (this.path == "*")
-                    return {};
-                return this.path == path ? {} : null;
-            };
-            return PathHandler;
-        })();
-        var Router = (function () {
-            function Router() {
-                this.paths = [];
-            }
-            Router.prototype.route = function (path, handler) {
-                this.paths.push(new PathHandler(path, handler));
-            };
-            Router.prototype.default = function (handler) {
-                this.route("*", handler);
-            };
-            Router.prototype.run = function () {
-                var _this = this;
-                window.addEventListener("popstate", function (e) {
-                    _this.handleRoute(location.pathname);
-                });
-                window.addEventListener("click", function (e) {
-                    var elem = e.srcElement;
-                    if (elem.tagName === "A" &&
-                        elem.target === "" &&
-                        elem.hostname === location.hostname) {
-                        e.preventDefault();
-                        _this.navigate(elem.pathname, null);
+            ko.bindingHandlers['orange-vm'] = {
+                init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                    return { controlsDescendantBindings: true };
+                },
+                update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                    var orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
+                    var value = ko.unwrap(valueAccessor());
+                    var onInitialized = function () { return orangeEl.control.dataContext = value; };
+                    if (orangeEl.isInitialized == true) {
+                        onInitialized();
                     }
-                });
-                this.handleRoute(location.pathname);
-            };
-            Router.prototype.navigate = function (path, state) {
-                if (path === location.pathname)
-                    return;
-                history.pushState(state, null, path);
-                this.handleRoute(path);
-            };
-            Router.prototype.handleRoute = function (path) {
-                for (var _i = 0, _a = this.paths; _i < _a.length; _i++) {
-                    var p = _a[_i];
-                    var match = p.tryMatch(path);
-                    if (match) {
-                        p.handler();
-                        return;
+                    else {
+                        orangeEl.addOnInitializedListener(onInitialized);
+                        ko.utils
+                            .domNodeDisposal
+                            .addDisposeCallback(element, function () { orangeEl.removeOnInitializedListener(onInitialized); });
                     }
                 }
             };
-            return Router;
-        })();
-        Routing.Router = Router;
-    })(Routing = Orange.Routing || (Orange.Routing = {}));
+        }
+    })(Bindings = Orange.Bindings || (Orange.Bindings = {}));
 })(Orange || (Orange = {}));
 /// <reference path="MutationObserverPolyfill.ts"/>
 /// <reference path="Uuid.ts" />
@@ -1192,6 +1223,7 @@ var Orange;
 /// <reference path="TemplatedControl.ts"/>
 /// <reference path="ViewBase.ts"/>
 /// <reference path="ControlManager.ts"/>
-/// <reference path="Bindings.ts" />
 /// <reference path="Router.ts" />
+/// <reference path="Knockout/KnockoutViewBase.ts" />
+/// <reference path="Knockout/KnockoutBindings.ts" />
 //# sourceMappingURL=orange.js.map
