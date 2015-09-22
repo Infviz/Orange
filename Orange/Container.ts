@@ -2,6 +2,13 @@
 
 module Orange.Modularity 
 {
+    export function Inject(target: any) {
+        if ((<any>window).Reflect == null)
+            throw "An attemtpt to use Orange.Modularity.Inject decorator was made without an available React implementation." 
+        
+        target.dependencies = () => (<any>window).Reflect.getMetadata("design:paramtypes", target);
+    }
+    
     export interface KeyValuePair { key: any; value: any; }
 
     export class Container {
