@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "sourceMap": true,
+        "declaration": false,
+        "target": "es5",
+        "noImplicitAny": true,
+        "removeComments": true
+    },
+    "filesGlob": [
+        "./**/*.ts",
+        "!./typings/**/*.ts",
+        "!./node_modules/*",
+        "./typings/tsd.d.ts"
+    ],
+    "files": [
+        "./bindings/TestView.ts",
+        "./bindings/spec.ts",
+        "./typings/tsd.d.ts"
+    ]
+}

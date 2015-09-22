@@ -40,20 +40,20 @@ module Orange.Bindings {
 	        	throw "Attepmt to bind to control on a non controll element.";
 
 	        let control = <Orange.Controls.Control>(<any>this.element).orange.control;
-	       	
+
 	        if ((<any>control)[this.target] == "undefined")
 				throw "The target property " + this.target + " could not be found."
-				
+
 			let prop = this.vm[this.property];
-			
+
 	        if (!!(prop.subscribe))
 	        	this.propDisposable = prop.subscribe((val: any) => (<any>control)[this.target] = val);
 
 	        if (ko.isObservable(prop) || ko.isComputed(prop))
 	        	(<any>control)[this.target] = prop();
-	        else 
+	        else
 	        	(<any>control)[this.target] = prop;
-				
+
 			if (this.mode == "twoWay")
 				control.addPropertyChangedListener(this.onPropertyChanged);
 		}
@@ -62,9 +62,9 @@ module Orange.Bindings {
 
 			if (propertyName != this.target)
 				return;
-				
+
 			let prop = this.vm[this.property];
-			
+
 			// if Rx.Observable
 			if (prop.onNext) {
 				prop.onNext(propertyValue);
@@ -107,6 +107,8 @@ module Orange.Bindings {
 				allBindingsAccessor: any,
 				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
 				bindingContext: any) => {
+
+				console.log("Warning: the 'bindings' binding is deprecated and might be removed in a future version of orange");
 
 				let bindings = new Array<ViewModelToControlBinding>();
 				let values = <Array<any>>(valueAccessor());
@@ -161,6 +163,8 @@ module Orange.Bindings {
 				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
 				bindingContext: any) => {
 
+				console.log("Warning: the 'orangeView' binding is deprecated and might be removed in a future version of orange");
+
 				let value = valueAccessor();
 
 				let dataViweAttr = document.createAttribute("data-view");
@@ -191,9 +195,9 @@ module Orange.Bindings {
 		        }
 		    }
 		};
-		
+
 		ko.bindingHandlers['orange-vm'] = {
-			
+
 			init: (element: HTMLElement,
 				valueAccessor: () => any,
 				allBindingsAccessor: any,
@@ -201,24 +205,24 @@ module Orange.Bindings {
 				bindingContext: any) => {
 					return { controlsDescendantBindings: true };
 				},
-				
+
 			update: (element: HTMLElement,
 				valueAccessor: () => any,
 				allBindingsAccessor: any,
 				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
 				bindingContext: any) => {
-				
+
 				let orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
 				let value = ko.unwrap(valueAccessor());
 				let onInitialized =
 					 () => (<any>orangeEl.control).dataContext = value;
-		
+
 				if (orangeEl.isInitialized == true){
 					onInitialized();
 				}
 				else {
 					orangeEl.addOnInitializedListener(onInitialized);
-					
+
 					ko.utils
 						.domNodeDisposal
 						.addDisposeCallback(element,
