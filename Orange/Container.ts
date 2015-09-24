@@ -2,9 +2,9 @@
 
 module Orange.Modularity 
 {
-    export function Inject(target: any) {
+    export function inject(target: any) {
         if ((<any>window).Reflect == null)
-            throw "An attemtpt to use Orange.Modularity.Inject decorator was made without an available React implementation." 
+            throw "An attempt to use Orange.Modularity.inject decorator was made without an available Reflect implementation." 
         
         target.dependencies = () => (<any>window).Reflect.getMetadata("design:paramtypes", target);
     }

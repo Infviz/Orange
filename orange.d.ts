@@ -13,7 +13,7 @@ declare module Orange {
     }
 }
 declare module Orange.Modularity {
-    function Inject(target: any): void;
+    function inject(target: any): void;
     interface KeyValuePair {
         key: any;
         value: any;
