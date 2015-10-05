@@ -2,6 +2,13 @@
 
 module Orange.Modularity 
 {
+    export function inject(target: any) {
+        if ((<any>window).Reflect == null)
+            throw "An attempt to use Orange.Modularity.inject decorator was made without an available Reflect implementation." 
+        
+        target.dependencies = () => (<any>window).Reflect.getMetadata("design:paramtypes", target);
+    }
+    
     export interface KeyValuePair { key: any; value: any; }
 
     export class Container {

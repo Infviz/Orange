@@ -417,6 +417,12 @@ var Orange;
 (function (Orange) {
     var Modularity;
     (function (Modularity) {
+        function inject(target) {
+            if (window.Reflect == null)
+                throw "An attempt to use Orange.Modularity.inject decorator was made without an available Reflect implementation.";
+            target.dependencies = function () { return window.Reflect.getMetadata("design:paramtypes", target); };
+        }
+        Modularity.inject = inject;
         var Container = (function () {
             function Container() {
                 this.typeMap = [];
