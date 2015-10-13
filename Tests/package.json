@@ -1,0 +1,11 @@
+{
+  "name": "OrangeTests",
+  "version": "0.0.0",
+  "description": "",
+  "main": "runner.html",
+  "author": "Markus Johnsson <markus.johnsson@infviz.com>",
+  "license": "MIT",
+  "dependencies": {
+    "mocha": "^2.3.3"
+  }
+}

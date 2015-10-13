@@ -1215,6 +1215,7 @@ var Orange;
             };
             ko.bindingHandlers.orangeView = {
                 init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                    console.warn("DEPRECATED: The Orange knockout binding 'orangeView' is deprecated and might be removed in a future version of orange ");
                     var value = valueAccessor();
                     var dataViweAttr = document.createAttribute("data-view");
                     dataViweAttr.value = value;

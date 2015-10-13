@@ -69,9 +69,9 @@ module Orange.Bindings {
 
 			if (propertyName != this.target)
 				return;
-				
+	
 			let prop = this.getSourceProperty();
-			
+
 			// if Rx.Observable
 			if (prop.onNext)
 				prop.onNext(propertyValue);
@@ -155,7 +155,6 @@ module Orange.Bindings {
 		};
 		
 		ko.bindingHandlers.bindings = {
-
 			init: (element: HTMLElement,
 				valueAccessor: () => any,
 				allBindingsAccessor: any,
@@ -163,7 +162,7 @@ module Orange.Bindings {
 				bindingContext: any) => {
 				
 				console.warn("DEPRECATED: The Orange knockout binding 'bindings' is deprecated, use 'binding' instead. Binding data: ", allBindingsAccessor());
-				
+
 				let bindings = new Array<ViewModelToControlBinding>();
 				let values = <Array<any>>(valueAccessor());
 
@@ -219,6 +218,8 @@ module Orange.Bindings {
 				allBindingsAccessor: any,
 				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
 				bindingContext: any) => {
+					
+				console.warn("DEPRECATED: The Orange knockout binding 'orangeView' is deprecated and might be removed in a future version of orange ");
 
 				let value = valueAccessor();
 
@@ -250,9 +251,9 @@ module Orange.Bindings {
 		        }
 		    }
 		};
-		
+
 		ko.bindingHandlers['orange-vm'] = {
-			
+
 			init: (element: HTMLElement,
 				valueAccessor: () => any,
 				allBindingsAccessor: any,
@@ -260,24 +261,24 @@ module Orange.Bindings {
 				bindingContext: any) => {
 					return { controlsDescendantBindings: true };
 				},
-				
+
 			update: (element: HTMLElement,
 				valueAccessor: () => any,
 				allBindingsAccessor: any,
 				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
 				bindingContext: any) => {
-				
+
 				let orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
 				let value = ko.unwrap(valueAccessor());
 				let onInitialized =
 					 () => (<any>orangeEl.control).dataContext = value;
-		
+
 				if (orangeEl.isInitialized == true){
 					onInitialized();
 				}
 				else {
 					orangeEl.addOnInitializedListener(onInitialized);
-					
+
 					ko.utils
 						.domNodeDisposal
 						.addDisposeCallback(element,

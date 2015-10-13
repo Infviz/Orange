@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+        <link rel="stylesheet" href="./node_modules/mocha/mocha.css">
+    </head>
+    <body>
+        <script id="Bindings-TestView" type="text/html">
+            <div class="content-wrapper">
+                <h2>This is TestView</h2>
+                <p data-bind="text: prop"></p>
+            </div>
+        </script>
+
+        <div id="mocha"></div>
+        <script src="bower_components/jquery/dist/jquery.js"></script>
+        <script src="bower_components/knockout/dist/knockout.js"></script>
+        <script src="../orange.js"></script>
+        <script src="./node_modules/mocha/mocha.js"></script>
+        <script>
+            mocha.ui('bdd');
+            mocha.reporter('html');
+        </script>
+        <script src="./bindings/TestView.js"></script>
+        <script src="./bindings/spec.js"></script>
+        <script>
+            var container = new Orange.Modularity.Container();
+            var controlManager = new Orange.Controls.ControlManager(container);
+            container.registerInstance(Orange.Controls.ControlManager, controlManager);
+            controlManager.manage(document.body);
+
+            mocha.run();
+        </script>
+
+        <div id="testingGround">
+        </div>
+    </body>
+</html>
