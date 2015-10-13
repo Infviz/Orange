@@ -1148,7 +1148,7 @@ var Orange;
             return ViewModelToControlBinding;
         })();
         if (ko) {
-            ko.bindingHandlers.binding = {
+            ko.bindingHandlers['o-binding'] = {
                 init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
                     var bindings = new Array();
                     var values = valueAccessor();

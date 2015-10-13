@@ -102,7 +102,7 @@ module Orange.Bindings {
 	
 	if (ko) {
 		
-		ko.bindingHandlers.binding = {
+		ko.bindingHandlers['o-binding'] = {
 
 			init: (element: HTMLElement,
 				valueAccessor: () => any,
