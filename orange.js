@@ -1084,48 +1084,51 @@ var Orange;
             ko.bindingHandlers.stopBindings = { init: function () { return ({ controlsDescendantBindings: true }); } };
             ko.virtualElements.allowedBindings.stopBindings = true;
         }
+        var BindingMode;
+        (function (BindingMode) {
+            BindingMode[BindingMode["TwoWay"] = 0] = "TwoWay";
+            BindingMode[BindingMode["OneWay"] = 1] = "OneWay";
+        })(BindingMode || (BindingMode = {}));
         var ViewModelToControlBinding = (function () {
-            function ViewModelToControlBinding(vm, element, property, target, mode) {
+            function ViewModelToControlBinding(vm, element, source, target, settings) {
                 var _this = this;
                 this.vm = vm;
                 this.element = element;
-                this.property = property;
+                this.source = source;
                 this.target = target;
-                this.mode = mode;
+                this.settings = settings;
                 this.propDisposable = null;
+                this.getSourceProperty = function () { return ((typeof _this.source === "string") ? _this.vm[_this.source] : _this.source); };
                 this.init = function () {
-                    if (!(_this.vm))
+                    if (_this.vm == null)
                         throw "No context was pressent for binding to use.";
-                    if (!(_this.vm[_this.property]))
-                        throw "The property " + _this.property + " could not be found.";
-                    if (!(_this.element.orange) || !(_this.element.orange.control))
+                    if (typeof _this.source === "string" && _this.vm[_this.source] == null)
+                        throw "The property " + _this.source + " could not be found.";
+                    if (_this.element.orange == null || _this.element.orange.control == null)
                         throw "Attepmt to bind to control on a non controll element.";
                     var control = _this.element.orange.control;
-                    if (control[_this.target] == "undefined")
+                    if (control[_this.target] === 'undefined')
                         throw "The target property " + _this.target + " could not be found.";
-                    var prop = _this.vm[_this.property];
-                    if (!!(prop.subscribe))
+                    var prop = _this.getSourceProperty();
+                    if (prop.subscribe != null)
                         _this.propDisposable = prop.subscribe(function (val) { return control[_this.target] = val; });
                     if (ko.isObservable(prop) || ko.isComputed(prop))
                         control[_this.target] = prop();
-                    else
+                    else if (prop.subscribe != null)
                         control[_this.target] = prop;
-                    if (_this.mode == "twoWay")
+                    if (_this.settings.mode == BindingMode.TwoWay)
                         control.addPropertyChangedListener(_this.onPropertyChanged);
                 };
                 this.onPropertyChanged = function (propertyName, propertyValue) {
                     if (propertyName != _this.target)
                         return;
-                    var prop = _this.vm[_this.property];
-                    if (prop.onNext) {
+                    var prop = _this.getSourceProperty();
+                    if (prop.onNext)
                         prop.onNext(propertyValue);
-                    }
-                    else if (ko.isObservable(prop) || ko.isComputed(prop)) {
+                    else if (ko.isObservable(prop) || ko.isComputed(prop))
                         prop(propertyValue);
-                    }
-                    else {
-                        _this.vm[_this.property] = propertyValue;
-                    }
+                    else
+                        _this.vm[_this.source] = propertyValue;
                 };
                 var orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
                 if (orangeEl.isInitialized)
@@ -1134,19 +1137,52 @@ var Orange;
                     orangeEl.addOnInitializedListener(this.init);
             }
             ViewModelToControlBinding.prototype.dispose = function () {
-                if (!!this.propDisposable && !!(this.propDisposable.dispose))
+                if (this.propDisposable != null && this.propDisposable.dispose != null)
                     this.propDisposable.dispose();
-                if (!!(this.element.orange)) {
+                if (this.element.orange != null) {
                     (this.element.orange).removeOnInitializedListener(this.init);
-                    if (!!(this.element.orange).control)
+                    if (this.element.orange.control != null)
                         (this.element.orange).control.removePropertyChangedListener(this.onPropertyChanged);
                 }
             };
             return ViewModelToControlBinding;
         })();
         if (ko) {
+            ko.bindingHandlers.binding = {
+                init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                    var bindings = new Array();
+                    var values = valueAccessor();
+                    var bindingProperties = Array.isArray(values) ? values : [values];
+                    var allSettingNames = ['mode'];
+                    for (var _i = 0; _i < bindingProperties.length; _i++) {
+                        var bindingProperty = bindingProperties[_i];
+                        var allProperties = Object.getOwnPropertyNames(bindingProperty);
+                        var settingProperties = allProperties.filter(function (p) { return allSettingNames.indexOf(p) > -1; });
+                        var properties = allProperties.filter(function (p) { return settingProperties.indexOf(p) < 0; });
+                        if (properties.length < 1)
+                            throw 'No binding property could be found.';
+                        var settings = {
+                            mode: BindingMode.OneWay
+                        };
+                        if (settingProperties.indexOf('mode') > -1) {
+                            var modeStr = bindingProperty['mode'];
+                            if (modeStr === 'two-way')
+                                settings.mode = BindingMode.TwoWay;
+                            else if (modeStr !== 'one-way')
+                                throw "Binding mode has to be 'one-way' or 'two-way' (was '" + modeStr + "').";
+                        }
+                        for (var _a = 0; _a < properties.length; _a++) {
+                            var property = properties[_a];
+                            var source = bindingProperty[property];
+                            var target = property;
+                            bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, source, target, settings));
+                        }
+                    }
+                }
+            };
             ko.bindingHandlers.bindings = {
                 init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                    console.warn("DEPRECATED: The Orange knockout binding 'bindings' is deprecated, use 'binding' instead. Binding data: ", allBindingsAccessor());
                     var bindings = new Array();
                     var values = (valueAccessor());
                     if (Array.isArray(values) == false)
@@ -1156,15 +1192,17 @@ var Orange;
                         var propertyNames = Object.getOwnPropertyNames(value);
                         if (propertyNames.length > 2)
                             throw "Faulty binding, should be {vmProp:ctrlProp [, mode: m]}, were m can be 'oneWay' or 'twoWay'.";
-                        var mode = 'oneWay';
+                        var settings = { mode: BindingMode.OneWay };
                         if (propertyNames.length == 2) {
-                            mode = Object.getOwnPropertyDescriptor(value, "mode").value;
+                            var mode = Object.getOwnPropertyDescriptor(value, "mode").value;
                             if (mode != 'oneWay' && mode != 'twoWay')
                                 throw "Binding mode has to be 'oneWay' or 'twoWay'.";
+                            if (mode === 'twoWay')
+                                settings.mode == BindingMode.TwoWay;
                         }
                         var sourceProp = propertyNames.filter(function (v) { return v != "mode"; })[0];
                         var targetProp = Object.getOwnPropertyDescriptor(value, sourceProp).value;
-                        bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, sourceProp, targetProp, mode));
+                        bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, sourceProp, targetProp, settings));
                     }
                     ko.utils
                         .domNodeDisposal
