@@ -161,7 +161,7 @@ module Orange.Bindings {
 				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
 				bindingContext: any) => {
 				
-				console.warn("DEPRECATED: The Orange knockout binding 'bindings' is deprecated, use 'binding' instead. Binding data: ", allBindingsAccessor());
+				console.warn("DEPRECATED: The Orange knockout binding 'bindings' is deprecated, use 'o-binding' instead. Binding data: ", allBindingsAccessor());
 
 				let bindings = new Array<ViewModelToControlBinding>();
 				let values = <Array<any>>(valueAccessor());

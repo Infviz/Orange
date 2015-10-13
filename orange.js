@@ -1182,7 +1182,7 @@ var Orange;
             };
             ko.bindingHandlers.bindings = {
                 init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-                    console.warn("DEPRECATED: The Orange knockout binding 'bindings' is deprecated, use 'binding' instead. Binding data: ", allBindingsAccessor());
+                    console.warn("DEPRECATED: The Orange knockout binding 'bindings' is deprecated, use 'o-binding' instead. Binding data: ", allBindingsAccessor());
                     var bindings = new Array();
                     var values = (valueAccessor());
                     if (Array.isArray(values) == false)
