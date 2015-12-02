@@ -23,7 +23,7 @@ module Orange.Controls {
 
 		public removeOnInitializedListener(callback: () => void) : void {
 
-			var idx = this._onInitializedListeners.indexOf(callback);	
+			let idx = this._onInitializedListeners.indexOf(callback);	
 			
 			if (idx > -1) 
 				this._onInitializedListeners.splice(idx, 1);
@@ -171,17 +171,16 @@ module Orange.Controls {
 		public static createControlsInElement(element: HTMLElement, container: Orange.Modularity.Container): void;
 		public static createControlsInElement(element: HTMLElement, container?: Orange.Modularity.Container): void {
 
-			var attr = ControlManager.getControlAttribute(element);
+			let attr = ControlManager.getControlAttribute(element);
 
 			if (attr != null) {
 				ControlManager.createControlFromElement(element, container);
 			}
 			else {
-				var controls = element.querySelectorAll("[" + this._controlAttributeNames.join("], [") +  "]");
-
-				for (var ceIdx = 0; ceIdx < controls.length; ++ceIdx) {
-					var ce = <HTMLElement>(controls[ceIdx]);
-					ControlManager.createControlFromElement(ce, container);
+				let controls = element.querySelectorAll("[" + this._controlAttributeNames.join("], [") +  "]");
+				
+				for (let ceIdx = 0; ceIdx < controls.length; ++ceIdx) {
+					ControlManager.createControlFromElement(<HTMLElement>(controls[ceIdx]), container);
 				}
 			}
 		}
@@ -213,14 +212,14 @@ module Orange.Controls {
 
 		private static createControlInternal(element: HTMLElement, container: Orange.Modularity.Container): Controls.Control {
 
-			var type = ControlManager.getControlAttribute(element);
+			let type = ControlManager.getControlAttribute(element);
 
-			// The element already has a controll connected to it.
-			var orangeElement = GetOrInitializeOrangeElement(element);
+			// The element already has a control connected to it.
+			let orangeElement = GetOrInitializeOrangeElement(element);
 			if (orangeElement.isInitialized)
 				return null;
 
-			var control = container.resolve(type.value);
+			let control = container.resolve(type.value);
 
 			orangeElement.control = control;
 
@@ -230,23 +229,25 @@ module Orange.Controls {
 			control.id = controlId;
 			control.element = element;
 
-			if (!!(<any>control).applyTemplate)
-				(<any>control).applyTemplate();
+			if (!!control.applyTemplate)
+				control.applyTemplate();
 
-			if (!!(<any>control).onApplyTemplate)
-				(<any>control).onApplyTemplate();
+			if (!!control.onApplyTemplate)
+				control.onApplyTemplate();
 
-			var children = ControlManager.getChildren(element);
+			let children = ControlManager.getChildren(element);
 
-			for (var i = 0; i < children.length; i++) 
-				ControlManager.createControlsInElement(children[i], container);
+			for (let child of children) 
+				ControlManager.createControlsInElement(child, container);
 
 			orangeElement.isInitialized = true;
-			var listeners: Array<() => void> = <Array<() => void>>(<any>orangeElement)._onInitializedListeners;
-			for (var listenerIdx = listeners.length - 1; listenerIdx >= 0; listenerIdx--) {
-				listeners[listenerIdx]();
-			}
 			
+			for (let listener of <Array<() => void>>(<any>orangeElement)._onInitializedListeners)
+				listener();
+			
+			if (!!control.onControlCreated)
+				control.onControlCreated();
+				
 			return control;
 		}
 
@@ -255,10 +256,10 @@ module Orange.Controls {
 			if (mutation.type !== "childList")
 				return;
 
-			var addedNodes = mutation.addedNodes;
-			for (var i = 0; i < addedNodes.length; i++) {
+			let addedNodes = mutation.addedNodes;
+			for (let i = 0; i < addedNodes.length; i++) {
 
-				var node = addedNodes[i];
+				let node = addedNodes[i];
 
 				// 1 == ELEMENT_NODE
 				if (node.nodeType !== 1) continue;
@@ -266,10 +267,10 @@ module Orange.Controls {
 				ControlManager.createControlsInElement(<HTMLElement>node, this._container);
 			}
 
-			var removedNodes = mutation.removedNodes;
-			for (var i = 0; i < removedNodes.length; i++) {
+			let removedNodes = mutation.removedNodes;
+			for (let i = 0; i < removedNodes.length; i++) {
 
-				var node = removedNodes[i];
+				let node = removedNodes[i];
 
 				// 1 == ELEMENT_NODE
 				if (node.nodeType !== 1) continue;
