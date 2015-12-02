@@ -53,7 +53,7 @@ declare class TemplateLoader {
     static load(templates: Array<TemplateInfo>): void;
 }
 declare module Orange.Controls {
-    class Control {
+    abstract class Control {
         private _element;
         element: HTMLElement;
         private _id;
@@ -72,6 +72,7 @@ declare module Orange.Controls {
         protected raisePropertyChanged<T>(property: () => T): void;
         protected onElementSet(): void;
         protected onPropertyChanged(propertyName: string, value: any): void;
+        protected onControlCreated(): void;
     }
 }
 declare module Orange.Controls {

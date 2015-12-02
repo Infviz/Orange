@@ -1,4 +1,3 @@
-/// <reference path="_references.ts"/>
 if (typeof window.WeakMap === 'undefined') {
     (function () {
         var defineProperty = Object.defineProperty;
@@ -72,7 +71,6 @@ if (typeof window.WeakMap === 'undefined') {
             node;
     }
     function dispatchCallbacks() {
-        // http://dom.spec.whatwg.org/#mutation-observers
         isScheduled = false;
         var observers = scheduledObservers;
         scheduledObservers = [];
@@ -366,7 +364,6 @@ if (typeof window.WeakMap === 'undefined') {
     if (!global.MutationObserver)
         global.MutationObserver = JsMutationObserver;
 })(this);
-/// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
     var Uuid = (function () {
@@ -412,7 +409,6 @@ var Orange;
     })();
     Orange.Uuid = Uuid;
 })(Orange || (Orange = {}));
-/// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
     var Modularity;
@@ -520,7 +516,6 @@ var Orange;
         Modularity.Container = Container;
     })(Modularity = Orange.Modularity || (Orange.Modularity = {}));
 })(Orange || (Orange = {}));
-/// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
     var Modularity;
@@ -611,7 +606,6 @@ var TemplateLoader = (function () {
     };
     return TemplateLoader;
 })();
-/// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
     var Controls;
@@ -681,13 +675,13 @@ var Orange;
             };
             Control.prototype.onElementSet = function () { };
             Control.prototype.onPropertyChanged = function (propertyName, value) { };
+            Control.prototype.onControlCreated = function () { };
             Control.propertyRegex = /return _this.([a-zA-Z0-9]+);/;
             return Control;
         })();
         Controls.Control = Control;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
-/// <reference path="_references.ts"/>
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -753,7 +747,6 @@ var Orange;
         Controls.TemplatedControl = TemplatedControl;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
-/// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
     var Controls;
@@ -802,7 +795,6 @@ var Orange;
         Controls.ViewBase = ViewBase;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
-/// <reference path="_references.ts"/>
 var Orange;
 (function (Orange) {
     var Controls;
@@ -933,8 +925,7 @@ var Orange;
                 else {
                     var controls = element.querySelectorAll("[" + this._controlAttributeNames.join("], [") + "]");
                     for (var ceIdx = 0; ceIdx < controls.length; ++ceIdx) {
-                        var ce = (controls[ceIdx]);
-                        ControlManager.createControlFromElement(ce, container);
+                        ControlManager.createControlFromElement((controls[ceIdx]), container);
                     }
                 }
             };
@@ -966,13 +957,17 @@ var Orange;
                 if (!!control.onApplyTemplate)
                     control.onApplyTemplate();
                 var children = ControlManager.getChildren(element);
-                for (var i = 0; i < children.length; i++)
-                    ControlManager.createControlsInElement(children[i], container);
-                orangeElement.isInitialized = true;
-                var listeners = orangeElement._onInitializedListeners;
-                for (var listenerIdx = listeners.length - 1; listenerIdx >= 0; listenerIdx--) {
-                    listeners[listenerIdx]();
+                for (var _i = 0; _i < children.length; _i++) {
+                    var child = children[_i];
+                    ControlManager.createControlsInElement(child, container);
                 }
+                orangeElement.isInitialized = true;
+                for (var _a = 0, _b = orangeElement._onInitializedListeners; _a < _b.length; _a++) {
+                    var listener = _b[_a];
+                    listener();
+                }
+                if (!!control.onControlCreated)
+                    control.onControlCreated();
                 return control;
             };
             ControlManager.dependencies = function () { return [Orange.Modularity.Container]; };
@@ -1053,7 +1048,6 @@ var Orange;
         Routing.Router = Router;
     })(Routing = Orange.Routing || (Orange.Routing = {}));
 })(Orange || (Orange = {}));
-/// <reference path="../_references.ts"/>
 var Orange;
 (function (Orange) {
     var Controls;
@@ -1074,7 +1068,6 @@ var Orange;
         Controls.KnockoutViewBase = KnockoutViewBase;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
-/// <reference path="../_references.ts"/>
 var Orange;
 (function (Orange) {
     var Bindings;
@@ -1259,16 +1252,4 @@ var Orange;
         }
     })(Bindings = Orange.Bindings || (Orange.Bindings = {}));
 })(Orange || (Orange = {}));
-/// <reference path="MutationObserverPolyfill.ts"/>
-/// <reference path="Uuid.ts" />
-/// <reference path="Container.ts"/>
-/// <reference path="RegionManager.ts"/>
-/// <reference path="TemplateLoader.ts"/>
-/// <reference path="Control.ts"/>
-/// <reference path="TemplatedControl.ts"/>
-/// <reference path="ViewBase.ts"/>
-/// <reference path="ControlManager.ts"/>
-/// <reference path="Router.ts" />
-/// <reference path="Knockout/KnockoutViewBase.ts" />
-/// <reference path="Knockout/KnockoutBindings.ts" />
 //# sourceMappingURL=orange.js.map
