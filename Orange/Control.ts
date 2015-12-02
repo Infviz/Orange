@@ -2,7 +2,7 @@
 
 module Orange.Controls {
 	
-	export class Control {
+	export abstract class Control {
 		
 		private _element: HTMLElement = null;
 		public get element(): HTMLElement { return this._element; }
@@ -47,7 +47,7 @@ module Orange.Controls {
 		protected raisePropertyChanged<T>(property: () => T): void;
 		protected raisePropertyChanged(property: any): void {
 			
-			var propertyName: string = null;
+			let propertyName: string = null;
 			if (typeof property === "string") {
 				propertyName = property;
 			}
@@ -71,5 +71,6 @@ module Orange.Controls {
 		
 		protected onElementSet(): void { }
 		protected onPropertyChanged(propertyName: string, value: any): void { }
+		protected onControlCreated() : void { }
 	}
 }
