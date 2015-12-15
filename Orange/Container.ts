@@ -29,13 +29,12 @@ module Orange.Modularity
             this.typeMap.push({ key: type, value: instance });
         }
         
-        
         tryResolve(type: any | string, register: boolean = false) : TryResolveResult {
             
             if (typeof type === "string") {
                 let ctr = Container.getConstructorFromString(type); 
                 if (ctr == null)
-                    throw new ReferenceError(`No constructor identified by "${type}" could be found`);   
+                    return { instance: null, success: false };
                 type = ctr; 
             }
 
@@ -57,7 +56,7 @@ module Orange.Modularity
             if (register === true)
                 this.registerInstance(type, instance);
 
-            return instance;
+            return { instance, success: true };
         }
         
         resolve(type: any | string, register: boolean = false) {
@@ -114,10 +113,19 @@ module Orange.Modularity
             if (Container.isValidConstructor(func))
                 return func;
 
-            // If the constructor was now found on window, try to require it.
+            // If the constructor was not found on window, try to require it.
             // NOTE: This is done to support browserify modules.
-            if ((<any>window).require != null)
-                func = (<any>window).require(constructorName);
+            if ((<any>window).require != null) {
+                // NOTE: Is there no way to get rid of this try catch? 
+                try {
+                    func = (<any>window).require(constructorName);
+                } catch (e) {
+                    func = null;
+                }
+            }
+            
+            if (func == null)
+                return null
 
             if (Container.isValidConstructor(func))
                 return func;
