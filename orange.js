@@ -431,16 +431,43 @@ var Orange;
             Container.prototype.registerType = function (type, instance) {
                 this.typeMap.push({ key: type, value: instance });
             };
+            Container.prototype.tryResolve = function (type, register) {
+                if (register === void 0) { register = false; }
+                if (typeof type === "string") {
+                    var ctr = Container.getConstructorFromString(type);
+                    if (ctr == null)
+                        throw new ReferenceError("No constructor identified by \"" + type + "\" could be found");
+                    type = ctr;
+                }
+                var instance = this.lookup(this.instances, type);
+                if (instance != null)
+                    return { instance: instance, success: true };
+                var resolvedType = this.lookup(this.typeMap, type) || type;
+                if (false == Container.isValidConstructor(resolvedType))
+                    return { instance: null, success: false };
+                if (false == this.checkArity(resolvedType))
+                    return { instance: null, success: false };
+                instance = this.createInstance(resolvedType);
+                if (register === true)
+                    this.registerInstance(type, instance);
+                return instance;
+            };
             Container.prototype.resolve = function (type, register) {
                 if (register === void 0) { register = false; }
-                if (typeof type === "string")
-                    type = Container.getConstructorFromString(type);
+                if (typeof type === "string") {
+                    var ctr = Container.getConstructorFromString(type);
+                    if (ctr == null)
+                        throw new ReferenceError("No constructor identified by \"" + type + "\" could be found");
+                    type = ctr;
+                }
                 var instance = this.lookup(this.instances, type);
                 if (instance != null)
                     return instance;
                 var resolvedType = this.lookup(this.typeMap, type) || type;
-                Container.validateConstructor(resolvedType);
-                this.checkArity(resolvedType);
+                if (false == Container.isValidConstructor(resolvedType))
+                    throw new Error("Orange.Modularity.Container failed to resolve type \"" + type + "\"");
+                if (false == this.checkArity(resolvedType))
+                    throw new Error("Orange.Modularity.Container failed to resolve type \"" + type + "\"");
                 instance = this.createInstance(resolvedType);
                 if (register === true)
                     this.registerInstance(type, instance);
@@ -469,7 +496,7 @@ var Orange;
                     return func;
                 if (func.default != null && Container.isValidConstructor(func.default))
                     return func.default;
-                throw new ReferenceError("No constructor identified by \"" + constructorName + "\" could be found");
+                return null;
             };
             Container.prototype.lookup = function (dict, key) {
                 for (var _i = 0; _i < dict.length; _i++) {
@@ -498,15 +525,10 @@ var Orange;
             Container.prototype.checkArity = function (type) {
                 var depCount = type.dependencies ? type.dependencies().length : 0;
                 var ctrCount = (type.length || type.arity || 0);
-                if (depCount != ctrCount)
-                    throw new Error("Orange.Modularity.Container failed to resolve type \"" + type + "\"");
+                return depCount === ctrCount;
             };
             Container.isValidConstructor = function (type) {
                 return type != null && (typeof (type) == "function");
-            };
-            Container.validateConstructor = function (type) {
-                if (false == Container.isValidConstructor(type))
-                    throw new Error("Orange.Modularity.Container failed to resolve type \"" + type + "\"");
             };
             Container.prototype.applyConstructor = function (ctor, args) {
                 return new (Function.bind.apply(ctor, [null].concat(args)));

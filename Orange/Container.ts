@@ -9,6 +9,8 @@ module Orange.Modularity
         target.dependencies = () => (<any>window).Reflect.getMetadata("design:paramtypes", target);
     }
     
+    export type TryResolveResult = { instance: any, success: boolean };
+    
     export interface KeyValuePair { key: any; value: any; }
 
     export class Container {
@@ -26,11 +28,46 @@ module Orange.Modularity
         registerType(type: any, instance: any): void {
             this.typeMap.push({ key: type, value: instance });
         }
+        
+        
+        tryResolve(type: any | string, register: boolean = false) : TryResolveResult {
+            
+            if (typeof type === "string") {
+                let ctr = Container.getConstructorFromString(type); 
+                if (ctr == null)
+                    throw new ReferenceError(`No constructor identified by "${type}" could be found`);   
+                type = ctr; 
+            }
 
+            let instance: any = this.lookup(this.instances, type);
+            
+            if (instance != null)
+                return { instance, success: true };
+
+            let resolvedType = this.lookup(this.typeMap, type) || type;
+
+            if (false == Container.isValidConstructor(resolvedType))
+                return { instance: null, success: false };
+            
+            if (false == this.checkArity(resolvedType))
+                return { instance: null, success: false };
+            
+            instance = this.createInstance(resolvedType);
+
+            if (register === true)
+                this.registerInstance(type, instance);
+
+            return instance;
+        }
+        
         resolve(type: any | string, register: boolean = false) {
             
-            if (typeof type === "string") 
-                type = Container.getConstructorFromString(type);
+            if (typeof type === "string") {
+                let ctr = Container.getConstructorFromString(type); 
+                if (ctr == null)
+                    throw new ReferenceError(`No constructor identified by "${type}" could be found`);   
+                type = ctr; 
+            }
 
             var instance: any = this.lookup(this.instances, type);
             
@@ -39,8 +76,11 @@ module Orange.Modularity
 
             var resolvedType = this.lookup(this.typeMap, type) || type;
 
-            Container.validateConstructor(resolvedType);
-            this.checkArity(resolvedType);
+            if (false == Container.isValidConstructor(resolvedType))
+                throw new Error(`Orange.Modularity.Container failed to resolve type "${type}"`);
+            
+            if (false == this.checkArity(resolvedType))
+                throw new Error(`Orange.Modularity.Container failed to resolve type "${type}"`);
 
             instance = this.createInstance(resolvedType);
 
@@ -86,8 +126,8 @@ module Orange.Modularity
             // we check for a default exported class and return it if it exists. 
             if (func.default != null && Container.isValidConstructor(func.default))
                 return func.default;
-
-            throw new ReferenceError(`No constructor identified by "${constructorName}" could be found`);
+            
+            return null;
         }
 
         private lookup(dict: Array<KeyValuePair>, key: any) {
@@ -120,18 +160,11 @@ module Orange.Modularity
             var depCount = type.dependencies ? type.dependencies().length : 0;
             var ctrCount = <number>(type.length || type.arity || 0);
 
-            if (depCount != ctrCount)
-                throw new Error(`Orange.Modularity.Container failed to resolve type "${type}"`);
+            return depCount === ctrCount;
         }
 
         private static isValidConstructor(type: any) : boolean {
             return type != null && (typeof(type) == "function");
-        }
-
-        private static validateConstructor(type: any) {
-
-            if (false == Container.isValidConstructor(type))
-                throw new Error(`Orange.Modularity.Container failed to resolve type "${type}"`);
         }
 
         private applyConstructor(ctor: any, args: Array<any>) {
