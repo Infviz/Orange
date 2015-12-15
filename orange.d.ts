@@ -14,6 +14,10 @@ declare module Orange {
 }
 declare module Orange.Modularity {
     function inject(target: any): void;
+    type TryResolveResult = {
+        instance: any;
+        success: boolean;
+    };
     interface KeyValuePair {
         key: any;
         value: any;
@@ -24,6 +28,7 @@ declare module Orange.Modularity {
         constructor();
         registerInstance(type: any, instance: any): void;
         registerType(type: any, instance: any): void;
+        tryResolve(type: any | string, register?: boolean): TryResolveResult;
         resolve(type: any | string, register?: boolean): any;
         resolveWithOverride(type: any, overrides: Array<KeyValuePair>): any;
         private static getConstructorFromString(constructorName);
@@ -31,7 +36,6 @@ declare module Orange.Modularity {
         private createInstance(resolvedType);
         private checkArity(type);
         private static isValidConstructor(type);
-        private static validateConstructor(type);
         private applyConstructor(ctor, args);
     }
 }
