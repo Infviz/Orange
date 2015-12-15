@@ -436,7 +436,7 @@ var Orange;
                 if (typeof type === "string") {
                     var ctr = Container.getConstructorFromString(type);
                     if (ctr == null)
-                        throw new ReferenceError("No constructor identified by \"" + type + "\" could be found");
+                        return { instance: null, success: false };
                     type = ctr;
                 }
                 var instance = this.lookup(this.instances, type);
@@ -450,7 +450,7 @@ var Orange;
                 instance = this.createInstance(resolvedType);
                 if (register === true)
                     this.registerInstance(type, instance);
-                return instance;
+                return { instance: instance, success: true };
             };
             Container.prototype.resolve = function (type, register) {
                 if (register === void 0) { register = false; }
@@ -490,8 +490,16 @@ var Orange;
                 }
                 if (Container.isValidConstructor(func))
                     return func;
-                if (window.require != null)
-                    func = window.require(constructorName);
+                if (window.require != null) {
+                    try {
+                        func = window.require(constructorName);
+                    }
+                    catch (e) {
+                        func = null;
+                    }
+                }
+                if (func == null)
+                    return null;
                 if (Container.isValidConstructor(func))
                     return func;
                 if (func.default != null && Container.isValidConstructor(func.default))
