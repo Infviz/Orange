@@ -32,15 +32,12 @@ module Orange.Controls {
 
 	export var GetOrInitializeOrangeElement = 
 		(element: HTMLElement) : IOrangeElementExtension => {
+			
+			let el = element as any;
+			if (el.orange == null)
+				el.orange = new OrangeElementExtension();
 
-			if (((<any>element).orange) == null) {
-				
-				var orangeEl = new OrangeElementExtension();;
-				(<any>element)["orange"] = orangeEl;
-				return orangeEl;
-			}
-
-			return <IOrangeElementExtension>(<any>element).orange;
+			return el.orange as IOrangeElementExtension;
 		};
 
 	export class ControlManager {

@@ -846,13 +846,10 @@ var Orange;
             return OrangeElementExtension;
         })();
         Controls.GetOrInitializeOrangeElement = function (element) {
-            if ((element.orange) == null) {
-                var orangeEl = new OrangeElementExtension();
-                ;
-                element["orange"] = orangeEl;
-                return orangeEl;
-            }
-            return element.orange;
+            var el = element;
+            if (el.orange == null)
+                el.orange = new OrangeElementExtension();
+            return el.orange;
         };
         var ControlManager = (function () {
             function ControlManager(container) {
