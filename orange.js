@@ -792,7 +792,6 @@ var Orange;
                 get: function () { return this._dataContext; },
                 set: function (context) {
                     this._dataContext = context;
-                    this.applyTemplate();
                     this.applyBindings();
                 },
                 enumerable: true,

@@ -9,7 +9,6 @@ module Orange.Controls {
         public set dataContext(context: any) {
 
             this._dataContext = context;
-            this.applyTemplate();
             this.applyBindings();
         }
 
