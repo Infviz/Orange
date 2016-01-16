@@ -10,11 +10,11 @@ module Orange {
 		public get value(): string { return this._value; }
 
 		private static _tStart: number = Date.now == null ? Date.now() : new Date().getTime();
-		private static getTime: () => number = 
-			(window.performance == null && window.performance.now == null) ? 
-				() => Math.round(performance.now() + Uuid._tStart) : 
-				(Date.now == null ? 
-					() => Date.now() : 
+		private static getTime: () => number =
+			(window.performance == null && window.performance.now == null) ?
+				() => Math.round(performance.now() + Uuid._tStart) :
+				(Date.now == null ?
+					() => Date.now() :
 					() => (new Date()).getTime());
 
 		private static generateV4Uuid() {
@@ -50,5 +50,7 @@ module Orange {
 		}
 
 		public sameValueAs(uuid: Uuid) { return this._value.toLowerCase() === uuid._value.toLowerCase(); }
+
+		public toString() { return this._value; }
 	}
 }
