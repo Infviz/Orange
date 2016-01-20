@@ -9,19 +9,20 @@ module Orange.Bindings {
 		ko.virtualElements.allowedBindings.stopBindings = true;
 	}
 	
-	enum BindingMode { TwoWay, OneWay }
+    enum BindingMode { TwoWay, OneWay }
 	interface BindingSettings {
 		mode: BindingMode;
+        allowDynamic: boolean;
 	}
 	
 	class ViewModelToControlBinding {
-
+        
 		private propDisposable: any = null;
-
+        
 		constructor(
 			private vm: any,
 			private element: HTMLElement,
-			private source: any,
+			private source: string | number | any,
 			private target: string,
 			private settings: BindingSettings) {
 
@@ -32,35 +33,79 @@ module Orange.Bindings {
 			else
 				orangeEl.addOnInitializedListener(this.init);
 		}
-		
-		private getSourceProperty = () => ((typeof this.source === "string") ? this.vm[this.source] : this.source);
+        
+        private getErrorMessage() {
+            let binding = this.element
+                .getAttribute('data-bind')
+                .match(/(o-binding\s*:\s*\[(.|\s)*?\])|(o-binding\s*:\s*\{(.|\s)*?\})/)[0]
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            let target = this.target;
+            let source = this.source;
+            
+            return { target, source, binding, element: this.element }
+        }
+        
+        private error(message: string) {
+            console.error(message, this.getErrorMessage());
+            throw message + " Se console for mor information.";
+        }
+        
+        private warn(message: string) {
+            console.warn(message, this.getErrorMessage());
+        }
 
+        private isValidTarget(control: any, target: string) : boolean {
+            
+            let descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), target);
+            
+            if (descriptor != null)
+                return true;
+            else if ('undefined' !== typeof control[this.target])
+                return true;
+            
+            return false;
+        }
+        
 		private init = () : void => {
 
 			if (this.vm == null)
-				throw "No context was pressent for binding to use.";
+				this.error(`No context is pressent for the binding to use.`);
 
-			if (typeof this.source === "string" && this.vm[this.source] == null)
-				throw "The property " + this.source + " could not be found."
-
-	        if ((<any>this.element).orange == null || (<any>this.element).orange.control == null)
-	        	throw "Attepmt to bind to control on a non controll element.";
+	        if ((<any>this.element).orange == null)
+	        	this.error(`Attempting to bind to a control on a non controll element.`);
+            if((<any>this.element).orange.control == null)
+                this.error(`Attempting to bind to a control that has not yet been fully initialized.`);
 
 	        let control: any = (<any>this.element).orange.control;
 	       	
-	        if (control[this.target] === 'undefined')
-				throw "The target property " + this.target + " could not be found."
-				
-			let prop = this.getSourceProperty();
+	        if (false == this.isValidTarget(control, this.target) && false == this.settings.allowDynamic)
+				this.warn(`The target property ${this.target} could not be found.`); 
 			
-	        if (prop.subscribe != null)
-	        	this.propDisposable = prop.subscribe((val: any) => control[this.target] = val);
-
-	        if (ko.isObservable(prop) || ko.isComputed(prop))
-	        	control[this.target] = prop();
-			else if (prop.subscribe != null)
-	        	control[this.target] = prop;
-				
+            // Binding fixed value directly from the html i.g:
+            //   o-binding: { someTargetProp: 'Some string value' } 
+            // or 
+            //   o-binding: { someTargetProp: 10 }
+            if (typeof this.source === 'string' || typeof this.source === 'number' ) {
+                control[this.target] = this.source;
+                return;
+            }
+            
+            let sourceProp : any = this.source; 
+			
+            // If Rx.IObservable/Rx.Observable or ko.observable/ko.observableArray 
+            // save disposable to be able to clean up later
+	        if (sourceProp.subscribe != null)
+	        	this.propDisposable = sourceProp.subscribe((val: any) => control[this.target] = val);
+            
+	        if (ko.isObservable(sourceProp) || ko.isComputed(sourceProp))
+	        	control[this.target] = sourceProp();
+			else if (sourceProp.subscribe != null)
+	        	control[this.target] = sourceProp;
+			else 
+                this.error(`The source property is not of a recognized type. Should be Rx.Observable or ko.observable.` );
+                
 			if (this.settings.mode == BindingMode.TwoWay)
 				(<Orange.Controls.Control>control).addPropertyChangedListener(this.onPropertyChanged);
 		}
@@ -70,7 +115,7 @@ module Orange.Bindings {
 			if (propertyName != this.target)
 				return;
 	
-			let prop = this.getSourceProperty();
+			let prop = this.source;
 
 			// if Rx.Observable
 			if (prop.onNext)
@@ -114,7 +159,7 @@ module Orange.Bindings {
 				let values =  valueAccessor();
 				let bindingProperties = Array.isArray(values) ? values : [values];
 				
-				let allSettingNames = ['mode'];
+				let allSettingNames = [ 'mode', 'allow-dynamic' ];
 				
 				for (let bindingProperty of bindingProperties) {
 					
@@ -127,7 +172,8 @@ module Orange.Bindings {
 						throw 'No binding property could be found.';
 					
 					let settings: BindingSettings = {
-						mode: BindingMode.OneWay
+						mode: BindingMode.OneWay,
+                        allowDynamic: false
 					};
 					
 					if (settingProperties.indexOf('mode') > -1) {
@@ -137,6 +183,14 @@ module Orange.Bindings {
 						else if (modeStr !== 'one-way')  
 							throw "Binding mode has to be 'one-way' or 'two-way' (was '" + modeStr + "').";
 					}
+                    
+                    if (settingProperties.indexOf('allow-dynamic') > -1) {
+                        let str = bindingProperty['allow-dynamic'];
+						if (str === true)
+							settings.allowDynamic = true
+						else if (str !== 'false')  
+							throw "'allow-dynamic' has to be true or false (was '" + str + ", typeof(...): " + (typeof str) + "').";
+                    }
 					
 					for (let property of properties) {
 						let source = bindingProperty[property];
