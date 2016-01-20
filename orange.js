@@ -1118,31 +1118,36 @@ var Orange;
                 this.target = target;
                 this.settings = settings;
                 this.propDisposable = null;
-                this.getSourceProperty = function () { return ((typeof _this.source === "string") ? _this.vm[_this.source] : _this.source); };
                 this.init = function () {
                     if (_this.vm == null)
-                        throw "No context was pressent for binding to use.";
-                    if (typeof _this.source === "string" && _this.vm[_this.source] == null)
-                        throw "The property " + _this.source + " could not be found.";
-                    if (_this.element.orange == null || _this.element.orange.control == null)
-                        throw "Attepmt to bind to control on a non controll element.";
+                        _this.error("No context is pressent for the binding to use.");
+                    if (_this.element.orange == null)
+                        _this.error("Attempting to bind to a control on a non controll element.");
+                    if (_this.element.orange.control == null)
+                        _this.error("Attempting to bind to a control that has not yet been fully initialized.");
                     var control = _this.element.orange.control;
-                    if (control[_this.target] === 'undefined')
-                        throw "The target property " + _this.target + " could not be found.";
-                    var prop = _this.getSourceProperty();
-                    if (prop.subscribe != null)
-                        _this.propDisposable = prop.subscribe(function (val) { return control[_this.target] = val; });
-                    if (ko.isObservable(prop) || ko.isComputed(prop))
-                        control[_this.target] = prop();
-                    else if (prop.subscribe != null)
-                        control[_this.target] = prop;
+                    if (false == _this.isValidTarget(control, _this.target) && false == _this.settings.allowDynamic)
+                        _this.warn("The target property " + _this.target + " could not be found.");
+                    if (typeof _this.source === 'string' || typeof _this.source === 'number') {
+                        control[_this.target] = _this.source;
+                        return;
+                    }
+                    var sourceProp = _this.source;
+                    if (sourceProp.subscribe != null)
+                        _this.propDisposable = sourceProp.subscribe(function (val) { return control[_this.target] = val; });
+                    if (ko.isObservable(sourceProp) || ko.isComputed(sourceProp))
+                        control[_this.target] = sourceProp();
+                    else if (sourceProp.subscribe != null)
+                        control[_this.target] = sourceProp;
+                    else
+                        _this.error("The source property is not of a recognized type. Should be Rx.Observable or ko.observable.");
                     if (_this.settings.mode == BindingMode.TwoWay)
                         control.addPropertyChangedListener(_this.onPropertyChanged);
                 };
                 this.onPropertyChanged = function (propertyName, propertyValue) {
                     if (propertyName != _this.target)
                         return;
-                    var prop = _this.getSourceProperty();
+                    var prop = _this.source;
                     if (prop.onNext)
                         prop.onNext(propertyValue);
                     else if (ko.isObservable(prop) || ko.isComputed(prop))
@@ -1156,6 +1161,31 @@ var Orange;
                 else
                     orangeEl.addOnInitializedListener(this.init);
             }
+            ViewModelToControlBinding.prototype.getErrorMessage = function () {
+                var binding = this.element
+                    .getAttribute('data-bind')
+                    .match(/(o-binding\s*:\s*\[(.|\s)*?\])|(o-binding\s*:\s*\{(.|\s)*?\})/)[0]
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                var target = this.target;
+                var source = this.source;
+                return { target: target, source: source, binding: binding, element: this.element };
+            };
+            ViewModelToControlBinding.prototype.error = function (message) {
+                console.error(message, this.getErrorMessage());
+                throw message + " Se console for mor information.";
+            };
+            ViewModelToControlBinding.prototype.warn = function (message) {
+                console.warn(message, this.getErrorMessage());
+            };
+            ViewModelToControlBinding.prototype.isValidTarget = function (control, target) {
+                var descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(control), target);
+                if (descriptor != null)
+                    return true;
+                else if ('undefined' !== typeof control[this.target])
+                    return true;
+                return false;
+            };
             ViewModelToControlBinding.prototype.dispose = function () {
                 if (this.propDisposable != null && this.propDisposable.dispose != null)
                     this.propDisposable.dispose();
@@ -1173,7 +1203,7 @@ var Orange;
                     var bindings = new Array();
                     var values = valueAccessor();
                     var bindingProperties = Array.isArray(values) ? values : [values];
-                    var allSettingNames = ['mode'];
+                    var allSettingNames = ['mode', 'allow-dynamic'];
                     for (var _i = 0; _i < bindingProperties.length; _i++) {
                         var bindingProperty = bindingProperties[_i];
                         var allProperties = Object.getOwnPropertyNames(bindingProperty);
@@ -1182,7 +1212,8 @@ var Orange;
                         if (properties.length < 1)
                             throw 'No binding property could be found.';
                         var settings = {
-                            mode: BindingMode.OneWay
+                            mode: BindingMode.OneWay,
+                            allowDynamic: false
                         };
                         if (settingProperties.indexOf('mode') > -1) {
                             var modeStr = bindingProperty['mode'];
@@ -1190,6 +1221,13 @@ var Orange;
                                 settings.mode = BindingMode.TwoWay;
                             else if (modeStr !== 'one-way')
                                 throw "Binding mode has to be 'one-way' or 'two-way' (was '" + modeStr + "').";
+                        }
+                        if (settingProperties.indexOf('allow-dynamic') > -1) {
+                            var str = bindingProperty['allow-dynamic'];
+                            if (str === true)
+                                settings.allowDynamic = true;
+                            else if (str !== 'false')
+                                throw "'allow-dynamic' has to be true or false (was '" + str + ", typeof(...): " + (typeof str) + "').";
                         }
                         for (var _a = 0; _a < properties.length; _a++) {
                             var property = properties[_a];
