@@ -74,7 +74,7 @@ module Orange.Bindings {
 				this.error(`No context is pressent for the binding to use.`);
 
 	        if ((<any>this.element).orange == null)
-	        	this.error(`Attempting to bind to a control on a non controll element.`);
+	        	this.error(`Attempting to bind to a control on a non control element.`);
             if((<any>this.element).orange.control == null)
                 this.error(`Attempting to bind to a control that has not yet been fully initialized.`);
 
@@ -188,7 +188,7 @@ module Orange.Bindings {
                         let str = bindingProperty['allow-dynamic'];
 						if (str === true)
 							settings.allowDynamic = true
-						else if (str !== 'false')  
+						else if (str !== false)  
 							throw "'allow-dynamic' has to be true or false (was '" + str + ", typeof(...): " + (typeof str) + "').";
                     }
 					
@@ -215,7 +215,7 @@ module Orange.Bindings {
 				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
 				bindingContext: any) => {
 				
-				console.warn("DEPRECATED: The Orange knockout binding 'bindings' is deprecated, use 'o-binding' instead. Binding data: ", allBindingsAccessor());
+				console.warn("DEPRECATED: The Orange knockout binding 'bindings' is deprecated and will be removed in a future release. Use 'o-binding' instead. Binding data: ", allBindingsAccessor());
 
 				let bindings = new Array<ViewModelToControlBinding>();
 				let values = <Array<any>>(valueAccessor());
@@ -231,7 +231,7 @@ module Orange.Bindings {
 					if (propertyNames.length > 2)
 						throw "Faulty binding, should be {vmProp:ctrlProp [, mode: m]}, were m can be 'oneWay' or 'twoWay'.";
 
-					let settings: BindingSettings = { mode: BindingMode.OneWay };
+					let settings: BindingSettings = { mode: BindingMode.OneWay, allowDynamic: false };
 					if (propertyNames.length == 2) {
 						let mode = Object.getOwnPropertyDescriptor(value, "mode").value;
 

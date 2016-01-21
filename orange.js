@@ -1122,7 +1122,7 @@ var Orange;
                     if (_this.vm == null)
                         _this.error("No context is pressent for the binding to use.");
                     if (_this.element.orange == null)
-                        _this.error("Attempting to bind to a control on a non controll element.");
+                        _this.error("Attempting to bind to a control on a non control element.");
                     if (_this.element.orange.control == null)
                         _this.error("Attempting to bind to a control that has not yet been fully initialized.");
                     var control = _this.element.orange.control;
@@ -1226,7 +1226,7 @@ var Orange;
                             var str = bindingProperty['allow-dynamic'];
                             if (str === true)
                                 settings.allowDynamic = true;
-                            else if (str !== 'false')
+                            else if (str !== false)
                                 throw "'allow-dynamic' has to be true or false (was '" + str + ", typeof(...): " + (typeof str) + "').";
                         }
                         for (var _a = 0; _a < properties.length; _a++) {
@@ -1240,7 +1240,7 @@ var Orange;
             };
             ko.bindingHandlers.bindings = {
                 init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-                    console.warn("DEPRECATED: The Orange knockout binding 'bindings' is deprecated, use 'o-binding' instead. Binding data: ", allBindingsAccessor());
+                    console.warn("DEPRECATED: The Orange knockout binding 'bindings' is deprecated and will be removed in a future release. Use 'o-binding' instead. Binding data: ", allBindingsAccessor());
                     var bindings = new Array();
                     var values = (valueAccessor());
                     if (Array.isArray(values) == false)
@@ -1250,7 +1250,7 @@ var Orange;
                         var propertyNames = Object.getOwnPropertyNames(value);
                         if (propertyNames.length > 2)
                             throw "Faulty binding, should be {vmProp:ctrlProp [, mode: m]}, were m can be 'oneWay' or 'twoWay'.";
-                        var settings = { mode: BindingMode.OneWay };
+                        var settings = { mode: BindingMode.OneWay, allowDynamic: false };
                         if (propertyNames.length == 2) {
                             var mode = Object.getOwnPropertyDescriptor(value, "mode").value;
                             if (mode != 'oneWay' && mode != 'twoWay')

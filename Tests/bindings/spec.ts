@@ -228,7 +228,7 @@ describe(
                     done();
                 });
                 
-            it("should set dynamic (not 'vissible') fields on a control with 'allow-dynamic' flag set to true",
+            it("should set dynamic (not 'visible') fields on a control with 'allow-dynamic' flag set to true",
                 done => {
                     assertEqual((controlThree as any).dynamicProperty1, vm.vmTitle());
                     assertEqual((controlThree as any).dynamicProperty2, staticStringValue);
