@@ -2,19 +2,24 @@
 
 module Orange.Controls {
 
+    /** 
+     * [[include:IOrangeElementExtension-Description.md]] 
+     * */
 	export interface IOrangeElementExtension {
-
+        element: HTMLElement;
 		control: Control; 
 		isInitialized: boolean;
 		addOnInitializedListener(callback: () => void) : void;
 		removeOnInitializedListener(callback: () => void) : void;
 	}
-
+    
 	class OrangeElementExtension implements IOrangeElementExtension {
-
+        
 		control: Control = null;
 		isInitialized: boolean = false;
-
+        
+        constructor(public element: HTMLElement) { }
+        
 		private _onInitializedListeners = new Array<() => void>();
 
 		public addOnInitializedListener(callback: () => void) {
@@ -29,17 +34,23 @@ module Orange.Controls {
 				this._onInitializedListeners.splice(idx, 1);
 		}
 	}
-
+    
+    /** 
+     * [[include:GetOrInitializeOrangeElement-Description.md]] 
+     * */
 	export var GetOrInitializeOrangeElement = 
 		(element: HTMLElement) : IOrangeElementExtension => {
 			
 			let el = element as any;
 			if (el.orange == null)
-				el.orange = new OrangeElementExtension();
+				el.orange = new OrangeElementExtension(element);
 
 			return el.orange as IOrangeElementExtension;
 		};
 
+    /** 
+     * [[include:ControlManager-ClassDescription.md]] 
+     * */
 	export class ControlManager {
 
 		static dependencies = () => <any>[Orange.Modularity.Container];

@@ -1,0 +1,1 @@
+The `Control` class is the base class for all types of content generating classes. Everything that gets instantiated by the `ControlManager` has to be based on `Control`.
