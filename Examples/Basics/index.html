@@ -5,7 +5,8 @@
 	<title>Basic Orange</title>
     
     <script src="../../orange.js"></script>
-    <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
+    <script src="../bower_components/knockout/dist/knockout.js"></script>
+    <script src="../bower_components/reflect-metadata/Reflect.js"></script>
     <script src="application.js"></script>
 </head>
 
@@ -20,5 +21,6 @@
         </div>
     </script>
 
+   <script>window.onload = function() { new BasicExample.Application(); } </script>
 </body>
 </html>

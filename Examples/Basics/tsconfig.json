@@ -8,6 +8,6 @@
         "emitDecoratorMetadata": true
     }, 
     "files": [
-        "src/Basic.ts"
+        "Basic.ts"
     ]
 }

@@ -1,6 +1,5 @@
 
-
-/// <reference path="../../../orange.d.ts" />
+/// <reference path="../../orange.d.ts" />
 
 namespace BasicExample {
 
@@ -28,6 +27,4 @@ namespace BasicExample {
             this.manager.manage(document.body);
         }
     }
-
-    window.onload = () => new Application();
 }

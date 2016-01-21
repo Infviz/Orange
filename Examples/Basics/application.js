@@ -1,4 +1,4 @@
-/// <reference path="../../../orange.d.ts" />
+/// <reference path="../../orange.d.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -46,6 +46,5 @@ var BasicExample;
         return Application;
     })();
     BasicExample.Application = Application;
-    window.onload = function () { return new Application(); };
 })(BasicExample || (BasicExample = {}));
 //# sourceMappingURL=application.js.map

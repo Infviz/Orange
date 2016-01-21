@@ -1,0 +1,9 @@
+{
+  "name": "Orange Examples",
+  "version": "0.0.0",
+  "homepage": "https://github.com/Infviz/Orange",
+  "authors": [
+    "Jonatan Nyberg <jonatan.nyberg@infviz.com>"
+  ],
+  "description": "Examples to illustrate how orange works and what can be done."
+}
