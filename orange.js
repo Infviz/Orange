@@ -1128,7 +1128,9 @@ var Orange;
                     var control = _this.element.orange.control;
                     if (false == _this.isValidTarget(control, _this.target) && false == _this.settings.allowDynamic)
                         _this.warn("The target property " + _this.target + " could not be found.");
-                    if (typeof _this.source === 'string' || typeof _this.source === 'number') {
+                    if (typeof _this.source === 'string' ||
+                        typeof _this.source === 'number' ||
+                        typeof _this.source === 'boolean') {
                         control[_this.target] = _this.source;
                         return;
                     }

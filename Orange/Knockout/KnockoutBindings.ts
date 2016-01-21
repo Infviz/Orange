@@ -87,7 +87,11 @@ module Orange.Bindings {
             //   o-binding: { someTargetProp: 'Some string value' } 
             // or 
             //   o-binding: { someTargetProp: 10 }
-            if (typeof this.source === 'string' || typeof this.source === 'number' ) {
+            // or 
+            //   o-binding: { someTargetProp: boolean }
+            if (typeof this.source === 'string' || 
+                typeof this.source === 'number' || 
+                typeof this.source === 'boolean' ) {
                 control[this.target] = this.source;
                 return;
             }
