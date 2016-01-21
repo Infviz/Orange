@@ -17,6 +17,7 @@ class TestControl extends Orange.Controls.Control {
     
     public numberField: number = null;
     public stringField: string = null;
+    public booleanField: string = null;
     
     constructor() {
         super();    

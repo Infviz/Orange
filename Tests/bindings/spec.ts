@@ -98,6 +98,7 @@ describe(
             
             let staticStringValue = "Static string value!!!";
             let staticNumericValue = 10;
+            let staticBooleanValue = true;
 
             let vm = {
                 vmTitle: ko.observable('My Title')
@@ -115,7 +116,8 @@ describe(
                                     o-binding: { 
                                         title: vmTitle,
                                         stringField: '${staticStringValue}',
-                                        numberField: ${staticNumericValue}
+                                        numberField: ${staticNumericValue},
+                                        booleanField: ${staticBooleanValue},
                                     }">
                             </div>
                                 
@@ -140,6 +142,7 @@ describe(
                                             dynamicProperty1: vmTitle,
                                             dynamicProperty2: '${staticStringValue}',
                                             dynamicProperty3: ${staticNumericValue},
+                                            dynamicProperty4: ${staticBooleanValue},
                                             'allow-dynamic': true
                                         }
                                     ]">
@@ -225,6 +228,7 @@ describe(
                 done => {
                     assertEqual(controlOne.stringField, staticStringValue);
                     assertEqual(controlOne.numberField, staticNumericValue);
+                    assertEqual(controlOne.booleanField, staticBooleanValue);
                     done();
                 });
                 
@@ -233,6 +237,7 @@ describe(
                     assertEqual((controlThree as any).dynamicProperty1, vm.vmTitle());
                     assertEqual((controlThree as any).dynamicProperty2, staticStringValue);
                     assertEqual((controlThree as any).dynamicProperty3, staticNumericValue);
+                    assertEqual((controlThree as any).dynamicProperty4, staticBooleanValue);
                     done();
                 });
 
