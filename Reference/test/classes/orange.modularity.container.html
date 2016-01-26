@@ -54,7 +54,7 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../globals.html">Globals</a>
+					<a href="../index.html">Globals</a>
 				</li>
 				<li>
 					<a href="../modules/orange.html">Orange</a>
@@ -81,16 +81,16 @@
 						<p><strong>Basic example</strong></p>
 						<p>In this example we create an instance of <code>Foo</code> and register it in the container.
 						Whenever we resolve the type <code>Foo</code> from the container we will get the registered instance. </p>
-						<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span> </span>{ <span class="hljs-comment">/* ... */</span> }
+						<pre><code>class Foo { /* ... */ }
 
-let <span class="hljs-keyword">container</span> = <span class="hljs-keyword">new</span> Orange.Modularity.Container();
+let container =<span class="hljs-instruction"> new </span>Orange.Modularity.Container(<span class="hljs-function">)</span>;
 
-let fooInstance = <span class="hljs-keyword">new</span> Foo();
-<span class="hljs-keyword">container</span>.registerInstance(Foo, fooInstance);
+let fooInstance =<span class="hljs-instruction"> new </span>Foo(<span class="hljs-function">)</span>;
+container.registerInstance(Foo, fooInstance<span class="hljs-function">)</span>;
 
 
-<span class="hljs-comment">// wherever we resolve Foo we will get the same instance (i.e. fooInstance) </span>
-let myFoo = <span class="hljs-keyword">container</span>.resolve(Foo);
+// wherever we resolve Foo we will get the same<span class="hljs-instruction"> instance </span>(i.e. fooInstance<span class="hljs-function">)</span> 
+let myFoo =<span class="hljs-function"> container.resolve(</span>Foo<span class="hljs-function">)</span>;
 </code></pre><p><code>Container</code> can automatically resolve any type that has an empty constructor. To resolve 
 							more complex types some more information has to be provided, as illustrated in the
 						<em>Nested resolving</em> example below.  </p>
@@ -495,7 +495,7 @@ container.registerInstance(Bar, container.resolve(Bar));
 			<nav class="tsd-navigation primary">
 				<ul>
 					<li class="globals  ">
-						<a href="../globals.html"><em>Globals</em></a>
+						<a href="../index.html"><em>Globals</em></a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="../modules/orange.html">Orange</a>

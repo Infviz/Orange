@@ -17,6 +17,7 @@ class MyViewModel {
     content = ko.observable("Some content");
 }
 
+@Orange.Modularity.inject
 class MyView extends Orange.Controls.KnockoutViewBase {
     
     constructor(vm: MyViewModel) {
