@@ -1,10 +1,15 @@
 
 The `ControlManager` is what makes the view/control engine in Orange tick. It 
 listens to changes in the area of the DOM it is responsible for and reacts to 
-`HTMLElements` with the attributes `data-view` and `data-control` being added or removed. 
+`HTMLElements` with the attributes `data-view` and `data-control` being added 
+or removed.
+
+All views/controls created by the control manager have to be based on the 
+[Control](orange.controls.control.html) class.  
 
 ### Usage
-The control manager needs a container and information about which part of the DOM to manage. 
+The control manager needs a [container](orange.modularity.container.html) and information 
+about which part of the DOM to manage. 
 ```
 let container = new Orange.Modularity.Container();
 let controlManager = new Orange.Controls.ControlManager(container);
@@ -39,7 +44,7 @@ as follows:
 1. Call `Orange.Controls.GetOrInitializeOrangeElement` on `<div data-view=MyViews.MyMainView"></div>` to create/get an `IOrangeElementExtension` connecting the control/view to its associated `HTMLElement`.  
 
 * Create an instance of `MyViews.MyMainView` 
-  * Using `Orange.Modularity.Container` to resolve any classes needed by the class being instantiated (in the example above an instance of `MyMainViewModel` will be provided by the container)
+  * Using `Orange.Modularity.Container` to resolve any classes needed by the class being instantiated (in the example above an instance of `MyMainViewModel` will be provided by the container due to the `@Orange.Modularity.inject` decorator being present on the class)
 
 * Set the `control` property on the `IOrangeElementExtension` from *1* to the instance created in *2*  
  
@@ -63,4 +68,6 @@ controls/views that was connected to elements removed from the DOM.
 
 Any disposables (conforms to interface `{ dispose(): void }`) added to the control with 
 `addDisposable(disposable: { dispose(): void })` (inherited from `Orange.Controls.Control`) 
-will also be disposed.      
+will also be disposed.
+
+See [Container](orange.modularity.container.html) for mor information on injection.

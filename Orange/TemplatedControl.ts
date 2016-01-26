@@ -44,7 +44,10 @@ module Orange.Controls {
 			onTemplateAppliedCallback(true);
 		}
 	}
-
+    
+    /** 
+     * [[include:TemplatedControl-ClassDescription.md]]
+     */
 	export class TemplatedControl extends Control {
 
 		private _templateProvider: ITemplatedControlTemplateProvider = null;

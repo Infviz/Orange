@@ -704,6 +704,7 @@ var Orange;
                     this._propertyChangedListeners[plIdx](propertyName, value);
             };
             Control.prototype.onElementSet = function () { };
+            ;
             Control.prototype.onPropertyChanged = function (propertyName, value) { };
             Control.prototype.onControlCreated = function () { };
             Control.propertyRegex = /return _this.([a-zA-Z0-9]+);/;
@@ -830,7 +831,8 @@ var Orange;
     var Controls;
     (function (Controls) {
         var OrangeElementExtension = (function () {
-            function OrangeElementExtension() {
+            function OrangeElementExtension(element) {
+                this.element = element;
                 this.control = null;
                 this.isInitialized = false;
                 this._onInitializedListeners = new Array();
@@ -848,7 +850,7 @@ var Orange;
         Controls.GetOrInitializeOrangeElement = function (element) {
             var el = element;
             if (el.orange == null)
-                el.orange = new OrangeElementExtension();
+                el.orange = new OrangeElementExtension(element);
             return el.orange;
         };
         var ControlManager = (function () {
@@ -1101,8 +1103,15 @@ var Orange;
     (function (Bindings) {
         var ko = window.ko;
         if (ko) {
-            ko.bindingHandlers.stopBindings = { init: function () { return ({ controlsDescendantBindings: true }); } };
+            ko.bindingHandlers.stopBindings = {
+                init: function () {
+                    console.warn("DEPRECATED: The Orange knockout binding 'stopBindings' is deprecated and will be removed in a future release. Use 'stop-binding' instead.");
+                    return { controlsDescendantBindings: true };
+                }
+            };
             ko.virtualElements.allowedBindings.stopBindings = true;
+            ko.bindingHandlers['o-stop-bindings'] = { init: function () { return ({ controlsDescendantBindings: true }); } };
+            ko.virtualElements.allowedBindings['o-stop-bindings'] = true;
         }
         var BindingMode;
         (function (BindingMode) {
@@ -1298,6 +1307,26 @@ var Orange;
                 }
             };
             ko.bindingHandlers['orange-vm'] = {
+                init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                    console.warn("DEPRECATED: The Orange knockout binding 'orange-vm' is deprecated and will be removed in a future version of orange. Use 'o-view-model' instead.");
+                    return { controlsDescendantBindings: true };
+                },
+                update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+                    var orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
+                    var value = ko.unwrap(valueAccessor());
+                    var onInitialized = function () { return orangeEl.control.dataContext = value; };
+                    if (orangeEl.isInitialized == true) {
+                        onInitialized();
+                    }
+                    else {
+                        orangeEl.addOnInitializedListener(onInitialized);
+                        ko.utils
+                            .domNodeDisposal
+                            .addDisposeCallback(element, function () { orangeEl.removeOnInitializedListener(onInitialized); });
+                    }
+                }
+            };
+            ko.bindingHandlers['o-view-model'] = {
                 init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
                     return { controlsDescendantBindings: true };
                 },

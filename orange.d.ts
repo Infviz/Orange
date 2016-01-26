@@ -118,6 +118,7 @@ declare module Orange.Controls {
 }
 declare module Orange.Controls {
     interface IOrangeElementExtension {
+        element: HTMLElement;
         control: Control;
         isInitialized: boolean;
         addOnInitializedListener(callback: () => void): void;

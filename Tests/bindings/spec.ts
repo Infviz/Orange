@@ -2,23 +2,12 @@
 /// <reference path="../typings/tsd.d.ts"/>
 /// <reference path="../../orange.d.ts"/>
 /// <reference path="TestControl.ts" />
-
-
-function assert(f: () => boolean) {
-    if (f()) return;
-    throw new Error(String(f) + " failed");
-}
-
-function assertEqual(actual: any, expected: any) {
-    if (actual !== expected) {
-        throw new Error("Got: " + JSON.stringify(actual) + ", Expected: " + JSON.stringify(expected));
-    }
-}
+/// <reference path="../helpers/TestFunctions.ts" />
 
 describe(
     "Knockout Binding Tests",
     () => {
-        describe("orange-vm", () => {
+        describe("o-view-model", () => {
             var root: HTMLElement;
             var view: HTMLElement;
 
@@ -30,7 +19,7 @@ describe(
                 done => {
                     $("#testingGround").html(`
                         <div id="orange-vm-test-root">
-                            <div data-view="TestView" data-bind="orange-vm: item">
+                            <div data-view="TestView" data-bind="o-view-model: item">
                             </div>
                         </div>
                         `);
@@ -243,7 +232,4 @@ describe(
 
         });
 
-        describe("orangeView", () => {
-
-        });
     });

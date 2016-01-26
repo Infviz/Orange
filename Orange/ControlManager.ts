@@ -13,6 +13,9 @@ module Orange.Controls {
 		removeOnInitializedListener(callback: () => void) : void;
 	}
     
+    /** 
+     * Private class. See `IOrangeElementExtension` instead. 
+     * */
 	class OrangeElementExtension implements IOrangeElementExtension {
         
 		control: Control = null;
@@ -87,6 +90,9 @@ module Orange.Controls {
 
 			// Set to an array of attribute local names (without namespace) if not all 
 			// attribute mutations need to be observed.
+            
+            // NOTE: We want to do this, but when tested did not work on windows.
+            // Shoold look in to this further. 
 			//attributeFilter: ["data-control", "data-view"]
 		};
 

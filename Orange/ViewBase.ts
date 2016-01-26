@@ -2,6 +2,9 @@
 
 module Orange.Controls {
 
+    /**
+     * [[include:ViewBase-ClassDescription.md]]
+     */
     export class ViewBase extends TemplatedControl {
 
         private _dataContext: any = null;

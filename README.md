@@ -1,6 +1,8 @@
 # Orange
 TypeScript IoC container and dependency injection
 
+[Getting started](../../Examples/Basics/basics.md)
+
 ## Requirements
 
 Install grunt-cli (preferably globally) via npm

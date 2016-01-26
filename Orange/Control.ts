@@ -71,7 +71,7 @@ module Orange.Controls {
 	        	this._propertyChangedListeners[plIdx](propertyName, value);
 		}
 		
-		protected onElementSet(): void { }
+		protected onElementSet(): void { };
 		protected onPropertyChanged(propertyName: string, value: any): void { }
 		protected onControlCreated() : void { }
 	}

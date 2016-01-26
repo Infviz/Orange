@@ -3,6 +3,9 @@
 
 module Orange.Controls {
     
+    /**
+     * [[include:KnockoutViewBase-ClassDescription.md]]
+     */
     export class KnockoutViewBase extends ViewBase {
 
         constructor(templateName: string);

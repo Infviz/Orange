@@ -1,0 +1,2 @@
+The `TemplatedControl` is a class that makes it easier to create controls that are based on some 
+kind of template. [ViewBase](orange.controls.viewbase.html) for example use `TemplatedControl` as a base.  
