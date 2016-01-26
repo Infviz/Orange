@@ -1,7 +1,7 @@
 # Orange
 TypeScript IoC container and dependency injection
 
-[Getting started](../../Examples/Basics/basics.md)
+[Getting started](Examples/Basics/basics.md)
 
 ## Requirements
 
