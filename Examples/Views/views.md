@@ -12,6 +12,7 @@ View nest naturaly; using a view in side a view is as simple as:
     <div data-view="MyNestedView"></div>
 </div>
 ```
+Where the outer `div` in the above example is the template for the parent view.  
 
 To assign view models dynamically to a nested view use the 'o-view-model' binding: 
 
@@ -24,6 +25,7 @@ To assign view models dynamically to a nested view use the 'o-view-model' bindin
     </div>
 </div>
 ```
+Where the outer `div` in the above example is the template for the parent view.
 
 Loops work as well:
 

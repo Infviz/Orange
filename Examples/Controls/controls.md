@@ -6,29 +6,24 @@ example inherits from `Control`.
 But controls can also be created to solve specific tasks. A date picker, a color picker or a validating input 
 field are examples of GUI components that might be needed in many places and therefore work well as a task specific control. 
 
-Here we will lock at creating basics controls, examples discussed here can be found in the *Examples/Controls* folder.
+Here we will lock at creating basics controls. Some working examples can be found in the *Examples/Controls* folder.
 
-In the *Controls* example folder there are two controls; `ElementPositioner` and `SmartInput`. We will look at how both of 
-them work.  
+#### A basic control
 
+The most basic control inherrits from `Control` and does something on `onElementSet`:   
+```typescript
+class MyControl extends Orange.Controls.Control {
+    
+    protected onElementSet(): void {
+        this.element.innerHTML = "<span>Hello world, from MyControl!</span>";
+    }
+}
+```
+This control will inject some simple text into elements that have the `data-control="MyControl"` attribute.
+More information about how `onElementSet` works can be found on the `Control` page in the 
+[reference](http://infviz.github.io/Orange/Reference/dist/classes/orange.controls.control.html).
 
-### ElementPositioner
-
-The Element positioner takes its html content and positions it within the ElementPositioner element: 
-
-```html
-<div 
-    data-control="Controls.ElementPositioner" 
-    data-bind="o-binding: { x: vmX, y: vmY }">
-    <div class="position_me">
-        <span data-bind="text: name">Position me!</span>
-    </div>
-</div>
-``` 
-
-Here the `<div class="position_me">` element will be positioned given the `vmX` and `vmY` parameters, 
-defined on the view model used where the control is created (in the case of the example this is the 
-`MainContainerViewModel`). 
+For more in depth information look at the examples in the *Examples/Controls* folder. 
 
 #### Where to go next?
 [Injection](../Injection/injection.md)
