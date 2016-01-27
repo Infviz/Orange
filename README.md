@@ -7,8 +7,10 @@ ready to go.
 
 ### Start here 
 
-[Getting started](Examples/Basics/basics.md)
-[Injection](Examples/Injection/injection.md)
+* [Getting started](Examples/Basics/basics.md)
+* [Views](Examples/Views/views.md)
+* [Controls](Examples/Controls/controls.md)
+* [Injection](Examples/Injection/injection.md)
 
 ### Also...
 In the checked out orange folder you will find a *Reference/dist* folder, run the 

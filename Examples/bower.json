@@ -5,5 +5,9 @@
   "authors": [
     "Jonatan Nyberg <jonatan.nyberg@infviz.com>"
   ],
-  "description": "Examples to illustrate how orange works and what can be done."
+  "description": "Examples to illustrate how orange works and what can be done.",
+  "dependencies": {
+    "knockout": "~3.4.0",
+    "rxjs": "~4.0.7"
+  }
 }

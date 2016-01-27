@@ -1,0 +1,20 @@
+
+<div>
+    <p>Try editing the 'Positioned text'.</p>
+	
+	<div style="position: relative; width: 400px; height: 100px; border: 1px solid black;">
+		<div 
+			data-control="Controls.ElementPositioner" 
+			data-bind="o-binding: { x: vmX, y: vmY }">
+			<div class="position_me">
+				<span data-bind="text: name">Position me!</span>
+			</div>
+		</div>
+	</div>
+
+	<span style="font-size: 12px;">Positioned text:</span> 
+	<div style="display: inline;" 
+		data-control="Controls.SmartInput" 
+		data-bind="o-binding: { text: name, mode: 'two-way' }">
+    </div>
+</div>

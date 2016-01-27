@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "out": "app.js", 
+        "sourceMap": true, 
+        "target": "es5",
+        "noImplicitAny": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+    }, 
+    "exclude": [
+        
+    ]
+}
