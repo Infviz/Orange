@@ -190,6 +190,5 @@ node_modules/
 
 #bower
 bower_components/
-!/Examples/bower_components/
 
 SampleApplications/**/*.js
