@@ -7,15 +7,8 @@ ready to go.
 
 ### Start here 
 
-* [Getting started](Examples/Basics/basics.md)
-* [Views](Examples/Views/views.md)
-* [Controls](Examples/Controls/controls.md)
-* [Injection](Examples/Injection/injection.md)
-
-### Also...
-In the checked out orange folder you will find a *Reference/dist* folder, run the 
-*index.html* to take a look at the reference with some handy examples and 
-information on how things work.  
+* [Examples](Examples/examples.md)
+* [Reference](http://infviz.github.io/Orange/Reference/dist/index.html)  
 
 ## TODO
 
