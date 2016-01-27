@@ -20,3 +20,6 @@ container.registerInstance(Foo, fooInstance);
 let myFoo = container.resolve(Foo);
 
 ```
+
+#### Where to go next?
+[Reference](http://infviz.github.io/Orange/Reference/dist/index.html)

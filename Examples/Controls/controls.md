@@ -30,6 +30,6 @@ Here the `<div class="position_me">` element will be positioned given the `vmX` 
 defined on the view model used where the control is created (in the case of the example this is the 
 `MainContainerViewModel`). 
 
-### Where to go next?
+#### Where to go next?
 [Injection](../Injection/injection.md)
 

@@ -57,5 +57,5 @@ Any new views (`<div data-view="myview"></div>`) being inserted in to the manage
 
 In the end this will result in a view being inserted in the `<div data-view="MainView"></div>` html element. With content inserted from the model.
 
-### Where to go next?
-[Views](../Views/Views.md)
+#### Where to go next?
+[Views](../Views/views.md)
