@@ -1,11 +1,4 @@
-
-#Orange explained
-
-In this document Orange will be explained through examples. The code for all examples discussed here can be found in the *Examples* folder in the root of the repository.
-
-To run the examples run `bower install` in the *Examples* folder, then open a given example via its index.html file. Each example is contained within its own named folder within the *Examples* folder. 
-
-##The Basics
+## Basics
 
 The following example can be found in the *Basics* folder.
 
@@ -64,5 +57,5 @@ Any new views (`<div data-view="myview"></div>`) being inserted in to the manage
 
 In the end this will result in a view being inserted in the `<div data-view="MainView"></div>` html element. With content inserted from the model.
 
-###Where to go next?
+### Where to go next?
 [Views](../Views/Views.md)
