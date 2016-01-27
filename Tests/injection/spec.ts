@@ -98,19 +98,6 @@ describe(
                     
                     done();
                 });
-                
-                it("should resolve class with dependencies via inject decorator",
-                done => {
-                    
-                    let container = new Orange.Modularity.Container();
-                    
-                    let instanced = container.resolve(Injection.TestClassD);
-                    container.registerType(Injection.a, Injection.TestClassD);
-                    
-                    var blah = container.resolve(Injection.TestClassD);
-                    
-                    done();
-                });
         });
         
     });
