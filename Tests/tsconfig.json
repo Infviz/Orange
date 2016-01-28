@@ -22,6 +22,8 @@
         "./bindings/spec.ts",
         
         "./injection/InjectionTestClass.ts",   
-        "./injection/spec.ts"   
+        "./injection/spec.ts",   
+        
+        "./views/spec.ts"
     ]
 }
