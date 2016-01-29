@@ -1158,14 +1158,18 @@ var Orange;
                     var sourceProp = _this.source;
                     if (sourceProp.subscribe != null)
                         _this.propDisposable = sourceProp.subscribe(function (val) { return control[_this.target] = val; });
-                    if (ko.isObservable(sourceProp) || ko.isComputed(sourceProp))
+                    if (ko.isObservable(sourceProp) || ko.isComputed(sourceProp)) {
                         control[_this.target] = sourceProp();
-                    else if (sourceProp.subscribe != null)
+                    }
+                    else if (sourceProp.subscribe == null) {
                         control[_this.target] = sourceProp;
-                    else
-                        _this.error("The source property is not of a recognized type. Should be Rx.Observable or ko.observable.");
-                    if (_this.settings.mode == BindingMode.TwoWay)
-                        control.addPropertyChangedListener(_this.onPropertyChanged);
+                    }
+                    if (_this.settings.mode == BindingMode.TwoWay) {
+                        if (sourceProp.subscribe == null)
+                            _this.warn("Two way bingins are only possible with sources of type Rx.IObservable or knockout observables.");
+                        else
+                            control.addPropertyChangedListener(_this.onPropertyChanged);
+                    }
                 };
                 this.onPropertyChanged = function (propertyName, propertyValue) {
                     if (propertyName != _this.target)

@@ -92,7 +92,10 @@ describe(
             let staticBooleanValue = true;
 
             let vm = {
-                vmTitle: ko.observable('My Title')
+                vmTitle: ko.observable('My Title'),
+                vmContent: "My nice content",
+                vmCallback: () => {  },
+                vmObject: { someProp: "value", otherProp: 10}
             };
 
             before(
@@ -106,9 +109,12 @@ describe(
                                 data-bind="
                                     o-binding: { 
                                         title: vmTitle,
+                                        content: vmContent,
+                                        callback: vmCallback,
+                                        someobject: vmObject,
                                         stringField: '${staticStringValue}',
                                         numberField: ${staticNumericValue},
-                                        booleanField: ${staticBooleanValue},
+                                        booleanField: ${staticBooleanValue}
                                     }">
                             </div>
                                 
@@ -181,6 +187,10 @@ describe(
             it("should set the property 'title' on all controls.",
                 done => {
                     assertEqual(controlOne.title, vm.vmTitle());
+                    assertEqual(controlOne.content, vm.vmContent);
+                    assertEqual(controlOne.someobject, vm.vmObject);
+                    assertEqual(controlOne.callback, vm.vmCallback);
+                    
                     assertEqual(controlTwo.title, vm.vmTitle());
                     assertEqual(controlThree.title, vm.vmTitle());
                     done();

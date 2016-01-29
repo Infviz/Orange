@@ -13,5 +13,3 @@ ready to go.
 ## TODO
 
 * Register Orange as an own bower package
-* Set Orange as a dependency in bower.json
-* Update app/_references.ts with path to bower_components/orange/Reference.d.ts
