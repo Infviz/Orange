@@ -10,7 +10,7 @@ module Orange.Bindings {
 	if (ko) {
 		ko.bindingHandlers.stopBindings = { 
             init: () => {
-                console.warn("DEPRECATED: The Orange knockout binding 'stopBindings' is deprecated and will be removed in a future release. Use 'stop-binding' instead."); 
+                console.warn("DEPRECATED: The Orange knockout binding 'stopBindings' is deprecated and will be removed in a future release. Use 'o-stop-bindings' instead."); 
                 return { controlsDescendantBindings: true };
             }
         };

@@ -16,10 +16,10 @@ module Orange.Controls {
 
         protected onApplyBindings(): void {
             super.onApplyBindings();
-
+            
             if (this.dataContext == null)
                 return;
-
+            
             (<any>window).ko.applyBindingsToDescendants(this.dataContext, this.element);
         }
     }

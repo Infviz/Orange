@@ -62,16 +62,24 @@ module Orange.Controls {
 
 		protected onApplyTemplate(): void { }
 
-		protected applyTemplate(): void {
+		protected applyTemplate(doneCallback : () => void): void {
 
 			this._templateProvider
 			.applyTemplate(
 				this.element,
 				(success, error) => {
-					if (success)
+					if (success) {
 						this._isTemplateApplied = true;
-					else
-						throw ("TemplatedControl.applyTemplate: A template provider failed to apply its template: " + (error || "").toString());
+                        this.onApplyTemplate();
+                        doneCallback();
+                    }
+					else {
+						throw {
+                            message: "TemplatedControl.applyTemplate: A template provider failed to apply its template: " + (error || "").toString(),
+                            templateProvider: this._templateProvider,
+                            element: this.element
+                        };
+                    }
 				});
 		}
 	}

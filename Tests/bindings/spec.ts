@@ -19,21 +19,23 @@ describe(
                 done => {
                     $("#testingGround").html(`
                         <div id="orange-vm-test-root">
-                            <div data-view="TestView" data-bind="o-view-model: item">
-                            </div>
+                            <div data-view="TestView" data-bind="o-view-model: item"></div>
                         </div>
                         `);
                     root = document.getElementById("orange-vm-test-root");
                     view = <HTMLElement>root.querySelector("[data-view='TestView']");
 
                     var element = Orange.Controls.GetOrInitializeOrangeElement(view);
-                    if (element.isInitialized)
+                    
+                    let isInitialized = () => {
+                        ko.applyBindings(vm, root);
                         done();
-                    else {
-                        element.addOnInitializedListener(() => done());
                     }
-
-                    ko.applyBindings(vm, root);
+                    
+                    if (element.isInitialized)
+                        isInitialized();
+                    else
+                        element.addOnInitializedListener(isInitialized);
                 });
             after(
                 done => {

@@ -763,14 +763,22 @@ var Orange;
                 configurable: true
             });
             TemplatedControl.prototype.onApplyTemplate = function () { };
-            TemplatedControl.prototype.applyTemplate = function () {
+            TemplatedControl.prototype.applyTemplate = function (doneCallback) {
                 var _this = this;
                 this._templateProvider
                     .applyTemplate(this.element, function (success, error) {
-                    if (success)
+                    if (success) {
                         _this._isTemplateApplied = true;
-                    else
-                        throw ("TemplatedControl.applyTemplate: A template provider failed to apply its template: " + (error || "").toString());
+                        _this.onApplyTemplate();
+                        doneCallback();
+                    }
+                    else {
+                        throw {
+                            message: "TemplatedControl.applyTemplate: A template provider failed to apply its template: " + (error || "").toString(),
+                            templateProvider: _this._templateProvider,
+                            element: _this.element
+                        };
+                    }
                 });
             };
             return TemplatedControl;
@@ -793,8 +801,7 @@ var Orange;
                 get: function () { return this._dataContext; },
                 set: function (context) {
                     this._dataContext = context;
-                    this.applyTemplate();
-                    this.applyBindings();
+                    this.applyTemplate(function () { });
                 },
                 enumerable: true,
                 configurable: true
@@ -805,11 +812,14 @@ var Orange;
                     return null;
                 return ((element.orange).control);
             };
-            ViewBase.prototype.applyTemplate = function () {
+            ViewBase.prototype.applyTemplate = function (doneCallback) {
                 if (null == this.element)
                     return;
                 this.element.innerHTML = "";
-                _super.prototype.applyTemplate.call(this);
+                if (this.dataContext != null)
+                    _super.prototype.applyTemplate.call(this, doneCallback);
+                else
+                    doneCallback();
             };
             ViewBase.prototype.onApplyTemplate = function () {
                 _super.prototype.onApplyTemplate.call(this);
@@ -840,6 +850,9 @@ var Orange;
             OrangeElementExtension.prototype.addOnInitializedListener = function (callback) {
                 this._onInitializedListeners.push(callback);
             };
+            OrangeElementExtension.prototype.getOnOnitializedListners = function () {
+                return this._onInitializedListeners;
+            };
             OrangeElementExtension.prototype.removeOnInitializedListener = function (callback) {
                 var idx = this._onInitializedListeners.indexOf(callback);
                 if (idx > -1)
@@ -864,19 +877,19 @@ var Orange;
                 this.handleMutation = function (mutation) {
                     if (mutation.type !== "childList")
                         return;
-                    var addedNodes = mutation.addedNodes;
-                    for (var i = 0; i < addedNodes.length; i++) {
-                        var node = addedNodes[i];
-                        if (node.nodeType !== 1)
-                            continue;
-                        ControlManager.createControlsInElement(node, _this._container);
-                    }
                     var removedNodes = mutation.removedNodes;
                     for (var i = 0; i < removedNodes.length; i++) {
                         var node = removedNodes[i];
                         if (node.nodeType !== 1)
                             continue;
                         ControlManager.disposeDescendants(node);
+                    }
+                    var addedNodes = mutation.addedNodes;
+                    for (var i = 0; i < addedNodes.length; i++) {
+                        var node = addedNodes[i];
+                        if (node.nodeType !== 1)
+                            continue;
+                        ControlManager.createControlsInElement(node, _this._container);
                     }
                 };
                 this._container = container;
@@ -907,14 +920,12 @@ var Orange;
                 if (element != null)
                     element.orange = null;
                 var disposables = control.disposables;
-                for (var dIdx = disposables.length - 1; dIdx >= 0; dIdx--) {
+                for (var dIdx = disposables.length - 1; dIdx >= 0; dIdx--)
                     disposables[dIdx].dispose();
-                }
                 if (typeof element.children !== "undefined") {
                     var children = element.children;
-                    for (var cIdx = 0; cIdx < children.length; cIdx++) {
+                    for (var cIdx = 0; cIdx < children.length; cIdx++)
                         ControlManager.disposeDescendants(children[cIdx]);
-                    }
                 }
             };
             ControlManager.prototype.manage = function (element) {
@@ -974,29 +985,30 @@ var Orange;
                 var type = ControlManager.getControlAttribute(element);
                 var orangeElement = Controls.GetOrInitializeOrangeElement(element);
                 if (orangeElement.isInitialized)
-                    return null;
+                    return orangeElement.control;
                 var control = container.resolve(type.value);
                 orangeElement.control = control;
-                var controlId = Orange.Uuid.generate();
-                element.setAttribute('data-control-id', controlId.value);
-                control.id = controlId;
+                control.id = Orange.Uuid.generate();
+                element.setAttribute('data-control-id', control.id.value);
                 control.element = element;
-                if (!!control.applyTemplate)
-                    control.applyTemplate();
-                if (!!control.onApplyTemplate)
-                    control.onApplyTemplate();
-                var children = ControlManager.getChildren(element);
-                for (var _i = 0; _i < children.length; _i++) {
-                    var child = children[_i];
-                    ControlManager.createControlsInElement(child, container);
+                var finalize = function () {
+                    ControlManager
+                        .getChildren(element)
+                        .forEach(function (child) {
+                        return ControlManager
+                            .createControlsInElement(child, container);
+                    });
+                    control.onControlCreated && control.onControlCreated();
+                    orangeElement.isInitialized = true;
+                    orangeElement
+                        .getOnOnitializedListners()
+                        .forEach(function (listener) { return listener(); });
+                };
+                if (control.applyTemplate == null)
+                    finalize();
+                else {
+                    control.applyTemplate(finalize);
                 }
-                orangeElement.isInitialized = true;
-                for (var _a = 0, _b = orangeElement._onInitializedListeners; _a < _b.length; _a++) {
-                    var listener = _b[_a];
-                    listener();
-                }
-                if (!!control.onControlCreated)
-                    control.onControlCreated();
                 return control;
             };
             ControlManager.dependencies = function () { return [Orange.Modularity.Container]; };
@@ -1105,7 +1117,7 @@ var Orange;
         if (ko) {
             ko.bindingHandlers.stopBindings = {
                 init: function () {
-                    console.warn("DEPRECATED: The Orange knockout binding 'stopBindings' is deprecated and will be removed in a future release. Use 'stop-binding' instead.");
+                    console.warn("DEPRECATED: The Orange knockout binding 'stopBindings' is deprecated and will be removed in a future release. Use 'o-stop-bindings' instead.");
                     return { controlsDescendantBindings: true };
                 }
             };
