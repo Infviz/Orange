@@ -122,15 +122,15 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 									<li>This will indirectly result in the <code>onElementSet()</code> method inherited from <code>Orange.Controls.Control</code> being called.</li>
 								</ul>
 							</li>
-							<li><p>Call <code>applyTemplate()</code> followed by  <code>onApplyTemplate()</code> if the view/control has those methods.</p>
+							<li><p>Call <code>applyTemplate()</code> if the view/control has that method.</p>
 							</li>
 							<li><p>Find any child views/controls and go through <em>this</em> procedure on them, starting at <em>1</em>.</p>
+							</li>
+							<li><p>Call <code>onControlCreated()</code> inherited from <code>Orange.Controls.Control</code>. </p>
 							</li>
 							<li><p>Set the <code>isInitialized</code> property on the <code>IOrangeElementExtension</code> from <em>1</em> to <code>true</code>.</p>
 							</li>
 							<li><p>Call any <code>onInializedListeners</code> present on the <code>IOrangeElementExtension</code> from <em>1</em>.</p>
-							</li>
-							<li><p>Call <code>onControlCreated()</code> inherited from <code>Orange.Controls.Control</code>. </p>
 							</li>
 						</ol>
 						<h3 id="when-a-htmlelement-is-removed">When a HTMLElement is removed</h3>
@@ -216,7 +216,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L62">ControlManager.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L67">ControlManager.ts:67</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -238,7 +238,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 					<div class="tsd-signature tsd-kind-icon">_container<span class="tsd-signature-symbol">:</span> <a href="orange.modularity.container.html" class="tsd-signature-type">Container</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L61">ControlManager.ts:61</a></li>
+							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L66">ControlManager.ts:66</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -248,7 +248,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 					<div class="tsd-signature tsd-kind-icon">_element<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">HTMLElement</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L142">ControlManager.ts:142</a></li>
+							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L145">ControlManager.ts:145</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -258,7 +258,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 					<div class="tsd-signature tsd-kind-icon">_observer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MutationObserver</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L141">ControlManager.ts:141</a></li>
+							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L144">ControlManager.ts:144</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -268,7 +268,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 					<div class="tsd-signature tsd-kind-icon">_control<wbr>Attribute<wbr>Names<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L139">ControlManager.ts:139</a></li>
+							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L142">ControlManager.ts:142</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -285,7 +285,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L62">ControlManager.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L67">ControlManager.ts:67</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="orange.modularity.container.html" class="tsd-signature-type">Container</a></h4>
@@ -305,7 +305,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L202">ControlManager.ts:202</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L205">ControlManager.ts:205</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -322,7 +322,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L268">ControlManager.ts:268</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L274">ControlManager.ts:274</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -345,7 +345,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L144">ControlManager.ts:144</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L147">ControlManager.ts:147</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -368,7 +368,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L207">ControlManager.ts:207</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L210">ControlManager.ts:210</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -395,7 +395,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L211">ControlManager.ts:211</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L214">ControlManager.ts:214</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -409,7 +409,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L212">ControlManager.ts:212</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L215">ControlManager.ts:215</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -436,7 +436,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L217">ControlManager.ts:217</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L220">ControlManager.ts:220</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -450,7 +450,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L218">ControlManager.ts:218</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L221">ControlManager.ts:221</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -476,7 +476,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L227">ControlManager.ts:227</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L230">ControlManager.ts:230</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -503,7 +503,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L184">ControlManager.ts:184</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L187">ControlManager.ts:187</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -517,7 +517,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L185">ControlManager.ts:185</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L188">ControlManager.ts:188</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -543,7 +543,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L59">ControlManager.ts:59</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L64">ControlManager.ts:64</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
@@ -560,7 +560,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L116">ControlManager.ts:116</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L121">ControlManager.ts:121</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -583,7 +583,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L99">ControlManager.ts:99</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L104">ControlManager.ts:104</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -606,7 +606,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L155">ControlManager.ts:155</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L158">ControlManager.ts:158</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -629,7 +629,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L168">ControlManager.ts:168</a></li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L171">ControlManager.ts:171</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -659,7 +659,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 					<div class="tsd-signature tsd-kind-icon">_mutation<wbr>Observer<wbr>Config<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L68">ControlManager.ts:68</a></li>
+							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L73">ControlManager.ts:73</a></li>
 						</ul>
 					</aside>
 					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
@@ -668,7 +668,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<div class="tsd-signature tsd-kind-icon">attribute<wbr>Old<wbr>Value<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L85">ControlManager.ts:85</a></li>
+								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L90">ControlManager.ts:90</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -678,7 +678,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<div class="tsd-signature tsd-kind-icon">attributes<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L74">ControlManager.ts:74</a></li>
+								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L79">ControlManager.ts:79</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -688,7 +688,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<div class="tsd-signature tsd-kind-icon">character<wbr>Data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L77">ControlManager.ts:77</a></li>
+								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L82">ControlManager.ts:82</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -698,7 +698,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<div class="tsd-signature tsd-kind-icon">character<wbr>Data<wbr>Old<wbr>Value<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L89">ControlManager.ts:89</a></li>
+								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L94">ControlManager.ts:94</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -708,7 +708,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<div class="tsd-signature tsd-kind-icon">child<wbr>List<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L71">ControlManager.ts:71</a></li>
+								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L76">ControlManager.ts:76</a></li>
 							</ul>
 						</aside>
 					</section>
@@ -718,7 +718,7 @@ controlManager.manage(<span class="hljs-built_in">document</span>.body);
 						<div class="tsd-signature tsd-kind-icon">subtree<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/fb_better_examples_and_documentation/Orange/ControlManager.ts#L81">ControlManager.ts:81</a></li>
+								<li>Defined in <a href="https://github.com/Infviz/Orange/blob/gh-pages/Orange/ControlManager.ts#L86">ControlManager.ts:86</a></li>
 							</ul>
 						</aside>
 					</section>

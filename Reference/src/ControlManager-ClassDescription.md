@@ -51,15 +51,15 @@ as follows:
 * Set the `element` property on the control/view inherited from `Orange.Controls.Control` to the `HTMLElement` causing the instantiation.
   * This will indirectly result in the `onElementSet()` method inherited from `Orange.Controls.Control` being called.
 
-* Call `applyTemplate()` followed by  `onApplyTemplate()` if the view/control has those methods.
+* Call `applyTemplate()` if the view/control has that method.
 
 * Find any child views/controls and go through *this* procedure on them, starting at *1*.
+
+* Call `onControlCreated()` inherited from `Orange.Controls.Control`. 
 
 * Set the `isInitialized` property on the `IOrangeElementExtension` from *1* to `true`.
 
 * Call any `onInializedListeners` present on the `IOrangeElementExtension` from *1*.
-
-* Call `onControlCreated()` inherited from `Orange.Controls.Control`. 
 
 ### When a HTMLElement is removed
 When an element is removed from the managed part of the DOM the control manager will 
