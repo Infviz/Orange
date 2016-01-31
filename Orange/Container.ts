@@ -2,6 +2,9 @@
 
 module Orange.Modularity 
 {
+    /**
+     * [[include:Inject-DecoratorDescription.md]]
+     */
     export function inject(target: any) {
         if ((<any>window).Reflect == null)
             throw "An attempt to use Orange.Modularity.inject decorator was made without an available Reflect implementation." 
@@ -12,7 +15,10 @@ module Orange.Modularity
     export type TryResolveResult = { instance: any, success: boolean };
     
     export interface KeyValuePair { key: any; value: any; }
-
+    
+    /** 
+     * [[include:Container-ClassDescription.md]]
+     */
     export class Container {
         private typeMap: Array<KeyValuePair> = [];
         private instances: Array<KeyValuePair> = [];

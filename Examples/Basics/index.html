@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Basic Orange</title>
+    
+    <script src="../../orange.js"></script>
+    <script src="../bower_components/knockout/dist/knockout.js"></script>
+    <script src="../bower_components/reflect-metadata/Reflect.js"></script>
+    <script src="application.js"></script>
+</head>
+
+<body>
+
+    <div data-view="BasicExample.MainView"></div>
+        
+    <script id="BasicExample-MainView" type="html/text">
+        <div>
+            <h1 data-bind="text: header"></h1>
+            <span data-bind="text: content"></span>
+        </div>
+    </script>
+
+   <script>window.onload = function() { new BasicExample.Application(); } </script>
+</body>
+</html>

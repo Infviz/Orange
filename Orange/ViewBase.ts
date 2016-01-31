@@ -2,6 +2,9 @@
 
 module Orange.Controls {
 
+    /**
+     * [[include:ViewBase-ClassDescription.md]]
+     */
     export class ViewBase extends TemplatedControl {
 
         private _dataContext: any = null;
@@ -9,8 +12,7 @@ module Orange.Controls {
         public set dataContext(context: any) {
 
             this._dataContext = context;
-            this.applyTemplate();
-            this.applyBindings();
+            this.applyTemplate(() => { });
         }
 
         constructor(templateName: string);
@@ -31,14 +33,17 @@ module Orange.Controls {
             return <T>(((<any>element).orange).control);
         }
         
-        protected applyTemplate(): void {
+        protected applyTemplate(doneCallback: () => void): void {
             
             if (null == this.element)
                 return;
                 
             this.element.innerHTML = "";
             
-            super.applyTemplate();    
+            if (this.dataContext != null)
+                super.applyTemplate(doneCallback);
+            else 
+                doneCallback();
         }
         
         protected onApplyTemplate(): void {

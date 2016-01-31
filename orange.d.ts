@@ -100,7 +100,7 @@ declare module Orange.Controls {
         isTemplateApplied: boolean;
         constructor(templateProvider: ITemplatedControlTemplateProvider);
         protected onApplyTemplate(): void;
-        protected applyTemplate(): void;
+        protected applyTemplate(doneCallback: () => void): void;
     }
 }
 declare module Orange.Controls {
@@ -110,7 +110,7 @@ declare module Orange.Controls {
         constructor(templateName: string);
         constructor(templateName: string, context: any);
         getControl<T>(selector: string): T;
-        protected applyTemplate(): void;
+        protected applyTemplate(doneCallback: () => void): void;
         protected onApplyTemplate(): void;
         private applyBindings();
         protected onApplyBindings(): void;
@@ -118,9 +118,11 @@ declare module Orange.Controls {
 }
 declare module Orange.Controls {
     interface IOrangeElementExtension {
+        element: HTMLElement;
         control: Control;
         isInitialized: boolean;
         addOnInitializedListener(callback: () => void): void;
+        getOnOnitializedListners(): Array<() => void>;
         removeOnInitializedListener(callback: () => void): void;
     }
     var GetOrInitializeOrangeElement: (element: HTMLElement) => IOrangeElementExtension;

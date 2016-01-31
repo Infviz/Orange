@@ -1,49 +1,14 @@
 # Orange
-TypeScript IoC container and dependency injection
+TypeScript IoC container, dependency injection and basic MVVM framework.  
 
-## Requirements
+Orange comes compiled and ready just include the *orange.js* file in your html 
+and somehow refer to the *orange.d.ts* file in your typescript source and you are 
+ready to go. 
 
-Install grunt-cli (preferably globally) via npm
+### Start here 
 
-      npm install -g grunt-cli
-
-## Build SampleApplication
-
-### With Visual Studio
-
-Open SampleApplication/SampleApplication.sln
-
-### From console
-
-Navigate to: 
-
-    cd SampleApplication/SampleApplication
-
-Install node dependencies
-
-    npm install
-
-Install bower dependencies
-
-(If you haven't installed bower, it's recommended to install it globally: npm install -g bower)
-
-    bower install
-
-Install typescript definitions
-
-(If you haven't installed tsd, it's recommended to install it globally: npm install -g tsd)
-
-    tsd reinstall
-
-Run grunt to compile application
-
-      grunt
-      
-To automatically compile TypeScript files when saved on disk and reload the browser, run;
-
-     grunt serve
-  
-
+* [Examples](Examples/examples.md)
+* [Reference](http://infviz.github.io/Orange/Reference/dist/index.html)  
 
 ## TODO
 

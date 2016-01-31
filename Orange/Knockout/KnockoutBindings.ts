@@ -1,12 +1,23 @@
 /// <reference path="../_references.ts"/>
 
+/**
+ * [[include:OrangeBindings-ModuleDescription.md]]
+ */
 module Orange.Bindings {
 
 	let ko = (<any>window).ko;
 
 	if (ko) {
-		ko.bindingHandlers.stopBindings = { init: () => ({ controlsDescendantBindings: true }) };
-		ko.virtualElements.allowedBindings.stopBindings = true;
+		ko.bindingHandlers.stopBindings = { 
+            init: () => {
+                console.warn("DEPRECATED: The Orange knockout binding 'stopBindings' is deprecated and will be removed in a future release. Use 'o-stop-bindings' instead."); 
+                return { controlsDescendantBindings: true };
+            }
+        };
+        ko.virtualElements.allowedBindings.stopBindings = true;
+        
+        ko.bindingHandlers['o-stop-bindings'] = { init: () => ({ controlsDescendantBindings: true }) };
+        ko.virtualElements.allowedBindings['o-stop-bindings'] = true;
 	}
 	
     enum BindingMode { TwoWay, OneWay }
@@ -311,6 +322,42 @@ module Orange.Bindings {
 		};
 
 		ko.bindingHandlers['orange-vm'] = {
+            
+			init: (element: HTMLElement,
+				valueAccessor: () => any,
+				allBindingsAccessor: any,
+				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+				bindingContext: any) => {
+                    console.warn("DEPRECATED: The Orange knockout binding 'orange-vm' is deprecated and will be removed in a future version of orange. Use 'o-view-model' instead.");
+					return { controlsDescendantBindings: true };
+				},
+
+			update: (element: HTMLElement,
+				valueAccessor: () => any,
+				allBindingsAccessor: any,
+				viewModel: any, // Deprecated, use bindingContext.$data or .rawData instead
+				bindingContext: any) => {
+
+				let orangeEl = Orange.Controls.GetOrInitializeOrangeElement(element);
+				let value = ko.unwrap(valueAccessor());
+				let onInitialized =
+					 () => (<any>orangeEl.control).dataContext = value;
+
+				if (orangeEl.isInitialized == true){
+					onInitialized();
+				}
+				else {
+					orangeEl.addOnInitializedListener(onInitialized);
+
+					ko.utils
+						.domNodeDisposal
+						.addDisposeCallback(element,
+							function() { orangeEl.removeOnInitializedListener(onInitialized); } );
+				}
+			}
+		};
+        
+        ko.bindingHandlers['o-view-model'] = {
 
 			init: (element: HTMLElement,
 				valueAccessor: () => any,

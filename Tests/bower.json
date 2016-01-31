@@ -14,7 +14,8 @@
     "tests"
   ],
   "dependencies": {
+    "jquery": "~2.1.4",
     "knockout": "~3.3.0",
-    "jquery": "~2.1.4"
+    "reflect-metadata": "~0.1.3"
   }
 }

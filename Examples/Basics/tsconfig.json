@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "out": "application.js", 
+        "sourceMap": true, 
+        "target": "es5",
+        "noImplicitAny": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+    }, 
+    "files": [
+        "Basic.ts",
+        "test.ts"
+    ]
+}

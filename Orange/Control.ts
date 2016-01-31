@@ -1,7 +1,9 @@
 /// <reference path="_references.ts"/>
 
 module Orange.Controls {
-	
+	/**
+     * [[include:Control-ClassDescription.md]] 
+     */
 	export abstract class Control {
 		
 		private _element: HTMLElement = null;
@@ -69,7 +71,7 @@ module Orange.Controls {
 	        	this._propertyChangedListeners[plIdx](propertyName, value);
 		}
 		
-		protected onElementSet(): void { }
+		protected onElementSet(): void { };
 		protected onPropertyChanged(propertyName: string, value: any): void { }
 		protected onControlCreated() : void { }
 	}

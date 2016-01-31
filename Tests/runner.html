@@ -10,22 +10,32 @@
         <script id="Bindings-TestView" type="text/html">
             <div class="content-wrapper">
                 <h2>This is TestView</h2>
-                <p data-bind="text: prop"></p>
+                <!--<p data-bind="text: prop"></p>-->
             </div>
         </script>
 
         <div id="mocha"></div>
         <script src="bower_components/jquery/dist/jquery.js"></script>
         <script src="bower_components/knockout/dist/knockout.js"></script>
+        <script src="bower_components/reflect-metadata/Reflect.js"></script>
+        
         <script src="../orange.js"></script>
         <script src="./node_modules/mocha/mocha.js"></script>
         <script>
             mocha.ui('bdd');
             mocha.reporter('html');
         </script>
+        <script src="./helpers/TestFunctions.js"></script>
+        
         <script src="./bindings/TestView.js"></script>
         <script src="./bindings/TestControl.js"></script>
         <script src="./bindings/spec.js"></script>
+        
+        <script src="./injection/InjectionTestClass.js"></script>
+        <script src="./injection/spec.js"></script>
+        
+        <script src="./views/spec.js"></script>
+        
         <script>
             var container = new Orange.Modularity.Container();
             var controlManager = new Orange.Controls.ControlManager(container);

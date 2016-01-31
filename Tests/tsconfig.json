@@ -4,7 +4,9 @@
         "declaration": false,
         "target": "es5",
         "noImplicitAny": true,
-        "removeComments": false
+        "removeComments": false,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
     },
     "filesGlob": [
         "./**/*.ts",
@@ -13,9 +15,15 @@
         "./typings/tsd.d.ts"
     ],
     "files": [
+        "./typings/tsd.d.ts",
+        
         "./bindings/TestView.ts",
         "./bindings/TestControl.ts",
         "./bindings/spec.ts",
-        "./typings/tsd.d.ts"
+        
+        "./injection/InjectionTestClass.ts",   
+        "./injection/spec.ts",   
+        
+        "./views/spec.ts"
     ]
 }
