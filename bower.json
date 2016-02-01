@@ -29,6 +29,10 @@
         "**/.*",
         "node_modules",
         "bower_components",
-        "Tests"
+        "Tests",
+        "SampleApplications",
+        "Reference",
+        "Examples",
+        "index.html"
     ]
 }
