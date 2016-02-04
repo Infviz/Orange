@@ -184,7 +184,7 @@ module Orange.Controls {
 			};
 		}
 
-		public static createControlsInElement(element: HTMLElement, container?: Orange.Modularity.Container): void {
+		public static createControlsInElement(element: HTMLElement, container: Orange.Modularity.Container): void {
 
 			let attr = ControlManager.getControlAttribute(element);
 
@@ -209,11 +209,11 @@ module Orange.Controls {
 			mut.forEach(this.handleMutation);
 		}
 
-		public static createControlFromElement(controlElement: HTMLElement, container?: Orange.Modularity.Container): Controls.Control {
+		public static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Controls.Control {
 			return ControlManager.createControlInternal(controlElement, container);
 		}
 
-		public static createControlFromType(type: string, container?: Orange.Modularity.Container): Controls.Control {
+		public static createControlFromType(type: string, container: Orange.Modularity.Container): Controls.Control {
 
 			var element = document.createElement("div");
 			element.setAttribute(ControlManager._controlAttributeNames[0], type);
