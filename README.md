@@ -23,7 +23,3 @@ git clone https://github.com/Infviz/Orange.git
 
 * [Examples](Examples/examples.md)
 * [Reference](http://infviz.github.io/Orange/Reference/dist/index.html)  
-
-## TODO
-
-* Register Orange as an own bower package

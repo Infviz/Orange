@@ -621,7 +621,11 @@ describe(
 
                     childWasDisposed
                         .subscribe(isDisposed => {
+                            
+                            if (isDisposed == false ) return;
+                            
                             assertEqual((<any>childOrangeElement.control).disposeCalled, true);
+                            
                             childWasDisposed(false); // reset..
                             controlWasDisposed(false); // reset..
                             
@@ -635,7 +639,8 @@ describe(
 
                             let afterRecreationChecks =
                                 () => {
-
+                                    console.log("afterRecreationChecks");
+                                    
                                     let childElement = childOrangeElement.element.firstElementChild as HTMLElement;
                                     assertEqual(childElement.getAttribute('data-test-id'), 'Nested-Child-Knockout-View-Content');
 
@@ -649,6 +654,7 @@ describe(
 
                                     let afterControlInitialized =
                                         () => {
+                                            console.log("afterControlInitialized");
                                             assert(() => ctrlOrangeElement.isInitialized);
 
                                             let ctrl = ctrlOrangeElement.control;
