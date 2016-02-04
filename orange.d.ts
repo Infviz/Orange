@@ -145,14 +145,11 @@ declare module Orange.Controls {
         manage(element: HTMLElement): void;
         private static getChildren(element);
         private static getControlAttribute(element);
-        static createControlsInElement(element: HTMLElement): void;
-        static createControlsInElement(element: HTMLElement, container: Orange.Modularity.Container): void;
+        static createControlsInElement(element: HTMLElement, container?: Orange.Modularity.Container): void;
         dispose(): void;
         private onMutation;
-        static createControlFromElement(controlElement: HTMLElement): Controls.Control;
-        static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Controls.Control;
-        static createControlFromType(type: string): Controls.Control;
-        static createControlFromType(type: string, container: Orange.Modularity.Container): Controls.Control;
+        static createControlFromElement(controlElement: HTMLElement, container?: Orange.Modularity.Container): Controls.Control;
+        static createControlFromType(type: string, container?: Orange.Modularity.Container): Controls.Control;
         private static createControlInternal(element, container);
         private handleMutation;
     }
