@@ -117,7 +117,7 @@ declare module Orange.Controls {
         getControl<T>(selector: string): T;
         protected applyTemplate(doneCallback: () => void): void;
         protected onApplyTemplate(): void;
-        private applyBindings();
+        protected applyBindings(): void;
         protected onApplyBindings(): void;
     }
 }
