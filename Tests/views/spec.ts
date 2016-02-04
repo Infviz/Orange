@@ -3,6 +3,57 @@
 /// <reference path="../../orange.d.ts"/>
 /// <reference path="../helpers/TestFunctions.ts" />
 
+describe(
+    "Control basics",
+    () =>{
+        describe("raisePropertyChanged", 
+            () => {
+                it("should handle the common case", 
+                    done => {
+                        var control = class extends Orange.Controls.Control {
+                            myProp: string = null;
+                            test() {
+                                this.raisePropertyChanged(() => this.myProp);
+                            }
+                        };
+                        
+                        var c = new control();
+                        c.addPropertyChangedListener((pname,value) => { if (pname == "myProp") done(); });
+                        c.test();
+                    });
+            })
+        
+        describe("getPropertyName", 
+            () => {
+                var g = (<any>Orange.Controls.Control).getPropertyName;
+                
+                it("should handle the common case, arrow function", 
+                    done => { 
+                        assertEqual(g(() => this.g), "g"); 
+                        done(); 
+                    });
+                
+                it("should handle classic function", 
+                    done => { 
+                        assertEqual(g(function () { return this.bar; }), "bar"); 
+                        done(); 
+                    });
+                
+                it("should not call function", 
+                    done => { 
+                        var t: any = null;
+                        assertEqual(g(() => t.foo), "foo");  // would throw if func was called
+                        done(); 
+                    });
+                    
+                it("should handle property paths", 
+                    done => { 
+                        assertEqual(g(function () { return this.foo.bar; }), "bar"); 
+                        done(); 
+                    });
+                
+            })
+    })
 
 describe(
     "Knockout Views Tests",

@@ -10,6 +10,7 @@ declare module Orange {
         static generate(): Uuid;
         static isUuid(value: string): boolean;
         sameValueAs(uuid: Uuid): boolean;
+        toString(): string;
     }
 }
 declare module Orange.Modularity {
@@ -21,6 +22,10 @@ declare module Orange.Modularity {
     interface KeyValuePair {
         key: any;
         value: any;
+    }
+    class ResolveError extends Error {
+        innerError: Error;
+        constructor(message: string, innerError?: Error);
     }
     class Container {
         private typeMap;

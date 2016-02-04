@@ -16,6 +16,12 @@ module Orange.Modularity
     
     export interface KeyValuePair { key: any; value: any; }
     
+    export class ResolveError extends Error {
+        constructor(message: string, public innerError?: Error) {
+            super(message);
+        }
+    }
+    
     /** 
      * [[include:Container-ClassDescription.md]]
      */
@@ -38,10 +44,15 @@ module Orange.Modularity
         tryResolve(type: any | string, register: boolean = false) : TryResolveResult {
             
             if (typeof type === "string") {
-                let ctr = Container.getConstructorFromString(type); 
-                if (ctr == null)
+                try {
+                    let ctr = Container.getConstructorFromString(type);
+                    if (ctr == null)
+                        return { instance: null, success: false };
+                    type = ctr; 
+                }
+                catch (e) {
                     return { instance: null, success: false };
-                type = ctr; 
+                }
             }
 
             let instance: any = this.lookup(this.instances, type);
@@ -68,10 +79,16 @@ module Orange.Modularity
         resolve(type: any | string, register: boolean = false) {
             
             if (typeof type === "string") {
-                let ctr = Container.getConstructorFromString(type); 
-                if (ctr == null)
-                    throw new ReferenceError(`No constructor identified by "${type}" could be found`);   
-                type = ctr; 
+                try {
+                    let ctr = Container.getConstructorFromString(type);
+                    type = ctr;
+                }
+                catch (e) {
+                    throw new ResolveError(`Failed to resolve type '${type}', see innerError for details`, e);
+                }
+                
+                if (type == null)
+                    throw new ResolveError(`No constructor identified by "${type}" could be found`); 
             }
 
             var instance: any = this.lookup(this.instances, type);
@@ -82,10 +99,10 @@ module Orange.Modularity
             var resolvedType = this.lookup(this.typeMap, type) || type;
 
             if (false == Container.isValidConstructor(resolvedType))
-                throw new Error(`Orange.Modularity.Container failed to resolve type "${type}"`);
+                throw new ResolveError(`Orange.Modularity.Container failed to resolve type "${type}"`);
             
             if (false == this.checkArity(resolvedType))
-                throw new Error(`Orange.Modularity.Container failed to resolve type "${type}"`);
+                throw new ResolveError(`Orange.Modularity.Container failed to resolve type "${type}"`);
 
             instance = this.createInstance(resolvedType);
 
@@ -122,12 +139,7 @@ module Orange.Modularity
             // If the constructor was not found on window, try to require it.
             // NOTE: This is done to support browserify modules.
             if ((<any>window).require != null) {
-                // NOTE: Is there no way to get rid of this try catch? 
-                try {
-                    func = (<any>window).require(constructorName);
-                } catch (e) {
-                    func = null;
-                }
+                func = (<any>window).require(constructorName);
             }
             
             if (func == null)

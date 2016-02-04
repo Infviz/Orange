@@ -398,6 +398,7 @@ var Orange;
             return pattern.test(value);
         };
         Uuid.prototype.sameValueAs = function (uuid) { return this._value.toLowerCase() === uuid._value.toLowerCase(); };
+        Uuid.prototype.toString = function () { return this._value; };
         Uuid._counter = 0;
         Uuid._tStart = Date.now == null ? Date.now() : new Date().getTime();
         Uuid.getTime = (window.performance == null && window.performance.now == null) ?
@@ -409,6 +410,11 @@ var Orange;
     })();
     Orange.Uuid = Uuid;
 })(Orange || (Orange = {}));
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var Orange;
 (function (Orange) {
     var Modularity;
@@ -419,6 +425,15 @@ var Orange;
             target.dependencies = function () { return window.Reflect.getMetadata("design:paramtypes", target); };
         }
         Modularity.inject = inject;
+        var ResolveError = (function (_super) {
+            __extends(ResolveError, _super);
+            function ResolveError(message, innerError) {
+                _super.call(this, message);
+                this.innerError = innerError;
+            }
+            return ResolveError;
+        })(Error);
+        Modularity.ResolveError = ResolveError;
         var Container = (function () {
             function Container() {
                 this.typeMap = [];
@@ -434,10 +449,15 @@ var Orange;
             Container.prototype.tryResolve = function (type, register) {
                 if (register === void 0) { register = false; }
                 if (typeof type === "string") {
-                    var ctr = Container.getConstructorFromString(type);
-                    if (ctr == null)
+                    try {
+                        var ctr = Container.getConstructorFromString(type);
+                        if (ctr == null)
+                            return { instance: null, success: false };
+                        type = ctr;
+                    }
+                    catch (e) {
                         return { instance: null, success: false };
-                    type = ctr;
+                    }
                 }
                 var instance = this.lookup(this.instances, type);
                 if (instance != null)
@@ -455,19 +475,24 @@ var Orange;
             Container.prototype.resolve = function (type, register) {
                 if (register === void 0) { register = false; }
                 if (typeof type === "string") {
-                    var ctr = Container.getConstructorFromString(type);
-                    if (ctr == null)
-                        throw new ReferenceError("No constructor identified by \"" + type + "\" could be found");
-                    type = ctr;
+                    try {
+                        var ctr = Container.getConstructorFromString(type);
+                        type = ctr;
+                    }
+                    catch (e) {
+                        throw new ResolveError("Failed to resolve type '" + type + "', see innerError for details", e);
+                    }
+                    if (type == null)
+                        throw new ResolveError("No constructor identified by \"" + type + "\" could be found");
                 }
                 var instance = this.lookup(this.instances, type);
                 if (instance != null)
                     return instance;
                 var resolvedType = this.lookup(this.typeMap, type) || type;
                 if (false == Container.isValidConstructor(resolvedType))
-                    throw new Error("Orange.Modularity.Container failed to resolve type \"" + type + "\"");
+                    throw new ResolveError("Orange.Modularity.Container failed to resolve type \"" + type + "\"");
                 if (false == this.checkArity(resolvedType))
-                    throw new Error("Orange.Modularity.Container failed to resolve type \"" + type + "\"");
+                    throw new ResolveError("Orange.Modularity.Container failed to resolve type \"" + type + "\"");
                 instance = this.createInstance(resolvedType);
                 if (register === true)
                     this.registerInstance(type, instance);
@@ -491,12 +516,7 @@ var Orange;
                 if (Container.isValidConstructor(func))
                     return func;
                 if (window.require != null) {
-                    try {
-                        func = window.require(constructorName);
-                    }
-                    catch (e) {
-                        func = null;
-                    }
+                    func = window.require(constructorName);
                 }
                 if (func == null)
                     return null;
@@ -683,7 +703,8 @@ var Orange;
                     this._propertyChangedListeners.splice(idx, 1);
             };
             Control.getPropertyName = function (property) {
-                return Control.propertyRegex.exec(String(property))[1];
+                var regexMatch = Control.propertyRegex.exec(String(property));
+                return regexMatch[regexMatch.length - 1];
             };
             Control.prototype.raisePropertyChanged = function (property) {
                 var propertyName = null;
@@ -707,17 +728,12 @@ var Orange;
             ;
             Control.prototype.onPropertyChanged = function (propertyName, value) { };
             Control.prototype.onControlCreated = function () { };
-            Control.propertyRegex = /return _this.([a-zA-Z0-9]+);/;
+            Control.propertyRegex = /return ([_a-zA-Z0-9]+)(\.([_a-zA-Z0-9]+))*;?/;
             return Control;
         })();
         Controls.Control = Control;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 var Orange;
 (function (Orange) {
     var Controls;

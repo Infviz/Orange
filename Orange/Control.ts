@@ -40,9 +40,10 @@ module Orange.Controls {
 			if (idx > -1) this._propertyChangedListeners.splice(idx, 1);
 		}
 		
-		private static propertyRegex = /return _this.([a-zA-Z0-9]+);/;
+		private static propertyRegex = /return ([_a-zA-Z0-9]+)(\.([_a-zA-Z0-9]+))*;?/;
 		private static getPropertyName<T>(property: () => T) {
-            return Control.propertyRegex.exec(String(property))[1];
+            var regexMatch = Control.propertyRegex.exec(String(property));
+            return regexMatch[regexMatch.length-1];
         }
 
 		protected raisePropertyChanged(property: string): void;
