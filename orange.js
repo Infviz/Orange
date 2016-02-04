@@ -398,6 +398,7 @@ var Orange;
             return pattern.test(value);
         };
         Uuid.prototype.sameValueAs = function (uuid) { return this._value.toLowerCase() === uuid._value.toLowerCase(); };
+        Uuid.prototype.toString = function () { return this._value; };
         Uuid._counter = 0;
         Uuid._tStart = Date.now == null ? Date.now() : new Date().getTime();
         Uuid.getTime = (window.performance == null && window.performance.now == null) ?

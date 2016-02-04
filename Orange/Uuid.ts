@@ -50,5 +50,7 @@ module Orange {
 		}
 
 		public sameValueAs(uuid: Uuid) { return this._value.toLowerCase() === uuid._value.toLowerCase(); }
+        
+        public toString() { return this._value; }
 	}
 }

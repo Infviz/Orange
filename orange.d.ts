@@ -10,6 +10,7 @@ declare module Orange {
         static generate(): Uuid;
         static isUuid(value: string): boolean;
         sameValueAs(uuid: Uuid): boolean;
+        toString(): string;
     }
 }
 declare module Orange.Modularity {
