@@ -51,7 +51,7 @@ module Orange.Controls {
             this.applyBindings();
         }
 
-        private applyBindings(): void {
+        protected applyBindings(): void {
 
             if (false == this.isTemplateApplied) return;
 
