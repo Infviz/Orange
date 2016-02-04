@@ -683,7 +683,8 @@ var Orange;
                     this._propertyChangedListeners.splice(idx, 1);
             };
             Control.getPropertyName = function (property) {
-                return Control.propertyRegex.exec(String(property))[1];
+                var regexMatch = Control.propertyRegex.exec(String(property));
+                return regexMatch[regexMatch.length - 1];
             };
             Control.prototype.raisePropertyChanged = function (property) {
                 var propertyName = null;
@@ -707,7 +708,7 @@ var Orange;
             ;
             Control.prototype.onPropertyChanged = function (propertyName, value) { };
             Control.prototype.onControlCreated = function () { };
-            Control.propertyRegex = /return _this.([a-zA-Z0-9]+);/;
+            Control.propertyRegex = /return ([_a-zA-Z0-9]+)(\.([_a-zA-Z0-9]+))*;?/;
             return Control;
         })();
         Controls.Control = Control;
