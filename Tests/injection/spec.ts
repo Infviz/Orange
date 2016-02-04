@@ -13,18 +13,6 @@ describe(
 
             let testClassA = new Injection.TestClassA();
             
-            before(
-                done => {
-                    
-                    done();
-                });
-                
-            after(
-                done => {
-                
-                    done();
-                });
-
             it("should register and resolve instance",
                 done => {
                     
@@ -98,6 +86,40 @@ describe(
                     
                     done();
                 });
+            
         });
         
+        describe("resolve", 
+            () => {
+                let req: any;
+                before(()=> { 
+                    req = (<any>window).require;
+                    (<any>window).require = (type: string) => {
+                        if (type == "should/exist")
+                            return class { id = "A" };
+                        else
+                            throw Error("Could not resolve module " + type);
+                    } 
+                });
+                after(()=> { (<any>window).require = req; });
+                
+                it("should report errors from require",
+                    done => {
+                        let container = new Orange.Modularity.Container();
+                        
+                        assertEqual(container.resolve("should/exist").id, "A");
+                        
+                        try {
+                            let result = container.resolve("should/not/exist");
+                        }
+                        catch (e) {
+                            assert(() => e instanceof Orange.Modularity.ResolveError);
+                            assert(() => e.innerError instanceof Error);
+                            assertEqual(e.innerError.message, "Could not resolve module should/not/exist");
+                            return done();
+                        }
+                        
+                        done("failed");
+                    })
+            })
     });

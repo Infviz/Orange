@@ -22,6 +22,10 @@ declare module Orange.Modularity {
         key: any;
         value: any;
     }
+    class ResolveError extends Error {
+        innerError: Error;
+        constructor(message: string, innerError?: Error);
+    }
     class Container {
         private typeMap;
         private instances;
