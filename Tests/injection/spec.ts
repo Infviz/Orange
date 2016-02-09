@@ -113,6 +113,8 @@ describe(
                             let result = container.resolve("should/not/exist");
                         }
                         catch (e) {
+                            assertEqual(e.name, "ResolveError");
+                            assertEqual(e.message, "Failed to resolve type 'should/not/exist', see innerError for details");
                             assert(() => e instanceof Orange.Modularity.ResolveError);
                             assert(() => e.innerError instanceof Error);
                             assertEqual(e.innerError.message, "Could not resolve module should/not/exist");

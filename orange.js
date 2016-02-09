@@ -428,8 +428,10 @@ var Orange;
         var ResolveError = (function (_super) {
             __extends(ResolveError, _super);
             function ResolveError(message, innerError) {
-                _super.call(this, message);
+                _super.call(this);
                 this.innerError = innerError;
+                this.message = message;
+                this.name = "ResolveError";
             }
             return ResolveError;
         })(Error);
