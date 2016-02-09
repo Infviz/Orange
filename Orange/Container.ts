@@ -18,7 +18,9 @@ module Orange.Modularity
     
     export class ResolveError extends Error {
         constructor(message: string, public innerError?: Error) {
-            super(message);
+            super();
+            this.message = message;
+            this.name = "ResolveError";
         }
     }
     
