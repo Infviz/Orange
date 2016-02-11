@@ -2,16 +2,18 @@
 module Orange.Routing {
 
     class PathHandler {
-        constructor(
-            public path: string,
-            public handler: Function)
-        {
+		public path: string;
+		public handler: Function;
+
+        constructor(path: string, handler: Function) {
+			this.path = path.toLowerCase();
+			this.handler = handler;
         }
 
         tryMatch(path: string) {
             if (this.path == "*")
                 return {};
-            return this.path == path ? { } : null;
+            return this.path == path ? {} : null;
         }
     }
 
@@ -36,32 +38,50 @@ module Orange.Routing {
 
                 if (elem.tagName === "A" &&
                     elem.target === "" &&
-                    elem.hostname === location.hostname)
-                {
-                    e.preventDefault();
-                    this.navigate(elem.pathname, null);
+                    elem.hostname === location.hostname) {
+
+                    let hasNavigated = this.navigate(elem.pathname, null);
+					if (hasNavigated) {
+						e.preventDefault();
+					}
                 }
             });
 
             this.handleRoute(location.pathname);
         }
 
-        navigate(path: string, state: any) {
-            if (path === location.pathname)
+        navigate(navigatePath: string, state: any): boolean {
+            let path = this.cleanPath(navigatePath);
+			if (path === this.cleanPath(location.pathname))
                 return;
 
             history.pushState(state, null, path);
-            this.handleRoute(path);
+            return this.handleRoute(path);
         }
 
-        private handleRoute(path: string) {
+		private cleanPath(path: string): string {
+			
+			// To lower case
+			path = path.toLowerCase();
+			
+			// Remove trailing slash
+			if (path.substr(-1) === '/') {
+				path = path.substr(0, path.length - 1);
+			}
+
+			return path;
+		}
+
+        private handleRoute(path: string): boolean {
             for (var p of this.paths) {
                 var match = p.tryMatch(path);
                 if (match) {
                     p.handler();
-                    return;
+                    return true;
                 }
             }
+
+			return false;
         }
     }
 
