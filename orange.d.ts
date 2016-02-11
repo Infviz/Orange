@@ -160,7 +160,8 @@ declare module Orange.Routing {
         route(path: string, handler: Function): void;
         default(handler: Function): void;
         run(): void;
-        navigate(path: string, state: any): void;
+        navigate(navigatePath: string, state: any): boolean;
+        private cleanPath(path);
         private handleRoute(path);
     }
 }

@@ -1050,7 +1050,7 @@ var Orange;
     (function (Routing) {
         var PathHandler = (function () {
             function PathHandler(path, handler) {
-                this.path = path;
+                this.path = path.toLowerCase();
                 this.handler = handler;
             }
             PathHandler.prototype.tryMatch = function (path) {
@@ -1080,17 +1080,27 @@ var Orange;
                     if (elem.tagName === "A" &&
                         elem.target === "" &&
                         elem.hostname === location.hostname) {
-                        e.preventDefault();
-                        _this.navigate(elem.pathname, null);
+                        var hasNavigated = _this.navigate(elem.pathname, null);
+                        if (hasNavigated) {
+                            e.preventDefault();
+                        }
                     }
                 });
                 this.handleRoute(location.pathname);
             };
-            Router.prototype.navigate = function (path, state) {
-                if (path === location.pathname)
+            Router.prototype.navigate = function (navigatePath, state) {
+                var path = this.cleanPath(navigatePath);
+                if (path === this.cleanPath(location.pathname))
                     return;
                 history.pushState(state, null, path);
-                this.handleRoute(path);
+                return this.handleRoute(path);
+            };
+            Router.prototype.cleanPath = function (path) {
+                path = path.toLowerCase();
+                if (path.substr(-1) === '/') {
+                    path = path.substr(0, path.length - 1);
+                }
+                return path;
             };
             Router.prototype.handleRoute = function (path) {
                 for (var _i = 0, _a = this.paths; _i < _a.length; _i++) {
@@ -1098,9 +1108,10 @@ var Orange;
                     var match = p.tryMatch(path);
                     if (match) {
                         p.handler();
-                        return;
+                        return true;
                     }
                 }
+                return false;
             };
             return Router;
         })();
