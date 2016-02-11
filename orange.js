@@ -1091,7 +1091,7 @@ var Orange;
             Router.prototype.navigate = function (navigatePath, state) {
                 var path = this.cleanPath(navigatePath);
                 if (path === this.cleanPath(location.pathname))
-                    return;
+                    return true;
                 history.pushState(state, null, path);
                 return this.handleRoute(path);
             };
