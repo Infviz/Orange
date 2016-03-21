@@ -24,6 +24,8 @@
         "./injection/InjectionTestClass.ts",   
         "./injection/spec.ts",   
         
-        "./views/spec.ts"
+        "./views/spec.ts",
+        
+        "./router/spec.ts"
     ]
 }

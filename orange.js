@@ -1062,20 +1062,13 @@ var Orange;
         })();
         var Router = (function () {
             function Router() {
-                this.paths = [];
-            }
-            Router.prototype.route = function (path, handler) {
-                this.paths.push(new PathHandler(path, handler));
-            };
-            Router.prototype.default = function (handler) {
-                this.route("*", handler);
-            };
-            Router.prototype.run = function () {
                 var _this = this;
-                window.addEventListener("popstate", function (e) {
+                this.paths = [];
+                this.onpopstate = function (evnt) {
+                    console.log("handle popstate: " + location.pathname);
                     _this.handleRoute(location.pathname);
-                });
-                window.addEventListener("click", function (e) {
+                };
+                this.onclick = function (e) {
                     var elem = e.srcElement;
                     if (elem.tagName === "A" &&
                         elem.target === "" &&
@@ -1085,7 +1078,17 @@ var Orange;
                             e.preventDefault();
                         }
                     }
-                });
+                };
+            }
+            Router.prototype.route = function (path, handler) {
+                this.paths.push(new PathHandler(path, handler));
+            };
+            Router.prototype.default = function (handler) {
+                this.route("*", handler);
+            };
+            Router.prototype.run = function () {
+                window.addEventListener("popstate", this.onpopstate);
+                window.addEventListener("click", this.onclick);
                 this.handleRoute(location.pathname);
             };
             Router.prototype.navigate = function (navigatePath, state) {
@@ -1094,6 +1097,10 @@ var Orange;
                     return;
                 history.pushState(state, null, path);
                 return this.handleRoute(path);
+            };
+            Router.prototype.dispose = function () {
+                window.removeEventListener("popstate", this.onpopstate);
+                window.removeEventListener("click", this.onclick);
             };
             Router.prototype.cleanPath = function (path) {
                 path = path.toLowerCase();
