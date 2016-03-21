@@ -2,25 +2,38 @@
 module Orange.Routing {
 
     class PathHandler {
-        public path: string;
+        public path: string | RegExp;
         public handler: Function;
 
-        constructor(path: string, handler: Function) {
-            this.path = path.toLowerCase();
+        constructor(path: string | RegExp, handler: Function) {
+            if (typeof path === 'string')
+                path = (<string>path).toLowerCase();
+            
+            this.path = path;
             this.handler = handler;
         }
 
         tryMatch(path: string) {
-            if (this.path == "*")
+            
+            var selfPath = this.path;
+            
+            if (selfPath === "*")
                 return {};
-            return this.path == path ? {} : null;
+            
+            if (selfPath instanceof RegExp) {
+                if (selfPath.test(path)) {
+                    return selfPath.exec(path);
+                }
+            }
+                
+            return selfPath === path ? {} : null;
         }
     }
 
     export class Router {
         private paths: Array<PathHandler> = [];
 
-        route(path: string, handler: Function) {
+        route(path: string | RegExp, handler: Function) {
             this.paths.push(new PathHandler(path, handler));
         }
 
@@ -84,7 +97,7 @@ module Orange.Routing {
             for (var p of this.paths) {
                 var match = p.tryMatch(path);
                 if (match) {
-                    p.handler();
+                    p.handler(match);
                     return true;
                 }
             }

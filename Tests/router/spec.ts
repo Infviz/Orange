@@ -9,17 +9,17 @@ describe(
         var startUrl:string = window.location.pathname;
         
         var router: Orange.Routing.Router; 
-        var currentPath: string;
+        var handledPath: string;
         
         beforeEach((done) => {
             
             router = new Orange.Routing.Router();
-            currentPath = null;
+            handledPath = null;
             
             router.route("/never", () => { throw new Error("should not be called")  });
-            router.route("/zero", () => { currentPath = "/zero" });
-            router.route("/one", () => { currentPath = "/one" });
-            router.route("/two", () => { currentPath = "/two" });
+            router.route("/zero", () => { handledPath = "/zero" });
+            router.route("/one", () => { handledPath = "/one" });
+            router.route("/two", () => { handledPath = "/two" });
             router.run();
             
             done();
@@ -41,12 +41,56 @@ describe(
         
         it("should dispatch to correct route handler", (done) => {
             router.navigate("/zero", null);
-            assertEqual(currentPath, "/zero");
+            assertEqual(handledPath, "/zero");
             assert(() => window.location.href.indexOf("/zero") != -1);
             
             router.navigate("/one", null);
-            assertEqual(currentPath, "/one");
+            assertEqual(handledPath, "/one");
             assert(() => window.location.href.indexOf("/one") != -1);
+            
+            done();
+        });
+        
+        it("should handle regex routes", (done) => {
+            
+            router.route(/\/a/, () => { handledPath = "/a" });
+            router.route(/\/aa/, () => { handledPath = "/aa" });
+            router.route(/\/aaa/, () => { handledPath = "/aaa" });
+            
+            router.route(/\/bbb/, () => { handledPath = "/bbb" });
+            router.route(/\/bb/, () => { handledPath = "/bb" });
+            router.route(/\/b/, () => { handledPath = "/b" });
+            
+            router.navigate("/a", null);
+            assertEqual(handledPath, "/a");
+            assert(() => window.location.href.indexOf("/a") != -1);
+            
+            // /a prefixes /aaa and is registered before, so we expect the /\/a/ route to match
+            router.navigate("/aaa", null);
+            assertEqual(handledPath, "/a");  
+            assert(() => window.location.href.indexOf("/a") != -1);
+            
+            router.navigate("/b", null);
+            assertEqual(handledPath, "/b");
+            assert(() => window.location.href.indexOf("/b") != -1);
+            
+            router.navigate("/bbb", null);
+            assertEqual(handledPath, "/bbb");
+            assert(() => window.location.href.indexOf("/bbb") != -1);
+            
+            // avoids prefixing problem by matching end of string in regex
+            
+            router.route(/\/c$/, () => { handledPath = "/c" });
+            router.route(/\/cc$/, () => { handledPath = "/cc" });
+            router.route(/\/ccc$/, () => { handledPath = "/ccc" });
+            
+            router.navigate("/c", null);
+            assertEqual(handledPath, "/c");
+            assert(() => window.location.href.indexOf("/c") != -1);
+            
+            router.navigate("/ccc", null);
+            assertEqual(handledPath, "/ccc");  
+            assert(() => window.location.href.indexOf("/ccc") != -1);
             
             done();
         });
@@ -60,7 +104,7 @@ describe(
             try {
                 a.click();
                 
-                assertEqual(currentPath, "/two");
+                assertEqual(handledPath, "/two");
                 assert(() => window.location.href.indexOf("/two") != -1);
             }
             finally {
@@ -79,11 +123,11 @@ describe(
             
             setTimeout(() => {
                 
-                assertEqual(currentPath, "/zero");
+                assertEqual(handledPath, "/zero");
                 assert(() => window.location.href.indexOf("/zero") != -1);
                 
                 done();
-            }, 50);
+            }, 200);
             
         });
     });

@@ -1050,13 +1050,21 @@ var Orange;
     (function (Routing) {
         var PathHandler = (function () {
             function PathHandler(path, handler) {
-                this.path = path.toLowerCase();
+                if (typeof path === 'string')
+                    path = path.toLowerCase();
+                this.path = path;
                 this.handler = handler;
             }
             PathHandler.prototype.tryMatch = function (path) {
-                if (this.path == "*")
+                var selfPath = this.path;
+                if (selfPath === "*")
                     return {};
-                return this.path == path ? {} : null;
+                if (selfPath instanceof RegExp) {
+                    if (selfPath.test(path)) {
+                        return selfPath.exec(path);
+                    }
+                }
+                return selfPath === path ? {} : null;
             };
             return PathHandler;
         })();
@@ -1114,7 +1122,7 @@ var Orange;
                     var p = _a[_i];
                     var match = p.tryMatch(path);
                     if (match) {
-                        p.handler();
+                        p.handler(match);
                         return true;
                     }
                 }

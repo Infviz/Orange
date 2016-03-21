@@ -157,7 +157,7 @@ declare module Orange.Controls {
 declare module Orange.Routing {
     class Router {
         private paths;
-        route(path: string, handler: Function): void;
+        route(path: string | RegExp, handler: Function): void;
         default(handler: Function): void;
         run(): void;
         navigate(navigatePath: string, state: any): boolean;
