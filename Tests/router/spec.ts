@@ -95,6 +95,19 @@ describe(
             done();
         });
         
+        it("should pass variables from regex match to handler", () => {
+            
+            var called = false;
+            router.route(/\/vars\/(\d+)/, 
+                (data: any) => { 
+                    called = true;
+                    assertEqual(data[1], "123"); 
+                });
+            router.navigate("/vars/123", null);
+            assertEqual(true, called);
+            
+        });
+        
         it("should handle <a href> clicks", (done) => {
             
             var a = document.createElement("a");
