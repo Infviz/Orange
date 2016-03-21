@@ -1050,32 +1050,33 @@ var Orange;
     (function (Routing) {
         var PathHandler = (function () {
             function PathHandler(path, handler) {
-                this.path = path.toLowerCase();
+                if (typeof path === 'string')
+                    path = path.toLowerCase();
+                this.path = path;
                 this.handler = handler;
             }
             PathHandler.prototype.tryMatch = function (path) {
-                if (this.path == "*")
+                var selfPath = this.path;
+                if (selfPath === "*")
                     return {};
-                return this.path == path ? {} : null;
+                if (selfPath instanceof RegExp) {
+                    if (selfPath.test(path)) {
+                        return selfPath.exec(path);
+                    }
+                }
+                return selfPath === path ? {} : null;
             };
             return PathHandler;
         })();
         var Router = (function () {
             function Router() {
-                this.paths = [];
-            }
-            Router.prototype.route = function (path, handler) {
-                this.paths.push(new PathHandler(path, handler));
-            };
-            Router.prototype.default = function (handler) {
-                this.route("*", handler);
-            };
-            Router.prototype.run = function () {
                 var _this = this;
-                window.addEventListener("popstate", function (e) {
+                this.paths = [];
+                this.onpopstate = function (evnt) {
+                    console.log("handle popstate: " + location.pathname);
                     _this.handleRoute(location.pathname);
-                });
-                window.addEventListener("click", function (e) {
+                };
+                this.onclick = function (e) {
                     var elem = e.srcElement;
                     if (elem.tagName === "A" &&
                         elem.target === "" &&
@@ -1085,7 +1086,17 @@ var Orange;
                             e.preventDefault();
                         }
                     }
-                });
+                };
+            }
+            Router.prototype.route = function (path, handler) {
+                this.paths.push(new PathHandler(path, handler));
+            };
+            Router.prototype.default = function (handler) {
+                this.route("*", handler);
+            };
+            Router.prototype.run = function () {
+                window.addEventListener("popstate", this.onpopstate);
+                window.addEventListener("click", this.onclick);
                 this.handleRoute(location.pathname);
             };
             Router.prototype.navigate = function (navigatePath, state) {
@@ -1094,6 +1105,10 @@ var Orange;
                     return;
                 history.pushState(state, null, path);
                 return this.handleRoute(path);
+            };
+            Router.prototype.dispose = function () {
+                window.removeEventListener("popstate", this.onpopstate);
+                window.removeEventListener("click", this.onclick);
             };
             Router.prototype.cleanPath = function (path) {
                 path = path.toLowerCase();
@@ -1107,7 +1122,7 @@ var Orange;
                     var p = _a[_i];
                     var match = p.tryMatch(path);
                     if (match) {
-                        p.handler();
+                        p.handler(match);
                         return true;
                     }
                 }
