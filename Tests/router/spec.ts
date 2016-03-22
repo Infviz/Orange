@@ -51,6 +51,15 @@ describe(
             done();
         });
         
+        it("should handle redirects", (done) => {
+            router.route("/redirect", () => { router.navigate('/one', null); });
+            router.navigate("/one", null);
+            assertEqual(handledPath, "/one");
+            assert(() => window.location.href.indexOf("/one") != -1);
+            
+            done();
+        });
+        
         it("should handle regex routes", (done) => {
             
             router.route(/\/a/, () => { handledPath = "/a" });
