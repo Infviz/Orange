@@ -67,7 +67,7 @@ module Orange.Routing {
         };
         
         private onclick = (e: MouseEvent) => {
-            var elem = <HTMLAnchorElement>e.srcElement;
+            var elem = <HTMLAnchorElement>(e.target || e.srcElement);
 
             if (elem.tagName === "A" &&
                 elem.target === "" &&

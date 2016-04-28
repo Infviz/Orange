@@ -1077,7 +1077,7 @@ var Orange;
                     _this.handleRoute(location.pathname);
                 };
                 this.onclick = function (e) {
-                    var elem = e.srcElement;
+                    var elem = (e.target || e.srcElement);
                     if (elem.tagName === "A" &&
                         elem.target === "" &&
                         elem.hostname === location.hostname) {
