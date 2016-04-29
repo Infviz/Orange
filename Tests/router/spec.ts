@@ -40,13 +40,21 @@ describe(
         });
         
         it("should dispatch to correct route handler", (done) => {
-            router.navigate("/zero", null);
+            let result = router.navigate("/zero", null);
+            assertEqual(result, true);
             assertEqual(handledPath, "/zero");
             assert(() => window.location.href.indexOf("/zero") != -1);
             
-            router.navigate("/one", null);
+            result = router.navigate("/one", null);
+            assertEqual(result, true);
             assertEqual(handledPath, "/one");
             assert(() => window.location.href.indexOf("/one") != -1);
+            
+            result = router.navigate("/one", null);
+            assertEqual(result, true);
+            
+            result = router.navigate("/nonExisting", null);
+            assertEqual(result, false);
             
             done();
         });

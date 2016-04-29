@@ -1081,8 +1081,8 @@ var Orange;
                     if (elem.tagName === "A" &&
                         elem.target === "" &&
                         elem.hostname === location.hostname) {
-                        var hasNavigated = _this.navigate(elem.pathname, null);
-                        if (hasNavigated) {
+                        var wasHandled = _this.navigate(elem.pathname, null);
+                        if (wasHandled) {
                             e.preventDefault();
                         }
                     }
@@ -1102,7 +1102,7 @@ var Orange;
             Router.prototype.navigate = function (navigatePath, state) {
                 var path = this.cleanPath(navigatePath);
                 if (path === this.cleanPath(location.pathname))
-                    return;
+                    return true;
                 history.pushState(state, null, path);
                 return this.handleRoute(path);
             };
