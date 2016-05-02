@@ -3,6 +3,12 @@
 /// <reference path="../../orange.d.ts"/>
 /// <reference path="../helpers/TestFunctions.ts" />
 
+function removeFromParent(elem: Element) {
+    if (elem.parentNode) {
+        elem.parentNode.removeChild(elem);
+    }
+}
+
 describe(
     "Control basics",
     () =>{
@@ -177,7 +183,7 @@ describe(
 
                     assertEqual(c.disposeCalled, false);
 
-                    view.remove();
+                    removeFromParent(view);
 
                     wasDisposed
                         .subscribe(isDisposed => {
@@ -376,7 +382,7 @@ describe(
                     let pc = <any>parentOrangeElement.control;
                     let cc = <any>childOrangeElement.control;
 
-                    parentView.remove();
+                    removeFromParent(parentView);
 
                     let checkBothDisposed = () => {
 

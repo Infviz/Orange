@@ -71,7 +71,7 @@ module Orange.Routing {
 
             if (elem.tagName === "A" &&
                 elem.target === "" &&
-                elem.hostname === location.hostname) {
+                (!elem.hostname || elem.hostname === location.hostname)) {
 
                 let wasHandled = this.navigate(elem.pathname, null);
                 if (wasHandled) {

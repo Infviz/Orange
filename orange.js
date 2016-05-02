@@ -1080,7 +1080,7 @@ var Orange;
                     var elem = (e.target || e.srcElement);
                     if (elem.tagName === "A" &&
                         elem.target === "" &&
-                        elem.hostname === location.hostname) {
+                        (!elem.hostname || elem.hostname === location.hostname)) {
                         var wasHandled = _this.navigate(elem.pathname, null);
                         if (wasHandled) {
                             e.preventDefault();
