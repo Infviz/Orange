@@ -160,4 +160,12 @@ describe(
             }, 200);
             
         });
+        
+        it("should not navigate if a route is removed", (done) => {
+            router.navigate("/zero", null);
+            router.unroute("/one");
+            router.navigate("/one", null);
+            assertEqual(handledPath, "/zero");
+            done();            
+        })
     });

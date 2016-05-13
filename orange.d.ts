@@ -158,6 +158,7 @@ declare module Orange.Routing {
     class Router {
         private paths;
         route(path: string | RegExp, handler: Function): void;
+        unroute(path: string | RegExp): void;
         default(handler: Function): void;
         run(): void;
         navigate(navigatePath: string, state: any): boolean;
