@@ -37,6 +37,13 @@ module Orange.Routing {
             this.paths.push(new PathHandler(path, handler));
         }
 
+        unroute(path: string | RegExp) {
+            // Keep paths not matching path parameter
+            this.paths = this.paths.filter( p => {
+                return p.path.toString() !== path.toString();
+            });
+        }
+        
         default(handler: Function) {
             this.route("*", handler);
         }
