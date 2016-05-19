@@ -1105,6 +1105,7 @@ var Orange;
                 this.handleRoute(location.pathname);
             };
             Router.prototype.navigate = function (navigatePath, state) {
+                if (state === void 0) { state = null; }
                 var path = this.cleanPath(navigatePath);
                 if (path === this.cleanPath(location.pathname))
                     return true;
@@ -1208,7 +1209,7 @@ var Orange;
                     if (sourceProp == null || sourceProp.subscribe == null) {
                         control[_this.target] = sourceProp;
                     }
-                    else if (ko.isObservable(sourceProp) || ko.isComputed(sourceProp)) {
+                    else if (ko.isObservable(sourceProp)) {
                         control[_this.target] = sourceProp();
                     }
                     if (sourceProp && sourceProp.subscribe != null)

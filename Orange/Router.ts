@@ -54,7 +54,7 @@ module Orange.Routing {
             this.handleRoute(location.pathname);
         }
 
-        navigate(navigatePath: string, state: any): boolean {
+        navigate(navigatePath: string, state: any = null): boolean {
             let path = this.cleanPath(navigatePath);
             if (path === this.cleanPath(location.pathname))
                 return true;

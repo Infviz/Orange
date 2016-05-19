@@ -114,7 +114,7 @@ module Orange.Bindings {
                // ONTE TIME only, no two way possible
                control[this.target] = sourceProp;
             }
-			else if (ko.isObservable(sourceProp) || ko.isComputed(sourceProp)) {
+			else if (ko.isObservable(sourceProp)) {
 	        	control[this.target] = sourceProp();
             }
             
