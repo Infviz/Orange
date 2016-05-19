@@ -161,7 +161,7 @@ declare module Orange.Routing {
         unroute(path: string | RegExp): void;
         default(handler: Function): void;
         run(): void;
-        navigate(navigatePath: string, state: any): boolean;
+        navigate(navigatePath: string, state?: any): boolean;
         dispose(): void;
         private onpopstate;
         private onclick;

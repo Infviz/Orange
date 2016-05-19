@@ -1,8 +1,3 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
 if (typeof window.WeakMap === 'undefined') {
     (function () {
         var defineProperty = Object.defineProperty;
@@ -412,9 +407,14 @@ var Orange;
                 function () { return Date.now(); } :
                 function () { return (new Date()).getTime(); });
         return Uuid;
-    }());
+    })();
     Orange.Uuid = Uuid;
 })(Orange || (Orange = {}));
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var Orange;
 (function (Orange) {
     var Modularity;
@@ -434,7 +434,7 @@ var Orange;
                 this.name = "ResolveError";
             }
             return ResolveError;
-        }(Error));
+        })(Error);
         Modularity.ResolveError = ResolveError;
         var Container = (function () {
             function Container() {
@@ -509,8 +509,8 @@ var Orange;
             Container.getConstructorFromString = function (constructorName) {
                 var path = constructorName.split(".");
                 var func = window;
-                for (var _i = 0, path_1 = path; _i < path_1.length; _i++) {
-                    var fragment = path_1[_i];
+                for (var _i = 0; _i < path.length; _i++) {
+                    var fragment = path[_i];
                     if (func[fragment] == null)
                         break;
                     func = func[fragment];
@@ -529,8 +529,8 @@ var Orange;
                 return null;
             };
             Container.prototype.lookup = function (dict, key) {
-                for (var _i = 0, dict_1 = dict; _i < dict_1.length; _i++) {
-                    var kvp = dict_1[_i];
+                for (var _i = 0; _i < dict.length; _i++) {
+                    var kvp = dict[_i];
                     if (kvp.key === key)
                         return kvp.value;
                 }
@@ -544,8 +544,8 @@ var Orange;
                 else {
                     var ctrArgs = [];
                     var deps = resolvedType.dependencies();
-                    for (var _i = 0, deps_1 = deps; _i < deps_1.length; _i++) {
-                        var dep = deps_1[_i];
+                    for (var _i = 0; _i < deps.length; _i++) {
+                        var dep = deps[_i];
                         ctrArgs.push(this.resolve(dep));
                     }
                     instance = this.applyConstructor(resolvedType, ctrArgs);
@@ -564,7 +564,7 @@ var Orange;
                 return new (Function.bind.apply(ctor, [null].concat(args)));
             };
             return Container;
-        }());
+        })();
         Modularity.Container = Container;
     })(Modularity = Orange.Modularity || (Orange.Modularity = {}));
 })(Orange || (Orange = {}));
@@ -613,7 +613,7 @@ var Orange;
                 }
             };
             return RegionManager;
-        }());
+        })();
         Modularity.RegionManager = RegionManager;
     })(Modularity = Orange.Modularity || (Orange.Modularity = {}));
 })(Orange || (Orange = {}));
@@ -657,7 +657,7 @@ var TemplateLoader = (function () {
         ;
     };
     return TemplateLoader;
-}());
+})();
 var Orange;
 (function (Orange) {
     var Controls;
@@ -732,7 +732,7 @@ var Orange;
             Control.prototype.onControlCreated = function () { };
             Control.propertyRegex = /return ([_a-zA-Z0-9]+)(\.([_a-zA-Z0-9]+))*;?/;
             return Control;
-        }());
+        })();
         Controls.Control = Control;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
@@ -749,7 +749,7 @@ var Orange;
                 onTemplateAppliedCallback(true);
             };
             return StringTemplateProvider;
-        }());
+        })();
         Controls.StringTemplateProvider = StringTemplateProvider;
         var ScriptTemplateProvider = (function () {
             function ScriptTemplateProvider(templateName) {
@@ -765,7 +765,7 @@ var Orange;
                 onTemplateAppliedCallback(true);
             };
             return ScriptTemplateProvider;
-        }());
+        })();
         Controls.ScriptTemplateProvider = ScriptTemplateProvider;
         var TemplatedControl = (function (_super) {
             __extends(TemplatedControl, _super);
@@ -800,7 +800,7 @@ var Orange;
                 });
             };
             return TemplatedControl;
-        }(Controls.Control));
+        })(Controls.Control);
         Controls.TemplatedControl = TemplatedControl;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
@@ -850,7 +850,7 @@ var Orange;
             };
             ViewBase.prototype.onApplyBindings = function () { };
             return ViewBase;
-        }(Controls.TemplatedControl));
+        })(Controls.TemplatedControl);
         Controls.ViewBase = ViewBase;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
@@ -877,7 +877,7 @@ var Orange;
                     this._onInitializedListeners.splice(idx, 1);
             };
             return OrangeElementExtension;
-        }());
+        })();
         Controls.GetOrInitializeOrangeElement = function (element) {
             var el = element;
             if (el.orange == null)
@@ -1040,7 +1040,7 @@ var Orange;
             };
             ControlManager._controlAttributeNames = ["data-control", "data-view"];
             return ControlManager;
-        }());
+        })();
         Controls.ControlManager = ControlManager;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
@@ -1067,7 +1067,7 @@ var Orange;
                 return selfPath === path ? {} : null;
             };
             return PathHandler;
-        }());
+        })();
         var Router = (function () {
             function Router() {
                 var _this = this;
@@ -1105,6 +1105,7 @@ var Orange;
                 this.handleRoute(location.pathname);
             };
             Router.prototype.navigate = function (navigatePath, state) {
+                if (state === void 0) { state = null; }
                 var path = this.cleanPath(navigatePath);
                 if (path === this.cleanPath(location.pathname))
                     return true;
@@ -1134,7 +1135,7 @@ var Orange;
                 return false;
             };
             return Router;
-        }());
+        })();
         Routing.Router = Router;
     })(Routing = Orange.Routing || (Orange.Routing = {}));
 })(Orange || (Orange = {}));
@@ -1154,7 +1155,7 @@ var Orange;
                 window.ko.applyBindingsToDescendants(this.dataContext, this.element);
             };
             return KnockoutViewBase;
-        }(Controls.ViewBase));
+        })(Controls.ViewBase);
         Controls.KnockoutViewBase = KnockoutViewBase;
     })(Controls = Orange.Controls || (Orange.Controls = {}));
 })(Orange || (Orange = {}));
@@ -1205,16 +1206,16 @@ var Orange;
                         return;
                     }
                     var sourceProp = _this.source;
-                    if (sourceProp.subscribe != null)
-                        _this.propDisposable = sourceProp.subscribe(function (val) { return control[_this.target] = val; });
-                    if (ko.isObservable(sourceProp) || ko.isComputed(sourceProp)) {
-                        control[_this.target] = sourceProp();
-                    }
-                    else if (sourceProp.subscribe == null) {
+                    if (sourceProp == null || sourceProp.subscribe == null) {
                         control[_this.target] = sourceProp;
                     }
+                    else if (ko.isObservable(sourceProp)) {
+                        control[_this.target] = sourceProp();
+                    }
+                    if (sourceProp && sourceProp.subscribe != null)
+                        _this.propDisposable = sourceProp.subscribe(function (val) { return control[_this.target] = val; });
                     if (_this.settings.mode == BindingMode.TwoWay) {
-                        if (sourceProp.subscribe == null)
+                        if (sourceProp && sourceProp.subscribe == null)
                             _this.warn("Two way bingins are only possible with sources of type Rx.IObservable or knockout observables.");
                         else
                             control.addPropertyChangedListener(_this.onPropertyChanged);
@@ -1272,7 +1273,7 @@ var Orange;
                 }
             };
             return ViewModelToControlBinding;
-        }());
+        })();
         if (ko) {
             ko.bindingHandlers['o-binding'] = {
                 init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
@@ -1280,8 +1281,8 @@ var Orange;
                     var values = valueAccessor();
                     var bindingProperties = Array.isArray(values) ? values : [values];
                     var allSettingNames = ['mode', 'allow-dynamic'];
-                    for (var _i = 0, bindingProperties_1 = bindingProperties; _i < bindingProperties_1.length; _i++) {
-                        var bindingProperty = bindingProperties_1[_i];
+                    for (var _i = 0; _i < bindingProperties.length; _i++) {
+                        var bindingProperty = bindingProperties[_i];
                         var allProperties = Object.getOwnPropertyNames(bindingProperty);
                         var settingProperties = allProperties.filter(function (p) { return allSettingNames.indexOf(p) > -1; });
                         var properties = allProperties.filter(function (p) { return settingProperties.indexOf(p) < 0; });
@@ -1305,8 +1306,8 @@ var Orange;
                             else if (str !== false)
                                 throw "'allow-dynamic' has to be true or false (was '" + str + ", typeof(...): " + (typeof str) + "').";
                         }
-                        for (var _a = 0, properties_1 = properties; _a < properties_1.length; _a++) {
-                            var property = properties_1[_a];
+                        for (var _a = 0; _a < properties.length; _a++) {
+                            var property = properties[_a];
                             var source = bindingProperty[property];
                             var target = property;
                             bindings.push(new ViewModelToControlBinding(bindingContext.$data, element, source, target, settings));

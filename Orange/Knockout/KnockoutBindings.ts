@@ -109,22 +109,22 @@ module Orange.Bindings {
             
             let sourceProp : any = this.source; 
 			
-            // If Rx.IObservable/Rx.Observable or ko.observable/ko.observableArray 
-            // save disposable to be able to clean up later
-	        if (sourceProp.subscribe != null)
-	        	this.propDisposable = sourceProp.subscribe((val: any) => control[this.target] = val);
-            
-	        if (ko.isObservable(sourceProp) || ko.isComputed(sourceProp)) {
-	        	control[this.target] = sourceProp();
-            }
-			else if (sourceProp.subscribe == null) {
-               // function, object, field, array..
+	        if (sourceProp == null || sourceProp.subscribe == null) {
+               // null, function, object, field, array..
                // ONTE TIME only, no two way possible
                control[this.target] = sourceProp;
             }
+			else if (ko.isObservable(sourceProp)) {
+	        	control[this.target] = sourceProp();
+            }
+            
+            // If Rx.IObservable/Rx.Observable or ko.observable/ko.observableArray 
+            // save disposable to be able to clean up later
+	        if (sourceProp && sourceProp.subscribe != null)
+	        	this.propDisposable = sourceProp.subscribe((val: any) => control[this.target] = val);
             
 			if (this.settings.mode == BindingMode.TwoWay) {
-                if (sourceProp.subscribe == null)
+                if (sourceProp && sourceProp.subscribe == null)
 				    this.warn("Two way bingins are only possible with sources of type Rx.IObservable or knockout observables.");
                 else     
                     (<Orange.Controls.Control>control).addPropertyChangedListener(this.onPropertyChanged);

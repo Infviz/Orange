@@ -95,7 +95,8 @@ describe(
                 vmTitle: ko.observable('My Title'),
                 vmContent: "My nice content",
                 vmCallback: () => {  },
-                vmObject: { someProp: "value", otherProp: 10}
+                vmObject: { someProp: "value", otherProp: 10},
+                vmNull: <any>null
             };
 
             before(
@@ -114,7 +115,8 @@ describe(
                                         someobject: vmObject,
                                         stringField: '${staticStringValue}',
                                         numberField: ${staticNumericValue},
-                                        booleanField: ${staticBooleanValue}
+                                        booleanField: ${staticBooleanValue},
+                                        nullField: vmNull
                                     }">
                             </div>
                                 
@@ -187,12 +189,17 @@ describe(
             it("should set the property 'title' on all controls.",
                 done => {
                     assertEqual(controlOne.title, vm.vmTitle());
-                    assertEqual(controlOne.content, vm.vmContent);
-                    assertEqual(controlOne.someobject, vm.vmObject);
-                    assertEqual(controlOne.callback, vm.vmCallback);
                     
                     assertEqual(controlTwo.title, vm.vmTitle());
                     assertEqual(controlThree.title, vm.vmTitle());
+                    done();
+                });
+                
+            it("should handle different property types", 
+                done => {
+                    assertEqual(controlOne.content, vm.vmContent);
+                    assertEqual(controlOne.someobject, vm.vmObject);
+                    assertEqual(controlOne.callback, vm.vmCallback);
                     done();
                 });
 
@@ -224,12 +231,12 @@ describe(
                     done();
                 });
 
-
-            it("should set a field on a control to a static value",
+            it("should set a field on a control to a static value (and null)",
                 done => {
                     assertEqual(controlOne.stringField, staticStringValue);
                     assertEqual(controlOne.numberField, staticNumericValue);
                     assertEqual(controlOne.booleanField, staticBooleanValue);
+                    assertEqual(controlOne.nullField, null);
                     done();
                 });
                 
