@@ -1086,7 +1086,8 @@ var Orange;
                         return getAnchor(element.parentElement);
                     };
                     var anchor = getAnchor(elem);
-                    if (anchor.tagName === "A" &&
+                    if (anchor != null &&
+                        anchor.tagName === "A" &&
                         anchor.target === "" &&
                         (!anchor.hostname || anchor.hostname === location.hostname)) {
                         var wasHandled = _this.navigate(anchor.pathname, null);

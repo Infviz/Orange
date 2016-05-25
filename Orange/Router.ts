@@ -88,7 +88,8 @@ module Orange.Routing {
             
             let anchor = getAnchor(elem);
             
-            if (anchor.tagName === "A" &&
+            if (anchor != null &&
+                anchor.tagName === "A" &&
                 anchor.target === "" &&
                 (!anchor.hostname || anchor.hostname === location.hostname)) {
 
