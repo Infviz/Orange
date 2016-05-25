@@ -74,13 +74,25 @@ module Orange.Routing {
         };
         
         private onclick = (e: MouseEvent) => {
-            var elem = <HTMLAnchorElement>(e.target || e.srcElement);
+            let elem = <HTMLElement>(e.target || e.srcElement);
+            
+            let getAnchor: (element: HTMLElement) => HTMLAnchorElement = (element: HTMLElement) => {
+                if (element == null)
+                    return null;
+                
+                if (element.tagName == "A")
+                    return <HTMLAnchorElement>element;
+                
+                return getAnchor(element.parentElement);
+            } 
+            
+            let anchor = getAnchor(elem);
+            
+            if (anchor.tagName === "A" &&
+                anchor.target === "" &&
+                (!anchor.hostname || anchor.hostname === location.hostname)) {
 
-            if (elem.tagName === "A" &&
-                elem.target === "" &&
-                (!elem.hostname || elem.hostname === location.hostname)) {
-
-                let wasHandled = this.navigate(elem.pathname, null);
+                let wasHandled = this.navigate(anchor.pathname, null);
                 if (wasHandled) {
                     e.preventDefault();
                 }

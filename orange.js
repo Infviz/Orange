@@ -1078,10 +1078,18 @@ var Orange;
                 };
                 this.onclick = function (e) {
                     var elem = (e.target || e.srcElement);
-                    if (elem.tagName === "A" &&
-                        elem.target === "" &&
-                        (!elem.hostname || elem.hostname === location.hostname)) {
-                        var wasHandled = _this.navigate(elem.pathname, null);
+                    var getAnchor = function (element) {
+                        if (element == null)
+                            return null;
+                        if (element.tagName == "A")
+                            return element;
+                        return getAnchor(element.parentElement);
+                    };
+                    var anchor = getAnchor(elem);
+                    if (anchor.tagName === "A" &&
+                        anchor.target === "" &&
+                        (!anchor.hostname || anchor.hostname === location.hostname)) {
+                        var wasHandled = _this.navigate(anchor.pathname, null);
                         if (wasHandled) {
                             e.preventDefault();
                         }

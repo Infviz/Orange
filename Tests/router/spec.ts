@@ -144,6 +144,27 @@ describe(
             done();
         });
         
+        it("should handle clicks on <a href> with other content in", (done) => {
+            
+            var a = document.createElement("a");
+            a.href = "/two";
+            var b = document.createElement("span");
+            a.appendChild(b);
+            document.body.appendChild(a);
+            
+            try {
+                b.click();
+                
+                assertEqual(handledPath, "/two");
+                assert(() => window.location.href.indexOf("/two") != -1);
+            }
+            finally {
+                document.body.removeChild(a);
+            }
+            
+            done();
+        });
+        
         it("should handle javascript triggered navigation", (done) => {
            
             router.navigate("/zero", null);
