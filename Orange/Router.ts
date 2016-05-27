@@ -25,16 +25,21 @@ module Orange.Routing {
                     return selfPath.exec(path);
                 }
             }
-                
+            
             return selfPath === path ? {} : null;
         }
     }
 
     export class Router {
         private paths: Array<PathHandler> = [];
+        private listeners: Array<PathHandler> = [];
 
         route(path: string | RegExp, handler: Function) {
             this.paths.push(new PathHandler(path, handler));
+        }
+
+        listen(path: string | RegExp, handler: Function) {
+            this.listeners.push(new PathHandler(path, handler));
         }
 
         unroute(path: string | RegExp) {
@@ -114,14 +119,22 @@ module Orange.Routing {
         }
 
         private handleRoute(path: string): boolean {
-            for (var p of this.paths) {
+
+            for (let l of this.listeners) {
+                var match = l.tryMatch(path);
+                if (match) {
+                    l.handler(match);
+                }
+            }
+
+            for (let p of this.paths) {
                 var match = p.tryMatch(path);
                 if (match) {
                     p.handler(match);
                     return true;
                 }
             }
-
+            
             return false;
         }
     }

@@ -1072,6 +1072,7 @@ var Orange;
             function Router() {
                 var _this = this;
                 this.paths = [];
+                this.listeners = [];
                 this.onpopstate = function (evnt) {
                     console.log("handle popstate: " + location.pathname);
                     _this.handleRoute(location.pathname);
@@ -1099,6 +1100,9 @@ var Orange;
             }
             Router.prototype.route = function (path, handler) {
                 this.paths.push(new PathHandler(path, handler));
+            };
+            Router.prototype.listen = function (path, handler) {
+                this.listeners.push(new PathHandler(path, handler));
             };
             Router.prototype.unroute = function (path) {
                 this.paths = this.paths.filter(function (p) {
@@ -1133,8 +1137,15 @@ var Orange;
                 return path;
             };
             Router.prototype.handleRoute = function (path) {
-                for (var _i = 0, _a = this.paths; _i < _a.length; _i++) {
-                    var p = _a[_i];
+                for (var _i = 0, _a = this.listeners; _i < _a.length; _i++) {
+                    var l = _a[_i];
+                    var match = l.tryMatch(path);
+                    if (match) {
+                        l.handler(match);
+                    }
+                }
+                for (var _b = 0, _c = this.paths; _b < _c.length; _b++) {
+                    var p = _c[_b];
                     var match = p.tryMatch(path);
                     if (match) {
                         p.handler(match);

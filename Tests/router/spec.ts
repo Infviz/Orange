@@ -189,4 +189,31 @@ describe(
             assertEqual(handledPath, "/zero");
             done();            
         })
+        
+        it("should fire events for any navigation", (done) => {
+            
+            let catchAll = new Array<string>();
+            let oneHasFired = false;
+            
+            router.listen(new RegExp(".*"), (args: RegExpMatchArray) => {
+                catchAll.push(args[0]);
+            });
+            
+            router.listen("/one", () => {
+                if (oneHasFired)
+                    done("/one has already fired")
+                oneHasFired = true;
+            });
+            
+            router.navigate("/zero", null);
+            router.navigate("/one", null);
+            
+            assertEqual(catchAll.length, 2);
+            assertEqual(catchAll[0], "/zero");
+            assertEqual(catchAll[1], "/one");
+            
+            assertEqual(oneHasFired, true);
+            
+            done();
+        })
     });
