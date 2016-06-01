@@ -1122,8 +1122,13 @@ var Orange;
                 var path = this.cleanPath(navigatePath);
                 if (path === this.cleanPath(location.pathname))
                     return true;
-                history.pushState(state, null, path);
-                return this.handleRoute(path);
+                if (this.handleRoute(path)) {
+                    history.pushState(state, null, path);
+                    return true;
+                }
+                else {
+                    return false;
+                }
             };
             Router.prototype.dispose = function () {
                 window.removeEventListener("popstate", this.onpopstate);

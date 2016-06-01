@@ -64,8 +64,14 @@ module Orange.Routing {
             if (path === this.cleanPath(location.pathname))
                 return true;
 
-            history.pushState(state, null, path);
-            return this.handleRoute(path);
+            if (this.handleRoute(path)) {
+                
+                history.pushState(state, null, path);
+                return true;
+            }
+            else {
+                return false;
+            }
         }
         
         dispose() {
