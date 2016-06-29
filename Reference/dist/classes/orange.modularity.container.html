@@ -83,14 +83,14 @@
 						Whenever we resolve the type <code>Foo</code> from the container we will get the registered instance. </p>
 						<pre><code>class Foo { /* ... */ }
 
-let container =<span class="hljs-instruction"> new </span>Orange.Modularity.Container(<span class="hljs-function">)</span>;
+let container =<span class="hljs-built_in"> new </span>Orange.Modularity.Container();
 
-let fooInstance =<span class="hljs-instruction"> new </span>Foo(<span class="hljs-function">)</span>;
-container.registerInstance(Foo, fooInstance<span class="hljs-function">)</span>;
+let fooInstance =<span class="hljs-built_in"> new </span>Foo();
+container.registerInstance(Foo, fooInstance);
 
 
-// wherever we resolve Foo we will get the same<span class="hljs-instruction"> instance </span>(i.e. fooInstance<span class="hljs-function">)</span> 
-let myFoo =<span class="hljs-function"> container.resolve(</span>Foo<span class="hljs-function">)</span>;
+// wherever we resolve Foo we will get the same<span class="hljs-built_in"> instance </span>(i.e. fooInstance) 
+let myFoo = container.resolve(Foo);
 </code></pre><p><code>Container</code> can automatically resolve any type that has an empty constructor. To resolve 
 							more complex types some more information has to be provided, as illustrated in the
 						<em>Nested resolving</em> example below.  </p>
@@ -98,11 +98,11 @@ let myFoo =<span class="hljs-function"> container.resolve(</span>Foo<span class=
 						<p>In this example we provide information about how to resolve <code>Bar</code> with the
 							<code>@Orange.Modularity.inject</code> decorator on the <code>Bar</code> class. Because of this the container has
 						all information it needs to directly resolve instances of <code>Bar</code>. </p>
-						<pre><code><span class="hljs-keyword">class</span> Foo { <span class="hljs-comment">/* ... */</span> }
+						<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span> </span>{ <span class="hljs-comment">/* ... */</span> }
 
 @Orange.Modularity.inject
-<span class="hljs-keyword">class</span> Bar { 
-    <span class="hljs-constructor"><span class="hljs-keyword">constructor</span>(private myFoo: Foo) </span>{ }
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bar</span> </span>{ 
+    <span class="hljs-keyword">constructor</span>(private myFoo: Foo) { }
  }
 
 <span class="hljs-keyword">let</span> container = <span class="hljs-keyword">new</span> Orange.Modularity.Container();
@@ -110,18 +110,18 @@ let myFoo =<span class="hljs-function"> container.resolve(</span>Foo<span class=
 <span class="hljs-keyword">let</span> myBar = container.resolve(Bar);
 </code></pre><p>In the example above resolving <code>Bar</code> will always result in a new instance of <code>Bar</code>, this 
 						is not always what we want. The following example illustrates how to make bar &#39;singleton&#39;. </p>
-						<pre><code><span class="hljs-keyword">class</span> Foo { <span class="hljs-comment">/* ... */</span> }
+						<pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Foo</span> </span>{ <span class="hljs-comment">/* ... */</span> }
 
 @Orange.Modularity.inject
-<span class="hljs-keyword">class</span> Bar { 
-    <span class="hljs-constructor"><span class="hljs-keyword">constructor</span>(private myFoo: Foo) </span>{ }
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bar</span> </span>{ 
+    constructor(<span class="hljs-keyword">private</span> myFoo: Foo) { }
 }
 
-<span class="hljs-keyword">let</span> container = <span class="hljs-keyword">new</span> Orange.Modularity.Container();
+let <span class="hljs-keyword">container</span> = <span class="hljs-keyword">new</span> Orange.Modularity.Container();
 
-container.registerInstance(Bar, container.resolve(Bar));
+<span class="hljs-keyword">container</span>.registerInstance(Bar, <span class="hljs-keyword">container</span>.resolve(Bar));
 
-<span class="hljs-keyword">let</span> myBar = container.resolve(Bar);
+let myBar = <span class="hljs-keyword">container</span>.resolve(Bar);
 </code></pre><p>In this case we will always get the same instance of bar.</p>
 					</div>
 				</div>
@@ -138,51 +138,58 @@ container.registerInstance(Bar, container.resolve(Bar));
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section ">
+						<section class="tsd-index-section tsd-is-external">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="orange.modularity.container.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-external"><a href="orange.modularity.container.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section tsd-is-private tsd-is-private-protected">
+						<section class="tsd-index-section tsd-is-private tsd-is-private-protected tsd-is-external">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="orange.modularity.container.html#instances" class="tsd-kind-icon">instances</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="orange.modularity.container.html#typemap" class="tsd-kind-icon">type<wbr>Map</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private tsd-is-external"><a href="orange.modularity.container.html#instances" class="tsd-kind-icon">instances</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private tsd-is-external"><a href="orange.modularity.container.html#typemap" class="tsd-kind-icon">type<wbr>Map</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private tsd-is-static tsd-is-external"><a href="orange.modularity.container.html#_defaultcontainer" class="tsd-kind-icon">_default<wbr>Container</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section ">
+						<section class="tsd-index-section tsd-is-external">
+							<h3>Accessors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-static tsd-is-external"><a href="orange.modularity.container.html#defaultcontainer" class="tsd-kind-icon">default<wbr>Container</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section tsd-is-external">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="orange.modularity.container.html#applyconstructor" class="tsd-kind-icon">apply<wbr>Constructor</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="orange.modularity.container.html#checkarity" class="tsd-kind-icon">check<wbr>Arity</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="orange.modularity.container.html#createinstance" class="tsd-kind-icon">create<wbr>Instance</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="orange.modularity.container.html#lookup" class="tsd-kind-icon">lookup</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="orange.modularity.container.html#registerinstance" class="tsd-kind-icon">register<wbr>Instance</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="orange.modularity.container.html#registertype" class="tsd-kind-icon">register<wbr>Type</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="orange.modularity.container.html#resolve" class="tsd-kind-icon">resolve</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="orange.modularity.container.html#resolvewithoverride" class="tsd-kind-icon">resolve<wbr>With<wbr>Override</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="orange.modularity.container.html#tryresolve" class="tsd-kind-icon">try<wbr>Resolve</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static"><a href="orange.modularity.container.html#getconstructorfromstring" class="tsd-kind-icon">get<wbr>Constructor<wbr>From<wbr>String</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static"><a href="orange.modularity.container.html#isvalidconstructor" class="tsd-kind-icon">is<wbr>Valid<wbr>Constructor</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external"><a href="orange.modularity.container.html#applyconstructor" class="tsd-kind-icon">apply<wbr>Constructor</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external"><a href="orange.modularity.container.html#checkarity" class="tsd-kind-icon">check<wbr>Arity</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external"><a href="orange.modularity.container.html#createinstance" class="tsd-kind-icon">create<wbr>Instance</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external"><a href="orange.modularity.container.html#lookup" class="tsd-kind-icon">lookup</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="orange.modularity.container.html#registerinstance" class="tsd-kind-icon">register<wbr>Instance</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="orange.modularity.container.html#registertype" class="tsd-kind-icon">register<wbr>Type</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="orange.modularity.container.html#resolve" class="tsd-kind-icon">resolve</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="orange.modularity.container.html#resolvewithoverride" class="tsd-kind-icon">resolve<wbr>With<wbr>Override</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-external"><a href="orange.modularity.container.html#tryresolve" class="tsd-kind-icon">try<wbr>Resolve</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static tsd-is-external"><a href="orange.modularity.container.html#getconstructorfromstring" class="tsd-kind-icon">get<wbr>Constructor<wbr>From<wbr>String</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static tsd-is-external"><a href="orange.modularity.container.html#isvalidconstructor" class="tsd-kind-icon">is<wbr>Valid<wbr>Constructor</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group ">
+			<section class="tsd-panel-group tsd-member-group tsd-is-external">
 				<h2>Constructors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-external">
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
-					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">new <wbr>Container<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="orange.modularity.container.html" class="tsd-signature-type">Container</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:30</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L35">Container.ts:35</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="orange.modularity.container.html" class="tsd-signature-type">Container</a></h4>
@@ -190,42 +197,72 @@ container.registerInstance(Bar, container.resolve(Bar));
 					</ul>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-private tsd-is-private-protected">
+			<section class="tsd-panel-group tsd-member-group tsd-is-private tsd-is-private-protected tsd-is-external">
 				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private tsd-is-external">
 					<a name="instances" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> instances</h3>
-					<div class="tsd-signature tsd-kind-icon">instances<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/orange.modularity.keyvaluepair.html" class="tsd-signature-type">KeyValuePair</a><span class="tsd-signature-symbol">&gt;</span></div>
+					<div class="tsd-signature tsd-kind-icon">instances<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/orange.modularity.keyvaluepair.html" class="tsd-signature-type">KeyValuePair</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in Container.ts:30</li>
+							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L32">Container.ts:32</a></li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private tsd-is-external">
 					<a name="typemap" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> type<wbr>Map</h3>
-					<div class="tsd-signature tsd-kind-icon">type<wbr>Map<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/orange.modularity.keyvaluepair.html" class="tsd-signature-type">KeyValuePair</a><span class="tsd-signature-symbol">&gt;</span></div>
+					<div class="tsd-signature tsd-kind-icon">type<wbr>Map<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/orange.modularity.keyvaluepair.html" class="tsd-signature-type">KeyValuePair</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> =&nbsp;[]</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in Container.ts:29</li>
+							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L31">Container.ts:31</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private tsd-is-static tsd-is-external">
+					<a name="_defaultcontainer" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagPrivate">Private</span> _default<wbr>Container</h3>
+					<div class="tsd-signature tsd-kind-icon">_default<wbr>Container<span class="tsd-signature-symbol">:</span> <a href="orange.modularity.container.html" class="tsd-signature-type">Container</a><span class="tsd-signature-symbol"> =&nbsp;new Container()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L34">Container.ts:34</a></li>
 						</ul>
 					</aside>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group ">
+			<section class="tsd-panel-group tsd-member-group tsd-is-external">
+				<h2>Accessors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-static tsd-is-external">
+					<a name="defaultcontainer" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> default<wbr>Container</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-static tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> defaultContainer<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="orange.modularity.container.html" class="tsd-signature-type">Container</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L35">Container.ts:35</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="orange.modularity.container.html" class="tsd-signature-type">Container</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-external">
 				<h2>Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 					<a name="applyconstructor" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> apply<wbr>Constructor</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">apply<wbr>Constructor<span class="tsd-signature-symbol">(</span>ctor<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:196</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L201">Container.ts:201</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -241,17 +278,17 @@ container.registerInstance(Bar, container.resolve(Bar));
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 					<a name="checkarity" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> check<wbr>Arity</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">check<wbr>Arity<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:185</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L190">Container.ts:190</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -264,17 +301,17 @@ container.registerInstance(Bar, container.resolve(Bar));
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 					<a name="createinstance" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> create<wbr>Instance</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">create<wbr>Instance<span class="tsd-signature-symbol">(</span>resolvedType<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:166</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L171">Container.ts:171</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -287,17 +324,17 @@ container.registerInstance(Bar, container.resolve(Bar));
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 					<a name="lookup" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> lookup</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">lookup<span class="tsd-signature-symbol">(</span>dict<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/orange.modularity.keyvaluepair.html" class="tsd-signature-type">KeyValuePair</a><span class="tsd-signature-symbol">&gt;</span>, key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:159</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L164">Container.ts:164</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -313,17 +350,17 @@ container.registerInstance(Bar, container.resolve(Bar));
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
 					<a name="registerinstance" class="tsd-anchor"></a>
 					<h3>register<wbr>Instance</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">register<wbr>Instance<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, instance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:36</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L41">Container.ts:41</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -339,17 +376,17 @@ container.registerInstance(Bar, container.resolve(Bar));
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
 					<a name="registertype" class="tsd-anchor"></a>
 					<h3>register<wbr>Type</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">register<wbr>Type<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, instance<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:40</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L45">Container.ts:45</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -365,17 +402,17 @@ container.registerInstance(Bar, container.resolve(Bar));
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
 					<a name="resolve" class="tsd-anchor"></a>
 					<h3>resolve</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">resolve<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span>, register<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:79</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L84">Container.ts:84</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -391,17 +428,17 @@ container.registerInstance(Bar, container.resolve(Bar));
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
 					<a name="resolvewithoverride" class="tsd-anchor"></a>
 					<h3>resolve<wbr>With<wbr>Override</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">resolve<wbr>With<wbr>Override<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, overrides<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/orange.modularity.keyvaluepair.html" class="tsd-signature-type">KeyValuePair</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:115</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L120">Container.ts:120</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -417,17 +454,17 @@ container.registerInstance(Bar, container.resolve(Bar));
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-external">
 					<a name="tryresolve" class="tsd-anchor"></a>
 					<h3>try<wbr>Resolve</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">try<wbr>Resolve<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span>, register<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/orange.modularity.html#tryresolveresult" class="tsd-signature-type">TryResolveResult</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:44</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L49">Container.ts:49</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -443,17 +480,17 @@ container.registerInstance(Bar, container.resolve(Bar));
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static tsd-is-external">
 					<a name="getconstructorfromstring" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagPrivate">Private</span> get<wbr>Constructor<wbr>From<wbr>String</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">get<wbr>Constructor<wbr>From<wbr>String<span class="tsd-signature-symbol">(</span>constructorName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:122</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L127">Container.ts:127</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -466,17 +503,17 @@ container.registerInstance(Bar, container.resolve(Bar));
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static tsd-is-external">
 					<a name="isvalidconstructor" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagPrivate">Private</span> is<wbr>Valid<wbr>Constructor</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static tsd-is-external">
 						<li class="tsd-signature tsd-kind-icon">is<wbr>Valid<wbr>Constructor<span class="tsd-signature-symbol">(</span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in Container.ts:192</li>
+									<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Container.ts#L197">Container.ts:197</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -497,19 +534,22 @@ container.registerInstance(Bar, container.resolve(Bar));
 					<li class="globals  ">
 						<a href="../index.html"><em>Globals</em></a>
 					</li>
-					<li class=" tsd-kind-module">
+					<li class="label tsd-is-external">
+						<span>Externals</span>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
 						<a href="../modules/orange.html">Orange</a>
 					</li>
-					<li class=" tsd-kind-module tsd-parent-kind-module">
+					<li class=" tsd-kind-module tsd-parent-kind-module tsd-is-external">
 						<a href="../modules/orange.bindings.html">Orange.<wbr>Bindings</a>
 					</li>
-					<li class=" tsd-kind-module tsd-parent-kind-module">
+					<li class=" tsd-kind-module tsd-parent-kind-module tsd-is-external">
 						<a href="../modules/orange.controls.html">Orange.<wbr>Controls</a>
 					</li>
-					<li class="current tsd-kind-module tsd-parent-kind-module">
+					<li class="current tsd-kind-module tsd-parent-kind-module tsd-is-external">
 						<a href="../modules/orange.modularity.html">Orange.<wbr>Modularity</a>
 					</li>
-					<li class=" tsd-kind-module tsd-parent-kind-module">
+					<li class=" tsd-kind-module tsd-parent-kind-module tsd-is-external">
 						<a href="../modules/orange.routing.html">Orange.<wbr>Routing</a>
 					</li>
 				</ul>
@@ -518,68 +558,74 @@ container.registerInstance(Bar, container.resolve(Bar));
 				<ul class="before-current">
 				</ul>
 				<ul class="current">
-					<li class="current tsd-kind-class tsd-parent-kind-module">
+					<li class="current tsd-kind-class tsd-parent-kind-module tsd-is-external">
 						<a href="orange.modularity.container.html" class="tsd-kind-icon">Container</a>
 						<ul>
-							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-external">
 								<a href="orange.modularity.container.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private tsd-is-external">
 								<a href="orange.modularity.container.html#instances" class="tsd-kind-icon">instances</a>
 							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private tsd-is-external">
 								<a href="orange.modularity.container.html#typemap" class="tsd-kind-icon">type<wbr>Map</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private tsd-is-static tsd-is-external">
+								<a href="orange.modularity.container.html#_defaultcontainer" class="tsd-kind-icon">_default<wbr>Container</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-static tsd-is-external">
+								<a href="orange.modularity.container.html#defaultcontainer" class="tsd-kind-icon">default<wbr>Container</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 								<a href="orange.modularity.container.html#applyconstructor" class="tsd-kind-icon">apply<wbr>Constructor</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 								<a href="orange.modularity.container.html#checkarity" class="tsd-kind-icon">check<wbr>Arity</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 								<a href="orange.modularity.container.html#createinstance" class="tsd-kind-icon">create<wbr>Instance</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-external">
 								<a href="orange.modularity.container.html#lookup" class="tsd-kind-icon">lookup</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
 								<a href="orange.modularity.container.html#registerinstance" class="tsd-kind-icon">register<wbr>Instance</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
 								<a href="orange.modularity.container.html#registertype" class="tsd-kind-icon">register<wbr>Type</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
 								<a href="orange.modularity.container.html#resolve" class="tsd-kind-icon">resolve</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
 								<a href="orange.modularity.container.html#resolvewithoverride" class="tsd-kind-icon">resolve<wbr>With<wbr>Override</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-external">
 								<a href="orange.modularity.container.html#tryresolve" class="tsd-kind-icon">try<wbr>Resolve</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static tsd-is-external">
 								<a href="orange.modularity.container.html#getconstructorfromstring" class="tsd-kind-icon">get<wbr>Constructor<wbr>From<wbr>String</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private tsd-is-static tsd-is-external">
 								<a href="orange.modularity.container.html#isvalidconstructor" class="tsd-kind-icon">is<wbr>Valid<wbr>Constructor</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-class tsd-parent-kind-module">
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-is-external">
 						<a href="orange.modularity.regionmanager.html" class="tsd-kind-icon">Region<wbr>Manager</a>
 					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module">
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-is-external">
 						<a href="orange.modularity.resolveerror.html" class="tsd-kind-icon">Resolve<wbr>Error</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module">
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-external">
 						<a href="../interfaces/orange.modularity.keyvaluepair.html" class="tsd-kind-icon">Key<wbr>Value<wbr>Pair</a>
 					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-is-external">
 						<a href="../modules/orange.modularity.html#tryresolveresult" class="tsd-kind-icon">Try<wbr>Resolve<wbr>Result</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module">
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-external">
 						<a href="../modules/orange.modularity.html#inject" class="tsd-kind-icon">inject</a>
 					</li>
 				</ul>

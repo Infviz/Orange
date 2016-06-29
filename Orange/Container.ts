@@ -31,6 +31,9 @@ module Orange.Modularity
         private typeMap: Array<KeyValuePair> = [];
         private instances: Array<KeyValuePair> = [];
 
+		private static _defaultContainer:Container = new Container();
+		public static get defaultContainer(): Container { return Container._defaultContainer; }
+
         constructor () {
             this.registerInstance(Container, this);
         }
