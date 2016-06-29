@@ -30,6 +30,8 @@ declare module Orange.Modularity {
     class Container {
         private typeMap;
         private instances;
+        private static _defaultContainer;
+        static defaultContainer: Container;
         constructor();
         registerInstance(type: any, instance: any): void;
         registerType(type: any, instance: any): void;

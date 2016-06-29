@@ -86,20 +86,20 @@
 						<p>Say we have a control <code>Foo</code> with a property (getter and setter) <code>myControlProperty</code> and a view model
 							with a KnockoutObservable property <code>myViewModelProperty</code>. Then we can do something similar to this in
 						the view template: </p>
-						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-title">div</span>
-    <span class="hljs-attribute">data-control</span>=<span class="hljs-value">"Foo"</span>
-    <span class="hljs-attribute">data-bind</span>=<span class="hljs-value">"o-binding: { myControlProperty: myViewModelProperty }"</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+    <span class="hljs-attr">data-control</span>=<span class="hljs-string">"Foo"</span>
+    <span class="hljs-attr">data-bind</span>=<span class="hljs-string">"o-binding: { myControlProperty: myViewModelProperty }"</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 </code></pre>
 						<p>The control <code>Foo</code> will have its property <code>myControlProperty</code> bound to the property <code>myViewModelProperty</code>
 							on the view model, i.e. whenever <code>myViewModelProperty</code> changes <code>myControlProperty</code> will recieve the
 						new value. </p>
 						<p>Sometimes it is useful to have this work in both directions. That is, if the value on the property
 						in the control changes, we get the change reflected in the view model. If that is the case we can use:   </p>
-						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-title">div</span>
-    <span class="hljs-attribute">data-control</span>=<span class="hljs-value">"Foo"</span>
-    <span class="hljs-attribute">data-bind</span>=<span class="hljs-value">"o-binding: { myControlProperty: myViewModelProperty, mode: 'two-way' }"</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+    <span class="hljs-attr">data-control</span>=<span class="hljs-string">"Foo"</span>
+    <span class="hljs-attr">data-bind</span>=<span class="hljs-string">"o-binding: { myControlProperty: myViewModelProperty, mode: 'two-way' }"</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 </code></pre>
 						<p>This however requires that the control has implemented its getter and setter correctly, calling
 						<code>raisePropertyChanged</code>:</p>
@@ -114,9 +114,9 @@
 						<p>the call to <code>raisePropertyChanged</code> here ensures that the property will work with two way bindings.</p>
 						<p> To bind multiple properties you simply add them (static values in the form of string, number
 						and booleans are also suported):</p>
-						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-title">div</span>
-    <span class="hljs-attribute">data-control</span>=<span class="hljs-value">"Foo"</span>
-    <span class="hljs-attribute">data-bind</span>=<span class="hljs-value">"
+						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+    <span class="hljs-attr">data-control</span>=<span class="hljs-string">"Foo"</span>
+    <span class="hljs-attr">data-bind</span>=<span class="hljs-string">"
         o-binding: { 
             myControlProperty: myViewModelProperty,
             myOtherControlProperty: myViewOtherModelProperty,
@@ -124,12 +124,12 @@
             isTrueThingy: true,
             someNumber: 10
         }"</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 </code></pre>
 						<p>or in the case of <code>&#39;two-way&#39;</code> and single way bindings combined: </p>
-						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-title">div</span>
-    <span class="hljs-attribute">data-control</span>=<span class="hljs-value">"Foo"</span>
-    <span class="hljs-attribute">data-bind</span>=<span class="hljs-value">"
+						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>
+    <span class="hljs-attr">data-control</span>=<span class="hljs-string">"Foo"</span>
+    <span class="hljs-attr">data-bind</span>=<span class="hljs-string">"
         o-binding: [
         { 
             myControlProperty: myViewModelProperty,
@@ -143,32 +143,32 @@
             . 
             mode: 'two-way'
         }]"</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 </code></pre>
 						<h4 id="o-stop-binding-example">o-stop-binding example</h4>
 						<p>The <code>o-stop-binding</code>-binding is used to stop the propagation of knockout bindings. </p>
 						<p>If we have the view template:</p>
-						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-title">div</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">data-bind</span>=<span class="hljs-value">"text: title"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span>
+						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-bind</span>=<span class="hljs-string">"text: title"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
 
-    <span class="hljs-tag">&lt;<span class="hljs-title">div</span> <span class="hljs-attribute">data-bind</span>=<span class="hljs-value">"o-stop-binding"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">data-bind</span>=<span class="hljs-string">"o-stop-binding"</span>&gt;</span>
         <span class="hljs-comment">&lt;!-- Some content that should not be bound..  --&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-title">div</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 </code></pre>
 						<p>the outermost div will get a context applied via the view model, but the binding will not
 						continue in to the div with the <code>data-bind=&quot;o-stop-binding&quot;</code>-binding. </p>
 						<h4 id="o-view-model-example">o-view-model example</h4>
 						<p>The <code>o-view-model</code>-binding is used to bind a view model to a view. </p>
 						<p>So given the view template: </p>
-						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-title">div</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-title">span</span> <span class="hljs-attribute">data-bind</span>=<span class="hljs-value">"text: title"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-title">span</span>&gt;</span>
+						<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">data-bind</span>=<span class="hljs-string">"text: title"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
 
-    <span class="hljs-tag">&lt;<span class="hljs-title">div</span> 
-        <span class="hljs-attribute">data-view</span>=<span class="hljs-value">"SomeView"</span>  
-        <span class="hljs-attribute">data-bind</span>=<span class="hljs-value">"o-view-model: myViewModel"</span>&gt;</span>
-    <span class="hljs-tag">&lt;<span class="hljs-title">div</span>&gt;</span>
-<span class="hljs-tag">&lt;/<span class="hljs-title">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> 
+        <span class="hljs-attr">data-view</span>=<span class="hljs-string">"SomeView"</span>  
+        <span class="hljs-attr">data-bind</span>=<span class="hljs-string">"o-view-model: myViewModel"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 </code></pre>
 						<p>the view <code>SomeView</code> will get its view model from the property <code>myViewModel</code> on the parent
 						view model. </p>
@@ -179,42 +179,42 @@
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section tsd-is-not-exported">
+						<section class="tsd-index-section tsd-is-external tsd-is-not-exported">
 							<h3>Enumerations</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum tsd-parent-kind-module tsd-is-not-exported"><a href="../enums/orange.bindings.bindingmode.html" class="tsd-kind-icon">Binding<wbr>Mode</a></li>
+								<li class="tsd-kind-enum tsd-parent-kind-module tsd-is-external tsd-is-not-exported"><a href="../enums/orange.bindings.bindingmode.html" class="tsd-kind-icon">Binding<wbr>Mode</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section tsd-is-not-exported">
+						<section class="tsd-index-section tsd-is-external tsd-is-not-exported">
 							<h3>Classes</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-class tsd-parent-kind-module tsd-is-not-exported"><a href="../classes/orange.bindings.viewmodeltocontrolbinding.html" class="tsd-kind-icon">View<wbr>Model<wbr>ToControl<wbr>Binding</a></li>
+								<li class="tsd-kind-class tsd-parent-kind-module tsd-is-external tsd-is-not-exported"><a href="../classes/orange.bindings.viewmodeltocontrolbinding.html" class="tsd-kind-icon">View<wbr>Model<wbr>ToControl<wbr>Binding</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section tsd-is-not-exported">
+						<section class="tsd-index-section tsd-is-external tsd-is-not-exported">
 							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported"><a href="../interfaces/orange.bindings.bindingsettings.html" class="tsd-kind-icon">Binding<wbr>Settings</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-module tsd-is-external tsd-is-not-exported"><a href="../interfaces/orange.bindings.bindingsettings.html" class="tsd-kind-icon">Binding<wbr>Settings</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section tsd-is-not-exported">
+						<section class="tsd-index-section tsd-is-external tsd-is-not-exported">
 							<h3>Variables</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-variable tsd-parent-kind-module tsd-is-not-exported"><a href="orange.bindings.html#ko" class="tsd-kind-icon">ko</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-module tsd-is-external tsd-is-not-exported"><a href="orange.bindings.html#ko" class="tsd-kind-icon">ko</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
+			<section class="tsd-panel-group tsd-member-group tsd-is-external tsd-is-not-exported">
 				<h2>Variables</h2>
-				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-module tsd-is-not-exported">
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-module tsd-is-external tsd-is-not-exported">
 					<a name="ko" class="tsd-anchor"></a>
 					<h3>ko</h3>
-					<div class="tsd-signature tsd-kind-icon">ko<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<div class="tsd-signature tsd-kind-icon">ko<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;(&lt;any&gt;window).ko</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in Knockout/KnockoutBindings.ts:8</li>
+							<li>Defined in <a href="https://github.com/Infviz/Orange/blob/56b9b45/Orange/Knockout/KnockoutBindings.ts#L8">Knockout/KnockoutBindings.ts:8</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -226,35 +226,38 @@
 					<li class="globals  ">
 						<a href="../index.html"><em>Globals</em></a>
 					</li>
-					<li class=" tsd-kind-module">
+					<li class="label tsd-is-external">
+						<span>Externals</span>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
 						<a href="orange.html">Orange</a>
 					</li>
-					<li class="current tsd-kind-module tsd-parent-kind-module">
+					<li class="current tsd-kind-module tsd-parent-kind-module tsd-is-external">
 						<a href="orange.bindings.html">Orange.<wbr>Bindings</a>
 					</li>
-					<li class=" tsd-kind-module tsd-parent-kind-module">
+					<li class=" tsd-kind-module tsd-parent-kind-module tsd-is-external">
 						<a href="orange.controls.html">Orange.<wbr>Controls</a>
 					</li>
-					<li class=" tsd-kind-module tsd-parent-kind-module">
+					<li class=" tsd-kind-module tsd-parent-kind-module tsd-is-external">
 						<a href="orange.modularity.html">Orange.<wbr>Modularity</a>
 					</li>
-					<li class=" tsd-kind-module tsd-parent-kind-module">
+					<li class=" tsd-kind-module tsd-parent-kind-module tsd-is-external">
 						<a href="orange.routing.html">Orange.<wbr>Routing</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-enum tsd-parent-kind-module tsd-is-not-exported">
+					<li class=" tsd-kind-enum tsd-parent-kind-module tsd-is-external tsd-is-not-exported">
 						<a href="../enums/orange.bindings.bindingmode.html" class="tsd-kind-icon">Binding<wbr>Mode</a>
 					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-module tsd-is-not-exported">
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-is-external tsd-is-not-exported">
 						<a href="../classes/orange.bindings.viewmodeltocontrolbinding.html" class="tsd-kind-icon">View<wbr>Model<wbr>ToControl<wbr>Binding</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-not-exported">
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-is-external tsd-is-not-exported">
 						<a href="../interfaces/orange.bindings.bindingsettings.html" class="tsd-kind-icon">Binding<wbr>Settings</a>
 					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-module tsd-is-not-exported">
+					<li class=" tsd-kind-variable tsd-parent-kind-module tsd-is-external tsd-is-not-exported">
 						<a href="orange.bindings.html#ko" class="tsd-kind-icon">ko</a>
 					</li>
 				</ul>
