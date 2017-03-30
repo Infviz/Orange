@@ -6,49 +6,49 @@ module Orange.Controls {
      * [[include:IOrangeElementExtension-Description.md]] 
      * */
 	export interface IOrangeElementExtension {
-        element: HTMLElement;
-		control: Control; 
+		element: HTMLElement;
+		control: Control;
 		isInitialized: boolean;
-		addOnInitializedListener(callback: () => void) : void;
-        getOnOnitializedListners() : Array<() => void>;
-		removeOnInitializedListener(callback: () => void) : void;
+		addOnInitializedListener(callback: () => void): void;
+		getOnOnitializedListners(): Array<() => void>;
+		removeOnInitializedListener(callback: () => void): void;
 	}
-    
+
     /** 
      * Private class. See `IOrangeElementExtension` instead. 
      * */
 	class OrangeElementExtension implements IOrangeElementExtension {
-        
+
 		control: Control = null;
 		isInitialized: boolean = false;
-        
-        constructor(public element: HTMLElement) { }
-        
+
+		constructor(public element: HTMLElement) { }
+
 		private _onInitializedListeners = new Array<() => void>();
 
 		public addOnInitializedListener(callback: () => void) {
 			this._onInitializedListeners.push(callback);
 		}
-        
-        public getOnOnitializedListners() : Array<() => void> {
-            return this._onInitializedListeners;
-        }
 
-		public removeOnInitializedListener(callback: () => void) : void {
+		public getOnOnitializedListners(): Array<() => void> {
+			return this._onInitializedListeners;
+		}
 
-			let idx = this._onInitializedListeners.indexOf(callback);	
-			
-			if (idx > -1) 
+		public removeOnInitializedListener(callback: () => void): void {
+
+			let idx = this._onInitializedListeners.indexOf(callback);
+
+			if (idx > -1)
 				this._onInitializedListeners.splice(idx, 1);
 		}
 	}
-    
+
     /** 
      * [[include:GetOrInitializeOrangeElement-Description.md]] 
      * */
-	export var GetOrInitializeOrangeElement = 
-		(element: HTMLElement) : IOrangeElementExtension => {
-			
+	export var GetOrInitializeOrangeElement =
+		(element: HTMLElement): IOrangeElementExtension => {
+
 			let el = element as any;
 			if (el.orange == null)
 				el.orange = new OrangeElementExtension(element);
@@ -62,11 +62,11 @@ module Orange.Controls {
 	export class ControlManager {
 
 		static dependencies = () => <any>[Orange.Modularity.Container];
-		
-		private _container: Orange.Modularity.Container;
-		public get containter() : Orange.Modularity.Container { return this._container; }
 
-		constructor(container: Orange.Modularity.Container) { 
+		private _container: Orange.Modularity.Container;
+		public get containter(): Orange.Modularity.Container { return this._container; }
+
+		constructor(container: Orange.Modularity.Container) {
 			this._container = container;
 		}
 
@@ -95,9 +95,9 @@ module Orange.Controls {
 
 			// Set to an array of attribute local names (without namespace) if not all 
 			// attribute mutations need to be observed.
-            
-            // NOTE: We want to do this, but when tested did not work on windows.
-            // Shoold look in to this further. 
+
+			// NOTE: We want to do this, but when tested did not work on windows.
+			// Shoold look in to this further. 
 			//attributeFilter: ["data-control", "data-view"]
 		};
 
@@ -113,7 +113,7 @@ module Orange.Controls {
 			}
 			else {
 				var orangeEl = GetOrInitializeOrangeElement(root);
-				if (orangeEl.control != null) 
+				if (orangeEl.control != null)
 					orangeEl.control.dispose();
 			}
 		}
@@ -168,7 +168,7 @@ module Orange.Controls {
 			return result;
 		}
 
-		private static getControlAttribute(element: HTMLElement) : { attributeType: string; value: string; } {
+		private static getControlAttribute(element: HTMLElement): { attributeType: string; value: string; } {
 
 			var attr: string = null;
 			var anIdx = 0;
@@ -177,9 +177,9 @@ module Orange.Controls {
 
 			if (attr == null || attr == "")
 				return null;
-			
+
 			return {
-				attributeType: ControlManager._controlAttributeNames[anIdx - 1], 
+				attributeType: ControlManager._controlAttributeNames[anIdx - 1],
 				value: attr
 			};
 		}
@@ -192,8 +192,8 @@ module Orange.Controls {
 				ControlManager.createControlFromElement(element, container);
 			}
 			else {
-				let controls = element.querySelectorAll("[" + this._controlAttributeNames.join("], [") +  "]");
-				
+				let controls = element.querySelectorAll("[" + this._controlAttributeNames.join("], [") + "]");
+
 				for (let ceIdx = 0; ceIdx < controls.length; ++ceIdx) {
 					ControlManager.createControlFromElement(<HTMLElement>(controls[ceIdx]), container);
 				}
@@ -209,11 +209,11 @@ module Orange.Controls {
 			mut.forEach(this.handleMutation);
 		}
 
-		public static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Controls.Control {
+		public static async createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Promise<Controls.Control> {
 			return ControlManager.createControlInternal(controlElement, container);
 		}
 
-		public static createControlFromType(type: string, container: Orange.Modularity.Container): Controls.Control {
+		public static async createControlFromType(type: string, container: Orange.Modularity.Container): Promise<Controls.Control> {
 
 			var element = document.createElement("div");
 			element.setAttribute(ControlManager._controlAttributeNames[0], type);
@@ -221,16 +221,16 @@ module Orange.Controls {
 			return ControlManager.createControlInternal(element, container);
 		}
 
-		private static createControlInternal(element: HTMLElement, container: Orange.Modularity.Container): Controls.Control {
+		private static async createControlInternal(element: HTMLElement, container: Orange.Modularity.Container): Promise<Controls.Control> {
 
 			let type = ControlManager.getControlAttribute(element);
 			let orangeElement = GetOrInitializeOrangeElement(element);
-            
-            // The element already has a control connected to it.
+
+			// The element already has a control connected to it.
 			if (orangeElement.isInitialized)
 				return orangeElement.control;
 
-			let control = container.resolve(type.value);
+			let control = await container.resolve(type.value);
 
 			orangeElement.control = control;
 
@@ -238,30 +238,30 @@ module Orange.Controls {
 			element.setAttribute('data-control-id', control.id.value);
 
 			control.element = element;
-            
-            let finalize = 
-                () => {
-                    ControlManager
-                        .getChildren(element)
-                        .forEach(child => 
-                            ControlManager
-                                .createControlsInElement(child, container));
-                    
-                    control.onControlCreated && control.onControlCreated();
-                    
-                    orangeElement.isInitialized = true;
-                    
-                    orangeElement
-                        .getOnOnitializedListners()
-                        .forEach(listener => listener());
-                }
-            
-            if (control.applyTemplate == null)
-                finalize();
-            else {
-                control.applyTemplate(finalize);
-            }
-                
+
+			let finalize =
+				() => {
+					ControlManager
+						.getChildren(element)
+						.forEach(child =>
+							ControlManager
+								.createControlsInElement(child, container));
+
+					control.onControlCreated && control.onControlCreated();
+
+					orangeElement.isInitialized = true;
+
+					orangeElement
+						.getOnOnitializedListners()
+						.forEach(listener => listener());
+				}
+
+			if (control.applyTemplate == null)
+				finalize();
+			else {
+				control.applyTemplate(finalize);
+			}
+
 			return control;
 		}
 
@@ -270,7 +270,7 @@ module Orange.Controls {
 			if (mutation.type !== "childList")
 				return;
 
-            let removedNodes = mutation.removedNodes;
+			let removedNodes = mutation.removedNodes;
 			for (let i = 0; i < removedNodes.length; i++) {
 
 				let node = removedNodes[i];
@@ -280,7 +280,7 @@ module Orange.Controls {
 
 				ControlManager.disposeDescendants(<HTMLElement>node);
 			}
-            
+
 			let addedNodes = mutation.addedNodes;
 			for (let i = 0; i < addedNodes.length; i++) {
 
@@ -290,7 +290,7 @@ module Orange.Controls {
 				if (node.nodeType !== 1) continue;
 
 				ControlManager.createControlsInElement(<HTMLElement>node, this._container);
-			}	
+			}
 		}
 	}
 }

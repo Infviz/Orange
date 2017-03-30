@@ -2,7 +2,7 @@ declare module Orange {
     class Uuid {
         private static _counter;
         private _value;
-        value: string;
+        readonly value: string;
         private static _tStart;
         private static getTime;
         private static generateV4Uuid();
@@ -31,13 +31,13 @@ declare module Orange.Modularity {
         private typeMap;
         private instances;
         private static _defaultContainer;
-        static defaultContainer: Container;
+        static readonly defaultContainer: Container;
         constructor();
         registerInstance(type: any, instance: any): void;
         registerType(type: any, instance: any): void;
-        tryResolve(type: any | string, register?: boolean): TryResolveResult;
-        resolve(type: any | string, register?: boolean): any;
-        resolveWithOverride(type: any, overrides: Array<KeyValuePair>): any;
+        tryResolve(type: any | string, register?: boolean): Promise<TryResolveResult>;
+        resolve(type: any | string, register?: boolean): Promise<any>;
+        resolveWithOverride(type: any, overrides: Array<KeyValuePair>): Promise<any>;
         private static getConstructorFromString(constructorName);
         private lookup(dict, key);
         private createInstance(resolvedType);
@@ -51,7 +51,7 @@ declare module Orange.Modularity {
         container: Orange.Modularity.Container;
         constructor(container: Orange.Modularity.Container);
         disposeRegions(root: HTMLElement): void;
-        initializeRegions(root: HTMLElement): void;
+        initializeRegions(root: HTMLElement): Promise<void>;
     }
 }
 interface TemplateInfo {
@@ -104,7 +104,7 @@ declare module Orange.Controls {
     class TemplatedControl extends Control {
         private _templateProvider;
         private _isTemplateApplied;
-        isTemplateApplied: boolean;
+        readonly isTemplateApplied: boolean;
         constructor(templateProvider: ITemplatedControlTemplateProvider);
         protected onApplyTemplate(): void;
         protected applyTemplate(doneCallback: () => void): void;
@@ -136,7 +136,7 @@ declare module Orange.Controls {
     class ControlManager {
         static dependencies: () => any;
         private _container;
-        containter: Orange.Modularity.Container;
+        readonly containter: Orange.Modularity.Container;
         constructor(container: Orange.Modularity.Container);
         private static _mutationObserverConfig;
         static disposeDescendants(root: HTMLElement): void;
@@ -150,8 +150,8 @@ declare module Orange.Controls {
         static createControlsInElement(element: HTMLElement, container: Orange.Modularity.Container): void;
         dispose(): void;
         private onMutation;
-        static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Controls.Control;
-        static createControlFromType(type: string, container: Orange.Modularity.Container): Controls.Control;
+        static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Promise<Controls.Control>;
+        static createControlFromType(type: string, container: Orange.Modularity.Container): Promise<Controls.Control>;
         private static createControlInternal(element, container);
         private handleMutation;
     }

@@ -1,13 +1,13 @@
 {
-    "compilerOptions": {
-        "out": "orange.js", 
-        "sourceMap": true, 
-        "declaration": true,
-        "target": "es5",
-        "noImplicitAny": true,
-        "removeComments": true
-    }, 
-    "files": [
-        "Orange/_references.ts"
-    ]
+	"compilerOptions": {
+		"out": "orange.js",
+		"inlineSourceMap": true,
+		"declaration": true,
+		"target": "es5",
+		"noImplicitAny": true,
+		"removeComments": true
+	},
+	"files": [
+		"Orange/_references.ts"
+	]
 }
