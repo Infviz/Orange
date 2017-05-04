@@ -39,8 +39,5 @@
 		"url": "https://github.com/Infviz/Orange/issues"
 	},
 	"homepage": "https://github.com/Infviz/Orange#readme",
-	"dependencies": {
-		"@types/es6-promise": "0.0.32",
-		"es6-promise": "^4.1.0"
-	}
+	"dependencies": {}
 }
