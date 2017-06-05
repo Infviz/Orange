@@ -5,7 +5,7 @@
 
 module Views.Nested {
 
-	export class NestedViewModel {
+    export class NestedViewModel {
 
-	}
+    }
 }

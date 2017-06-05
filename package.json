@@ -1,43 +1,43 @@
 {
-	"name": "orange-mvvm",
-	"version": "2.1.1",
-	"description": "TypeScript IoC container, dependency injection and basic MVVM framework",
-	"main": "orange.js",
-	"typings": "orange.d.ts",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/Infviz/Orange.git"
-	},
-	"keywords": [
-		"Orange",
-		"TypeScript",
-		"mvvm",
-		"injection",
-		"container",
-		"ioc",
-		"template",
-		"view",
-		"model",
-		"knockout",
-		"binding"
-	],
-	"contributors": [
-		{
-			"name": "Markus Johnsson",
-			"email": "markus.johnsson@infviz.com>"
-		},
-		{
-			"name": "Jonatan Nyberg",
-			"email": "jonatan.nyberg@infviz.com"
-		}
-	],
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/Infviz/Orange/issues"
-	},
-	"homepage": "https://github.com/Infviz/Orange#readme",
-	"dependencies": {}
+    "name": "orange-mvvm",
+    "version": "2.1.1",
+    "description": "TypeScript IoC container, dependency injection and basic MVVM framework",
+    "main": "orange.js",
+    "typings": "orange.d.ts",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Infviz/Orange.git"
+    },
+    "keywords": [
+        "Orange",
+        "TypeScript",
+        "mvvm",
+        "injection",
+        "container",
+        "ioc",
+        "template",
+        "view",
+        "model",
+        "knockout",
+        "binding"
+    ],
+    "contributors": [
+        {
+            "name": "Markus Johnsson",
+            "email": "markus.johnsson@infviz.com>"
+        },
+        {
+            "name": "Jonatan Nyberg",
+            "email": "jonatan.nyberg@infviz.com"
+        }
+    ],
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Infviz/Orange/issues"
+    },
+    "homepage": "https://github.com/Infviz/Orange#readme",
+    "dependencies": {}
 }

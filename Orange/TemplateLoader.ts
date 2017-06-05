@@ -7,7 +7,7 @@ class TemplateLoader {
     public static onload: () => void;
 
     static staticlyLoaded(): void {
-		if (TemplateLoader.onload) TemplateLoader.onload();
+        if (TemplateLoader.onload) TemplateLoader.onload();
     }
 
     static load(templates: Array<TemplateInfo>) : void {
