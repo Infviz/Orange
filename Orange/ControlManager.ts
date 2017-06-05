@@ -21,6 +21,7 @@ module Orange.Controls {
 
 		control: Control = null;
 		isInitialized: boolean = false;
+		promise: Promise<Control>;
 
 		constructor(public element: HTMLElement) { }
 
@@ -223,11 +224,21 @@ module Orange.Controls {
 
 		private static async createControlInternal(element: HTMLElement, container: Orange.Modularity.Container): Promise<Controls.Control> {
 
+			let orangeElement = <OrangeElementExtension>GetOrInitializeOrangeElement(element);
+
+			if (orangeElement.promise == null) {
+				orangeElement.promise = ControlManager.createControlInternalImpl(element, container, orangeElement);
+			}
+
+			return await orangeElement.promise;
+		}
+		
+		private static async createControlInternalImpl(element: HTMLElement, container: Orange.Modularity.Container, orangeElement: IOrangeElementExtension): Promise<Controls.Control> {
+
 			let type = ControlManager.getControlAttribute(element);
-			let orangeElement = GetOrInitializeOrangeElement(element);
 
 			// The element already has a control connected to it.
-			if (orangeElement.isInitialized)
+			if (orangeElement.control)
 				return orangeElement.control;
 
 			let control = await container.resolve(type.value);

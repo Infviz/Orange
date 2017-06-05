@@ -153,6 +153,7 @@ declare module Orange.Controls {
         static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Promise<Controls.Control>;
         static createControlFromType(type: string, container: Orange.Modularity.Container): Promise<Controls.Control>;
         private static createControlInternal(element, container);
+        private static createControlInternalImpl(element, container, orangeElement);
         private handleMutation;
     }
 }
