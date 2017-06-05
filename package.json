@@ -1,6 +1,6 @@
 {
   "name": "orange-mvvm",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "TypeScript IoC container, dependency injection and basic MVVM framework",
   "main": "orange.min.js",
   "scripts": {
