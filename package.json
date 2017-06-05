@@ -4,7 +4,8 @@
   "description": "TypeScript IoC container, dependency injection and basic MVVM framework",
   "main": "orange.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && uglifyjs --in-source-map orange.js.map --output orange.min.js --source-map filename=orange.min.js.map --compress --mangle  -- orange.js"
   },
   "repository": {
     "type": "git",
