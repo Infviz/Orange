@@ -2,7 +2,7 @@
   "name": "orange-mvvm",
   "version": "2.1.2",
   "description": "TypeScript IoC container, dependency injection and basic MVVM framework",
-  "main": "orange.js",
+  "main": "orange.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc && uglifyjs --in-source-map orange.js.map --output orange.min.js --source-map filename=orange.min.js.map --compress --mangle  -- orange.js"
@@ -36,6 +36,7 @@
   "homepage": "https://github.com/Infviz/Orange#readme",
   "files": [
     "orange.js",
+    "orange.min.js",
     "orange.d.ts"
   ]
 }
