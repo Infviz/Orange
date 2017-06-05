@@ -1,0 +1,40 @@
+{
+  "name": "orange-mvvm",
+  "version": "0.5.12",
+  "description": "TypeScript IoC container, dependency injection and basic MVVM framework",
+  "main": "orange.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Infviz/Orange.git"
+  },
+  "keywords": [
+    "Orange",
+    "TypeScript",
+    "MVVM",
+    "IoC",
+    "DI",
+    "container",
+    "viewmodel",
+    "knockout",
+    "binding"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Infviz/Orange/issues"
+  },
+  "contributors": [
+    "Markus Johnsson <markus.johnsson@infviz.com>",
+    "Jonatan Nyberg <jonatan.nyberg@infviz.com>",
+    "Christian Sörensen <christian@uxproductions.se>",
+    "Per Engstrom <per.engstrom@smhi.se>"
+  ],
+  "homepage": "https://github.com/Infviz/Orange#readme",
+  "files": [
+    "orange.js",
+    "orange.d.ts"
+  ]
+}
