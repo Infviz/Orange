@@ -1,7 +1,6 @@
 /// <reference path="_references.ts"/>
 
-module Orange.Modularity 
-{
+module Orange.Modularity {
     /**
      * [[include:Inject-DecoratorDescription.md]]
      */
@@ -9,7 +8,10 @@ module Orange.Modularity
         if ((<any>window).Reflect == null)
             throw "An attempt to use Orange.Modularity.inject decorator was made without an available Reflect implementation." 
         
-        target.dependencies = () => (<any>window).Reflect.getMetadata("design:paramtypes", target);
+        target.dependencies = () => {
+            const deps = (<any>window).Reflect.getMetadata("design:paramtypes", target);
+            return deps || [];
+        };
     }
     
     export type TryResolveResult = { instance: any, success: boolean };
@@ -31,7 +33,7 @@ module Orange.Modularity
         private typeMap: Array<KeyValuePair> = [];
         private instances: Array<KeyValuePair> = [];
 
-        private static _defaultContainer:Container = new Container();
+        private static _defaultContainer: Container = new Container();
         public static get defaultContainer(): Container { return Container._defaultContainer; }
 
         constructor () {
@@ -46,11 +48,11 @@ module Orange.Modularity
             this.typeMap.push({ key: type, value: instance });
         }
         
-        tryResolve(type: any | string, register: boolean = false) : TryResolveResult {
+        async tryResolve(type: any | string, register: boolean = false): Promise<TryResolveResult> {
             
             if (typeof type === "string") {
                 try {
-                    let ctr = Container.getConstructorFromString(type);
+                    let ctr = await Container.getConstructorFromString(type);
                     if (ctr == null)
                         return { instance: null, success: false };
                     type = ctr; 
@@ -73,7 +75,7 @@ module Orange.Modularity
             if (false == this.checkArity(resolvedType))
                 return { instance: null, success: false };
             
-            instance = this.createInstance(resolvedType);
+            instance = await this.createInstance(resolvedType);
 
             if (register === true)
                 this.registerInstance(type, instance);
@@ -81,27 +83,28 @@ module Orange.Modularity
             return { instance, success: true };
         }
         
-        resolve(type: any | string, register: boolean = false) {
+        async resolve(type: any | string, register: boolean = false) {
             
+            let typeConstructor = type
             if (typeof type === "string") {
                 try {
-                    let ctr = Container.getConstructorFromString(type);
-                    type = ctr;
+                    let ctr = await Container.getConstructorFromString(type);
+                    typeConstructor = ctr;
                 }
                 catch (e) {
                     throw new ResolveError(`Failed to resolve type '${type}', see innerError for details`, e);
                 }
                 
-                if (type == null)
+                if (typeConstructor == null)
                     throw new ResolveError(`No constructor identified by "${type}" could be found`); 
             }
 
-            var instance: any = this.lookup(this.instances, type);
+            var instance: any = this.lookup(this.instances, typeConstructor);
             
             if (instance != null)
                 return instance;
 
-            var resolvedType = this.lookup(this.typeMap, type) || type;
+            var resolvedType = this.lookup(this.typeMap, typeConstructor) || typeConstructor;
 
             if (false == Container.isValidConstructor(resolvedType))
                 throw new ResolveError(`Orange.Modularity.Container failed to resolve type "${type}"`);
@@ -109,10 +112,10 @@ module Orange.Modularity
             if (false == this.checkArity(resolvedType))
                 throw new ResolveError(`Orange.Modularity.Container failed to resolve type "${type}"`);
 
-            instance = this.createInstance(resolvedType);
+            instance = await this.createInstance(resolvedType);
 
             if (register === true)
-                this.registerInstance(type, instance);
+                this.registerInstance(typeConstructor, instance);
 
             return instance;
         }
@@ -124,7 +127,7 @@ module Orange.Modularity
             return sub.resolve(type, false);
         }
 
-        private static getConstructorFromString(constructorName: string) : any {
+        private static async getConstructorFromString(constructorName: string) {
 
             var path = constructorName.split(".");
 
@@ -141,12 +144,27 @@ module Orange.Modularity
             if (Container.isValidConstructor(func))
                 return func;
 
+            func = null;
+
             // If the constructor was not found on window, try to require it.
             // NOTE: This is done to support browserify modules.
             if ((<any>window).require != null) {
                 func = (<any>window).require(constructorName);
             }
             
+            if (func == null) {
+                if ((<any>window).SystemJS != null) {
+                    let sjs = (<any>window).SystemJS;
+                    try {
+                        const module = await sjs.import(constructorName);
+                        func = module;
+                    }
+                    catch (e) {
+                        return null;
+                    }
+                }
+            }
+
             if (func == null)
                 return null
 
@@ -168,7 +186,7 @@ module Orange.Modularity
             }
         }
 
-        private createInstance(resolvedType: any) {
+        private async createInstance(resolvedType: any) {
             var instance: any;
             var depCount = resolvedType.dependencies ? resolvedType.dependencies().length : 0;
             if (depCount == 0) {
@@ -180,7 +198,7 @@ module Orange.Modularity
                 var deps = resolvedType.dependencies();
 
                 for (var dep of deps)
-                    ctrArgs.push(this.resolve(dep));
+                    ctrArgs.push(await this.resolve(dep));
 
                 instance = this.applyConstructor(resolvedType, ctrArgs);
             }

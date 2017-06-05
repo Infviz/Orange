@@ -7,7 +7,7 @@ var startReq = { windowLoaded: false, templatesLoaded: false};
 function tryStartup() {
 
     if (!startReq.windowLoaded || !startReq.templatesLoaded)
-    	return;
+        return;
 
     var application = new Application();
     application.run();
@@ -25,15 +25,15 @@ TemplateLoader.onload = () => {
 
 class Application {
 
-	public run(): void {
-		
-		var container = new Orange.Modularity.Container();
+    public run(): void {
+        
+        var container = new Orange.Modularity.Container();
 
-		var controlManager = new Orange.Controls.ControlManager(container);
+        var controlManager = new Orange.Controls.ControlManager(container);
         
         container.registerInstance(Orange.Controls.ControlManager, controlManager);
         controlManager.manage(document.body);
-	}
+    }
 }
 
 

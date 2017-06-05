@@ -7,7 +7,7 @@ module Orange.Controls {
      * */
     export interface IOrangeElementExtension {
         element: HTMLElement;
-        control: Control; 
+        control: Control;
         isInitialized: boolean;
         addOnInitializedListener(callback: () => void) : void;
         getOnOnitializedListners() : Array<() => void>;
@@ -21,6 +21,7 @@ module Orange.Controls {
         
         control: Control = null;
         isInitialized: boolean = false;
+        promise: Promise<Control>;
         
         constructor(public element: HTMLElement) { }
         
@@ -36,9 +37,9 @@ module Orange.Controls {
 
         public removeOnInitializedListener(callback: () => void) : void {
 
-            let idx = this._onInitializedListeners.indexOf(callback);	
+            let idx = this._onInitializedListeners.indexOf(callback);
             
-            if (idx > -1) 
+            if (idx > -1)
                 this._onInitializedListeners.splice(idx, 1);
         }
     }
@@ -46,7 +47,7 @@ module Orange.Controls {
     /** 
      * [[include:GetOrInitializeOrangeElement-Description.md]] 
      * */
-    export var GetOrInitializeOrangeElement = 
+    export var GetOrInitializeOrangeElement =
         (element: HTMLElement) : IOrangeElementExtension => {
             
             let el = element as any;
@@ -66,7 +67,7 @@ module Orange.Controls {
         private _container: Orange.Modularity.Container;
         public get containter() : Orange.Modularity.Container { return this._container; }
 
-        constructor(container: Orange.Modularity.Container) { 
+        constructor(container: Orange.Modularity.Container) {
             this._container = container;
         }
 
@@ -113,7 +114,7 @@ module Orange.Controls {
             }
             else {
                 var orangeEl = GetOrInitializeOrangeElement(root);
-                if (orangeEl.control != null) 
+                if (orangeEl.control != null)
                     orangeEl.control.dispose();
             }
         }
@@ -179,7 +180,7 @@ module Orange.Controls {
                 return null;
             
             return {
-                attributeType: ControlManager._controlAttributeNames[anIdx - 1], 
+                attributeType: ControlManager._controlAttributeNames[anIdx - 1],
                 value: attr
             };
         }
@@ -209,11 +210,11 @@ module Orange.Controls {
             mut.forEach(this.handleMutation);
         }
 
-        public static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Controls.Control {
+        public static async createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Promise<Controls.Control> {
             return ControlManager.createControlInternal(controlElement, container);
         }
 
-        public static createControlFromType(type: string, container: Orange.Modularity.Container): Controls.Control {
+        public static async createControlFromType(type: string, container: Orange.Modularity.Container): Promise<Controls.Control> {
 
             var element = document.createElement("div");
             element.setAttribute(ControlManager._controlAttributeNames[0], type);
@@ -221,16 +222,26 @@ module Orange.Controls {
             return ControlManager.createControlInternal(element, container);
         }
 
-        private static createControlInternal(element: HTMLElement, container: Orange.Modularity.Container): Controls.Control {
+        private static async createControlInternal(element: HTMLElement, container: Orange.Modularity.Container): Promise<Controls.Control> {
+
+            let orangeElement = <OrangeElementExtension>GetOrInitializeOrangeElement(element);
+
+            if (orangeElement.promise == null) {
+                orangeElement.promise = ControlManager.createControlInternalImpl(element, container, orangeElement);
+            }
+
+            return await orangeElement.promise;
+        }
+        
+        private static async createControlInternalImpl(element: HTMLElement, container: Orange.Modularity.Container, orangeElement: IOrangeElementExtension): Promise<Controls.Control> {
 
             let type = ControlManager.getControlAttribute(element);
-            let orangeElement = GetOrInitializeOrangeElement(element);
             
             // The element already has a control connected to it.
-            if (orangeElement.isInitialized)
+            if (orangeElement.control)
                 return orangeElement.control;
 
-            let control = container.resolve(type.value);
+            let control = await container.resolve(type.value);
 
             orangeElement.control = control;
 
@@ -290,7 +301,7 @@ module Orange.Controls {
                 if (node.nodeType !== 1) continue;
 
                 ControlManager.createControlsInElement(<HTMLElement>node, this._container);
-            }	
+            }
         }
     }
 }

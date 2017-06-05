@@ -80,7 +80,7 @@ if (typeof (<any>window).WeakMap === 'undefined') {
     var registrationsTable = new (<any>window).WeakMap();
 
     // We use setImmediate or postMessage for our future callback.
-    var setImmediate: any = window.msSetImmediate;
+    var setImmediate: any = (<any>window).msSetImmediate;
 
     // Use post message to emulate setImmediate.
     if (!setImmediate) {
@@ -488,7 +488,7 @@ if (typeof (<any>window).WeakMap === 'undefined') {
                 var registrations = registrationsTable.get(node);
                 for (var i = 0; i < (<any>registrations).length; i++) {
                     if (registrations[i] === this) {
-                       (<any>registrations).splice(i, 1);
+                        (<any>registrations).splice(i, 1);
                         // Each node can only have one registered observer associated with
                         // this observer.
                         break;

@@ -15,12 +15,12 @@ module Orange.Modularity {
             }
             else {
                 var view = (<any>root)["instance"];
-		        if (typeof view.dispose === 'function')
+                if (typeof view.dispose === 'function')
                     view.dispose();
             }
         }
 
-        public initializeRegions(root: HTMLElement): void {
+        public async initializeRegions(root: HTMLElement) {
             var attr = root.getAttribute("data-view");
             if (attr == null || attr == "") {
                 if (typeof root.children !== "undefined") {
@@ -30,7 +30,7 @@ module Orange.Modularity {
             }
             else {
                 var viewType = eval(attr);
-                var view = this.container.resolve(viewType);
+                var view = await this.container.resolve(viewType);
                 if (typeof view.element !== "undefined")
                     view.element = root;
 
