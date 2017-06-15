@@ -80,7 +80,6 @@ module Orange.Routing {
         }
         
         private onpopstate = (evnt: PopStateEvent) => {
-            console.log("handle popstate: " + location.pathname);
             this.handleRoute(location.pathname);
         };
         
