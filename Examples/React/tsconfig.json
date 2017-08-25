@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "jsx": "react",
+        "module": "system",
+        "outFile": "index.js",
+        "target": "es5",
+        "lib": [
+            "dom",
+            "es2015",
+            "es2015.promise"
+        ]
+    }
+}

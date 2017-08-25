@@ -1,0 +1,15 @@
+{
+  "name": "orange-react-example",
+  "version": "1.0.0",
+  "description": "Example of Orange and React integration",
+  "main": "index.js",
+  "scripts": {},
+  "author": "Markus Johnsson",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "^16.0.5",
+    "@types/react-dom": "^15.5.4",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1"
+  }
+}
