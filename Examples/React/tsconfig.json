@@ -4,6 +4,8 @@
         "module": "system",
         "outFile": "index.js",
         "target": "es5",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
         "lib": [
             "dom",
             "es2015",
