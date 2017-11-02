@@ -6,7 +6,7 @@ module Orange.Modularity {
      */
     export function inject(target: any) {
         if ((<any>window).Reflect == null)
-            throw "An attempt to use Orange.Modularity.inject decorator was made without an available Reflect implementation."
+            throw new Error("An attempt to use Orange.Modularity.inject decorator was made without an available Reflect implementation.");
 
         target.dependencies = () => {
             const deps = (<any>window).Reflect.getMetadata("design:paramtypes", target);
@@ -19,7 +19,7 @@ module Orange.Modularity {
      */
     export function dependency(target: any, key: string) {
         if ((<any>window).Reflect == null)
-            throw "An attempt to use Orange.Modularity.dependency decorator was made without an available Reflect implementation."
+            throw new Error("An attempt to use Orange.Modularity.dependency decorator was made without an available Reflect implementation.");
 
         target.constructor.propertyDependencies = {
             ... target.constructor.propertyDependencies,
