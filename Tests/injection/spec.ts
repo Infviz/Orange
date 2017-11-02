@@ -149,5 +149,25 @@ describe(
 
                         done();
                     });
+
+                it("should support multiple property injection",
+                    async done => {
+
+                        class A {}
+                        class B {}
+                        class C {
+                            @Orange.Modularity.dependency
+                            a: A;
+                            @Orange.Modularity.dependency
+                            b: B;
+                        }
+
+                        let container = new Orange.Modularity.Container();
+                        let instance = await container.resolve(C);
+                        assert(() => instance.a instanceof A);
+                        assert(() => instance.b instanceof B);
+
+                        done();
+                    });
             });
     });
