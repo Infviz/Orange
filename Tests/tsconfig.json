@@ -3,6 +3,13 @@
         "sourceMap": true,
         "declaration": false,
         "target": "es5",
+        "lib": [
+            "dom",
+            "es5",
+            "scripthost",
+            "es2015.promise",
+            "es2015.iterable"
+        ],
         "noImplicitAny": true,
         "removeComments": false,
         "experimentalDecorators": true,
@@ -11,11 +18,9 @@
     "filesGlob": [
         "./**/*.ts",
         "!./typings/**/*.ts",
-        "!./node_modules/*",
-        "./typings/tsd.d.ts"
+        "!./node_modules/*"
     ],
     "files": [
-        "./typings/tsd.d.ts",
         
         "./bindings/TestView.ts",
         "./bindings/TestControl.ts",
