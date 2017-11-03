@@ -145,8 +145,8 @@ module Orange.Modularity {
             return instance;
         }
 
-        async resolveWithOverride<T = any>(type: string, overrides: Array<KeyValuePair>): Promise<T>
-        async resolveWithOverride<T>(type: Type<T>, overrides: Array<KeyValuePair>): Promise<T>
+        resolveWithOverride<T = any>(type: string, overrides: Array<KeyValuePair>): Promise<T>
+        resolveWithOverride<T>(type: Type<T>, overrides: Array<KeyValuePair>): Promise<T>
         resolveWithOverride(type: any, overrides: Array<KeyValuePair>) {
             const sub = new Container();
             sub.typeMap = this.typeMap;
@@ -173,12 +173,12 @@ module Orange.Modularity {
 
             func = null;
 
-            // If the constructor was not found on window, try to require it.
-            // NOTE: This is done to support browserify modules.
+            // Try CommonJS-style require (node, webpack, browserify)
             if ((<any>window).require != null) {
                 func = (<any>window).require(constructorName);
             }
 
+            // SystemJS-style import (SystemJS)
             if (func == null) {
                 if ((<any>window).SystemJS != null) {
                     let sjs = (<any>window).SystemJS;
