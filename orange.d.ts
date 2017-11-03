@@ -15,8 +15,9 @@ declare module Orange {
 }
 declare module Orange.Modularity {
     function inject(target: any): void;
-    type TryResolveResult = {
-        instance: any;
+    function dependency(target: any, key: string): void;
+    type TryResolveResult<T> = {
+        instance: T;
         success: boolean;
     };
     interface KeyValuePair {
@@ -27,20 +28,32 @@ declare module Orange.Modularity {
         innerError: Error;
         constructor(message: string, innerError?: Error);
     }
+    interface Type<T> {
+        new (...args: any[]): T;
+    }
     class Container {
         private typeMap;
         private instances;
         private static _defaultContainer;
         static readonly defaultContainer: Container;
         constructor();
-        registerInstance(type: any, instance: any): void;
-        registerType(type: any, instance: any): void;
-        tryResolve(type: any | string, register?: boolean): Promise<TryResolveResult>;
-        resolve(type: any | string, register?: boolean): Promise<any>;
-        resolveWithOverride(type: any, overrides: Array<KeyValuePair>): Promise<any>;
+        registerInstance<T, TR extends T>(type: Type<T>, instance: TR): void;
+        registerType<T, TR extends T>(type: Type<T>, mappedType: Type<TR>): void;
+        tryResolve<T = any>(type: string): Promise<TryResolveResult<T>>;
+        tryResolve<T = any>(type: string, register: boolean): Promise<TryResolveResult<T>>;
+        tryResolve<T>(type: Type<T>): Promise<TryResolveResult<T>>;
+        tryResolve<T>(type: Type<T>, register: boolean): Promise<TryResolveResult<T>>;
+        resolve<T = any>(type: string): Promise<T>;
+        resolve<T = any>(type: string, register: boolean): Promise<T>;
+        resolve<T>(type: Type<T>): Promise<T>;
+        resolve<T>(type: Type<T>, register: boolean): Promise<T>;
+        resolveWithOverride<T = any>(type: string, overrides: Array<KeyValuePair>): Promise<T>;
+        resolveWithOverride<T>(type: Type<T>, overrides: Array<KeyValuePair>): Promise<T>;
         private static getConstructorFromString(constructorName);
         private lookup(dict, key);
+        private buildObject(resolvedType);
         private createInstance(resolvedType);
+        private setProperties(resolvedType, instance);
         private checkArity(type);
         private static isValidConstructor(type);
         private applyConstructor(ctor, args);

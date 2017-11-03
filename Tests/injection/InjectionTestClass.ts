@@ -34,4 +34,9 @@ namespace Injection {
            
        } 
     }
+
+    export class TestClassE {
+        @Orange.Modularity.dependency
+        public propA: TestClassA;
+    }
 }
