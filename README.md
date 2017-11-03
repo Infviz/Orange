@@ -13,12 +13,6 @@ Install with npm:
 npm install orange-mvvm --save
 ``` 
 
-#### bower
-Install with bower:
-```
-bower install orange-mvvm --save
-``` 
-
 #### git
 Clone from git: 
 ```
