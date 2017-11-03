@@ -25,12 +25,12 @@ describe(
                     view = <HTMLElement>root.querySelector("[data-view='TestView']");
 
                     var element = Orange.Controls.GetOrInitializeOrangeElement(view);
-                    
+
                     let isInitialized = () => {
                         ko.applyBindings(vm, root);
                         done();
                     }
-                    
+
                     if (element.isInitialized)
                         isInitialized();
                     else
@@ -55,10 +55,16 @@ describe(
                 })
             it("should set the dataContext property of a ViewBase",
                 done => {
-                    var orangeView = Orange.Controls.GetOrInitializeOrangeElement(view);
-                    var dataContext = (<Orange.Controls.ViewBase>orangeView.control).dataContext;
+                    var orangeView = <Orange.Controls.ViewBase>Orange.Controls.GetOrInitializeOrangeElement(view).control;
+                    var dataContext = orangeView.dataContext;
                     assertEqual(dataContext, vm.item());
                     assertEqual(dataContext.prop, "xyz");
+                    done();
+                });
+            it("should expose template name through a property",
+                done => {
+                    var orangeView = <Orange.Controls.ViewBase>Orange.Controls.GetOrInitializeOrangeElement(view).control;
+                    assertEqual(orangeView.templateName, "Bindings-TestView");
                     done();
                 });
             it("should update dataContext and binding context based on knockout observable value",
@@ -85,7 +91,7 @@ describe(
             let controlOne: TestControl;
             let controlTwo: TestControl;
             let controlThree: TestControl;
-            
+
             let staticStringValue = "Static string value!!!";
             let staticNumericValue = 10;
             let staticBooleanValue = true;
@@ -93,8 +99,8 @@ describe(
             let vm = {
                 vmTitle: ko.observable('My Title'),
                 vmContent: "My nice content",
-                vmCallback: () => {  },
-                vmObject: { someProp: "value", otherProp: 10},
+                vmCallback: () => { },
+                vmObject: { someProp: "value", otherProp: 10 },
                 vmNull: <any>null
             };
 
@@ -188,13 +194,13 @@ describe(
             it("should set the property 'title' on all controls.",
                 done => {
                     assertEqual(controlOne.title, vm.vmTitle());
-                    
+
                     assertEqual(controlTwo.title, vm.vmTitle());
                     assertEqual(controlThree.title, vm.vmTitle());
                     done();
                 });
-                
-            it("should handle different property types", 
+
+            it("should handle different property types",
                 done => {
                     assertEqual(controlOne.content, vm.vmContent);
                     assertEqual(controlOne.someobject, vm.vmObject);
@@ -217,14 +223,14 @@ describe(
                     // value should not update the vm or controlTwo in any way.
                     controlOne.changeTitle("Some other new title");
                     assert(() => controlOne.title !== vm.vmTitle());
-                    
+
                     // title on controlTwo is bound 'two-way' so changing its
                     // value should update the vm property and therefore the 
                     // other control as well
                     controlTwo.changeTitle("Some other new title");
                     assertEqual(controlOne.title, vm.vmTitle());
                     assertEqual(controlTwo.title, vm.vmTitle());
-                    
+
                     // reset title..
                     controlTwo.changeTitle(staticStringValue);
                     done();
@@ -238,7 +244,7 @@ describe(
                     assertEqual(controlOne.nullField, null);
                     done();
                 });
-                
+
             it("should set dynamic (not 'visible') fields on a control with 'allow-dynamic' flag set to true",
                 done => {
                     assertEqual((controlThree as any).dynamicProperty1, vm.vmTitle());

@@ -17,7 +17,7 @@ module Orange.Controls {
 
         constructor(templateName: string);
         constructor(templateName: string, context: any);
-        constructor(templateName: string, context?: any) {
+        constructor(public readonly templateName: string, context?: any) {
 
             super(new ScriptTemplateProvider(templateName));
 

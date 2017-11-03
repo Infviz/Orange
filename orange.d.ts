@@ -125,6 +125,7 @@ declare module Orange.Controls {
 }
 declare module Orange.Controls {
     class ViewBase extends TemplatedControl {
+        readonly templateName: string;
         private _dataContext;
         dataContext: any;
         constructor(templateName: string);
