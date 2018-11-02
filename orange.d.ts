@@ -5,7 +5,7 @@ declare module Orange {
         readonly value: string;
         private static _tStart;
         private static getTime;
-        private static generateV4Uuid();
+        private static generateV4Uuid;
         constructor(uuid?: string);
         static generate(): Uuid;
         static isUuid(value: string): boolean;
@@ -25,7 +25,7 @@ declare module Orange.Modularity {
         value: any;
     }
     class ResolveError extends Error {
-        innerError: Error;
+        innerError?: Error;
         constructor(message: string, innerError?: Error);
     }
     interface Type<T> {
@@ -49,14 +49,14 @@ declare module Orange.Modularity {
         resolve<T>(type: Type<T>, register: boolean): Promise<T>;
         resolveWithOverride<T = any>(type: string, overrides: Array<KeyValuePair>): Promise<T>;
         resolveWithOverride<T>(type: Type<T>, overrides: Array<KeyValuePair>): Promise<T>;
-        private static getConstructorFromString(constructorName);
-        private lookup(dict, key);
-        private buildObject(resolvedType);
-        private createInstance(resolvedType);
-        private setProperties(resolvedType, instance);
-        private checkArity(type);
-        private static isValidConstructor(type);
-        private applyConstructor(ctor, args);
+        private static getConstructorFromString;
+        private lookup;
+        private buildObject;
+        private createInstance;
+        private setProperties;
+        private checkArity;
+        private static isValidConstructor;
+        private applyConstructor;
     }
 }
 declare module Orange.Modularity {
@@ -91,7 +91,7 @@ declare module Orange.Controls {
         addPropertyChangedListener(listener: (propertyName: string, value: any) => void): void;
         removePropertyChangedListener(listener: (propertyName: string, value: any) => void): void;
         private static propertyRegex;
-        private static getPropertyName<T>(property);
+        private static getPropertyName;
         protected raisePropertyChanged(property: string): void;
         protected raisePropertyChanged<T>(property: () => T): void;
         protected onElementSet(): void;
@@ -159,15 +159,15 @@ declare module Orange.Controls {
         private _observer;
         private _element;
         manage(element: HTMLElement): void;
-        private static getChildren(element);
-        private static getControlAttribute(element);
+        private static getChildren;
+        private static getControlAttribute;
         static createControlsInElement(element: HTMLElement, container: Orange.Modularity.Container): void;
         dispose(): void;
         private onMutation;
         static createControlFromElement(controlElement: HTMLElement, container: Orange.Modularity.Container): Promise<Controls.Control>;
         static createControlFromType(type: string, container: Orange.Modularity.Container): Promise<Controls.Control>;
-        private static createControlInternal(element, container);
-        private static createControlInternalImpl(element, container, orangeElement);
+        private static createControlInternal;
+        private static createControlInternalImpl;
         private handleMutation;
     }
 }
@@ -184,8 +184,8 @@ declare module Orange.Routing {
         dispose(): void;
         private onpopstate;
         private onclick;
-        private cleanPath(path);
-        private handleRoute(path);
+        private cleanPath;
+        private handleRoute;
     }
 }
 declare module Orange.Controls {
